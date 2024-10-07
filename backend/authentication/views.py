@@ -20,7 +20,18 @@ from .serializers import (
     CustomTokenObtainPairSerializer,
     VendorRegistrationSerializer,
     CustomerRegistrationSerializer,
+    MeSerializer,
 )
+
+
+class MeView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = MeSerializer
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        serializer = self.get_serializer(instance=user)
+        return Response(serializer.data)
 
 
 class LoginView(TokenObtainPairView):

@@ -10,11 +10,13 @@ from .views import (
     ResetPasswordView,
     ChangePasswordView,
     ActivateAccountView,
+    MeView,
 )
 
 app_name = "authentication"
 
 urlpatterns = [
+    path("me/", MeView.as_view(), name="me"),
     path("login/", LoginView.as_view(), name="login"),
     path("refresh/", TokenRefreshView.as_view(), name="refresh-token"),
     path("register/vendor/", VendorRegistrationView.as_view(), name="vendor-signup"),
