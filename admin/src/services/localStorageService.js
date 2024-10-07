@@ -21,6 +21,7 @@ const removeItem = (key) => {
 };
 
 const setAuthTokens = (tokens) => {
+	console.log("tokens =>", tokens);
 	if (tokens) {
 		const strTokens = JSON.stringify(tokens);
 		localStorage.setItem(localStorageKeys.authKey, strTokens);

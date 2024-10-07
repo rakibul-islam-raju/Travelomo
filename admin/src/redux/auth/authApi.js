@@ -5,12 +5,13 @@ export const authApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({
 		getMe: builder.query({
 			query: () => ({
-				url: `/me/`,
+				url: `/auth/me/`,
 				method: "GET",
 			}),
 			providesTags: ["Me"],
 			async onQueryStarted(_, { queryFulfilled, dispatch }) {
 				const { data } = await queryFulfilled;
+
 				dispatch(setUserInfo(data));
 			},
 		}),
@@ -25,6 +26,7 @@ export const authApi = baseApi.injectEndpoints({
 				const { data } = await queryFulfilled;
 
 				if (data?.access) {
+					console.log("data== =>", data);
 					dispatch(
 						userLoggedIn({
 							access: data.access,

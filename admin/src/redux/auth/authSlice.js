@@ -17,6 +17,8 @@ const authSlice = createSlice({
 			state.access = action.payload.access;
 			state.refresh = action.payload.refresh;
 
+			console.log("action.payload =>", action.payload);
+
 			localStorageService.setAuthTokens(action.payload);
 		},
 		userLoggedOut(state) {

@@ -4,7 +4,6 @@ import useAuthCheck from "@hooks/useAuthCheck";
 import { router } from "@router/index";
 import { ConfigProvider } from "antd";
 import { RouterProvider } from "react-router-dom";
-import "./App.css";
 
 function App() {
 	const authChecked = useAuthCheck();

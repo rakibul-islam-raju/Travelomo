@@ -36,7 +36,7 @@ axiosInstance.interceptors.response.use(
 
 		if (error.response?.status === 401 && !originalRequest._retry) {
 			// Check if the request is a login request
-			if (originalRequest.url.includes("/token/")) {
+			if (originalRequest.url.includes("/login/")) {
 				return Promise.reject(error);
 			}
 

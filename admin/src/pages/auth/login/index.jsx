@@ -21,7 +21,9 @@ const Login = () => {
 
 	return (
 		<Card>
-			<Typography.Title level={2}>Login</Typography.Title>
+			<Typography.Title level={2} className="text-center">
+				Login
+			</Typography.Title>
 			<Divider />
 			<Form layout="vertical" onFinish={handleLogin}>
 				<Form.Item
