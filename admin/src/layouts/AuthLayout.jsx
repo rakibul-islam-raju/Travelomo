@@ -8,6 +8,8 @@ const AuthLayout = () => {
 	const isLoggedIn = useAuth();
 	const location = useLocation();
 
+	console.log("isLoggedIn => ", isLoggedIn);
+
 	return !isLoggedIn ? (
 		<div className={styles.authLayout}>
 			<Row justify="center" align="middle" className={styles.authLayoutRow}>

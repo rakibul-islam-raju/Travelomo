@@ -4,6 +4,9 @@ import ForgetPassword from "@pages/auth/forgetPassword";
 import Login from "@pages/auth/login";
 import ResetPassword from "@pages/auth/resetPassword";
 import Dashboard from "@pages/dashboard";
+import NotFound from "@pages/NotFound";
+import VendorDetail from "@pages/vendor/vendorDetail";
+import VendorList from "@pages/vendor/vendorList";
 import { createBrowserRouter } from "react-router-dom";
 
 export const router = createBrowserRouter([
@@ -14,6 +17,18 @@ export const router = createBrowserRouter([
 			{
 				path: "/",
 				element: <Dashboard />,
+			},
+			{
+				path: "/vendors",
+				element: <VendorList />,
+			},
+			{
+				path: "/vendors/:vendorId",
+				element: <VendorDetail />,
+			},
+			{
+				path: "*",
+				element: <NotFound />,
 			},
 		],
 	},
@@ -34,5 +49,9 @@ export const router = createBrowserRouter([
 				element: <ResetPassword />,
 			},
 		],
+	},
+	{
+		path: "*",
+		element: <NotFound />,
 	},
 ]);

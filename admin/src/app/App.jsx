@@ -10,11 +10,11 @@ function App() {
 
 	return (
 		<ConfigProvider
-		// theme={{
-		// 	token: {
-		// 		colorPrimary: "#164e63",
-		// 	},
-		// }}
+			theme={{
+				token: {
+					colorPrimary: "#1677FF",
+				},
+			}}
 		>
 			{!authChecked ? (
 				<Loader />

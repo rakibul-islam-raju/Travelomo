@@ -26,7 +26,6 @@ export const authApi = baseApi.injectEndpoints({
 				const { data } = await queryFulfilled;
 
 				if (data?.access) {
-					console.log("data== =>", data);
 					dispatch(
 						userLoggedIn({
 							access: data.access,

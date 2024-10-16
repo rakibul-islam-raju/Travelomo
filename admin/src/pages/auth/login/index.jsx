@@ -1,3 +1,4 @@
+import { APP_DEFAULT_PATH } from "@config/index";
 import { useLoginMutation } from "@redux/auth/authApi";
 import {
 	Button,
@@ -9,14 +10,18 @@ import {
 	message,
 	Typography,
 } from "antd";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Login = () => {
+	const navigate = useNavigate();
+	const location = useLocation();
+
 	const [login, { isLoading }] = useLoginMutation();
 
 	const handleLogin = async (values) => {
 		await login(values).unwrap();
 		message.success("Login successful");
+		navigate(location?.state?.from?.pathname || APP_DEFAULT_PATH);
 	};
 
 	return (

@@ -17,8 +17,6 @@ const authSlice = createSlice({
 			state.access = action.payload.access;
 			state.refresh = action.payload.refresh;
 
-			console.log("action.payload =>", action.payload);
-
 			localStorageService.setAuthTokens(action.payload);
 		},
 		userLoggedOut(state) {
@@ -28,7 +26,7 @@ const authSlice = createSlice({
 
 			localStorageService.removeAuthTokens();
 			localStorage.clear();
-			window.location.href = "/signin";
+			window.location.href = "/auth/login";
 		},
 		setUserInfo(state, action) {
 			state.user = action.payload;

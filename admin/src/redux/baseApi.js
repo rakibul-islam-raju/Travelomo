@@ -7,6 +7,6 @@ export const baseApi = createApi({
 	baseQuery: axiosBaseQuery({
 		baseUrl: BASE_API_URL,
 	}),
-	tagTypes: [],
+	tagTypes: ["Me", "Vendor", "VendorDetails"],
 	endpoints: () => ({}),
 });

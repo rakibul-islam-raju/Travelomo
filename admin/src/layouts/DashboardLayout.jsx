@@ -1,18 +1,22 @@
 import {
 	DashboardOutlined,
+	LogoutOutlined,
 	MenuFoldOutlined,
 	MenuUnfoldOutlined,
 	UserOutlined,
 } from "@ant-design/icons";
 import useAuth from "@hooks/useAuth";
-import { Avatar, Button, Layout, Menu, theme } from "antd";
+import { userLoggedOut } from "@redux/auth/authSlice";
+import { Button, Dropdown, Layout, Menu, theme } from "antd";
 import clsx from "clsx";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import styles from "./index.module.scss";
 const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = () => {
+	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -51,6 +55,23 @@ const DashboardLayout = () => {
 		},
 	];
 
+	const userMenuItems = [
+		{
+			icon: <UserOutlined />,
+			key: "/profile",
+			label: "Profile",
+			onClick: () => {
+				navigate("/profile");
+			},
+		},
+		{
+			icon: <LogoutOutlined />,
+			label: "Logout",
+			danger: true,
+			onClick: () => dispatch(userLoggedOut()),
+		},
+	];
+
 	return isLoggedIn ? (
 		<Layout className={styles.dashboardLayout}>
 			<Header className={styles.dashboardHeader}>
@@ -61,7 +82,9 @@ const DashboardLayout = () => {
 					onClick={() => setCollapsed(!collapsed)}
 				/>
 				<div>
-					<Avatar icon={<UserOutlined />} />
+					<Dropdown menu={{ items: userMenuItems, style: { width: 150 } }}>
+						<Button shape="circle" icon={<UserOutlined />} />
+					</Dropdown>
 				</div>
 			</Header>
 			<Layout>
