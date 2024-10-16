@@ -1,7 +1,6 @@
 import uuid
 
 from django.db import models
-from user.models import User
 
 
 class PrimaryKeyModel(models.Model):
@@ -21,11 +20,11 @@ class BaseModel(PrimaryKeyModel):
 
 class BaseModelWithCreator(BaseModel):
     created_by = models.ForeignKey(
-        User,
+        "user.User",
         on_delete=models.CASCADE,
     )
     updated_by = models.ForeignKey(
-        User,
+        "user.User",
         on_delete=models.CASCADE,
         related_name="updated_by",
     )
