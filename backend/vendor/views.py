@@ -45,7 +45,15 @@ class VendorApprovalView(generics.UpdateAPIView):
         return VendorDetailSerializer
 
 
-class VendorDetailView(generics.RetrieveDestroyAPIView):
-    permission_classes = [IsSystemAdmin, IsVendor]
+class VendorDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Vendor.objects.all()
     serializer_class = VendorDetailSerializer
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            self.permission_classes = [IsVendor | IsSystemAdmin]
+        elif self.request.method == "DELETE":
+            self.permission_classes = [IsSystemAdmin]
+        else:
+            self.permission_classes = [IsVendor]
+        return super().get_permissions()
