@@ -3,7 +3,11 @@ import { MdOutlineSearch } from "react-icons/md";
 
 const SearchInput = () => {
 	return (
-		<Input size="large" placeholder="Search..." prefix={<MdOutlineSearch />} />
+		<Input
+			style={{ width: 300 }}
+			placeholder="Search..."
+			prefix={<MdOutlineSearch />}
+		/>
 	);
 };
 

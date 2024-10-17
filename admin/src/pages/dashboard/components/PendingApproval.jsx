@@ -1,83 +1,110 @@
-import { MoreOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Button, Card, Divider, Dropdown, Space, Table, message } from "antd";
-
-// Sample data for the table
-const data = [
-	{
-		key: "1",
-		name: "John Brown",
-		age: 32,
-		address: "New York No. 1 Lake Park",
-	},
-	{
-		key: "2",
-		name: "Jim Green",
-		age: 42,
-		address: "London No. 1 Lake Park",
-	},
-	{
-		key: "3",
-		name: "Joe Black",
-		age: 32,
-		address: "Sidney No. 1 Lake Park",
-	},
-];
+import {
+	CheckCircleOutlined,
+	CloseCircleOutlined,
+	ReloadOutlined,
+} from "@ant-design/icons";
+import { useQueryParams } from "@hooks/useQueryParams";
+import {
+	useApproveVendorMutation,
+	useGetVendorsQuery,
+} from "@redux/vendor/vendorApi";
+import {
+	Avatar,
+	Button,
+	Card,
+	Divider,
+	Image,
+	Popconfirm,
+	Space,
+	Table,
+	Typography,
+	message,
+} from "antd";
+import { useNavigate } from "react-router-dom";
 
 const PendingApproval = () => {
-	const handleApprove = (record) => {
-		// Logic to approve the vendor
-		message.success(`Approved vendor: ${record.name}`);
-		// You would typically make an API call here to update the backend
-	};
+	const navigate = useNavigate();
 
-	const handleReject = (record) => {
-		// Logic to reject the vendor
-		message.error(`Rejected vendor: ${record.name}`);
-		// You would typically make an API call here to update the backend
+	const { qParams } = useQueryParams({
+		limit: 5,
+		offset: 0,
+		is_approved: false,
+	});
+
+	const { data: vendors, isLoading, refetch } = useGetVendorsQuery(qParams);
+	const [approveVendor, { isLoading: isApproving }] =
+		useApproveVendorMutation();
+
+	const handleApproveVendor = async (vendorId) => {
+		await approveVendor({ id: vendorId, data: { is_approved: true } }).unwrap();
+		message.success("Vendor approved successfully");
 	};
 
 	const columns = [
 		{
-			title: "Name",
-			dataIndex: "name",
-			key: "name",
+			title: "Store Name",
+			dataIndex: "store_name",
+			key: "store_name",
+			render: (store_name, record) => (
+				<Space>
+					{record.logo ? (
+						<Image src={record.logo} alt="logo" width={35} height={35} />
+					) : (
+						<Avatar alt="logo" size={35}>
+							{record.store_name[0]}
+						</Avatar>
+					)}
+					<Typography.Text>{store_name}</Typography.Text>
+				</Space>
+			),
 		},
 		{
-			title: "Age",
-			dataIndex: "age",
-			key: "age",
+			title: "Phone Number",
+			dataIndex: "store_phone",
+			key: "store_phone",
 		},
 		{
-			title: "Address",
-			dataIndex: "address",
-			key: "address",
+			title: "Approval",
+			dataIndex: "is_approved",
+			key: "is_approved",
+			render: (is_approved) =>
+				is_approved ? (
+					<CheckCircleOutlined style={{ color: "green" }} />
+				) : (
+					<CloseCircleOutlined style={{ color: "red" }} />
+				),
 		},
-
 		{
 			title: "Action",
 			dataIndex: "action",
 			key: "action",
 			render: (_, record) => (
-				<Dropdown
-					menu={{
-						items: [
-							{
-								key: "approve",
-								label: "Approve",
-								onClick: () => handleApprove(record),
-							},
-							{
-								key: "reject",
-								label: "Reject",
-								danger: true,
-								onClick: () => handleReject(record),
-							},
-						],
-					}}
-					placement="bottomRight"
-				>
-					<Button shape="circle" icon={<MoreOutlined />} size="small" />
-				</Dropdown>
+				<Space direction="horizontal">
+					<Button
+						type="link"
+						size="small"
+						onClick={() => navigate(`/vendors/${record.id}`)}
+					>
+						View
+					</Button>
+					<Popconfirm
+						title="Approve the vendor"
+						description="Are you sure to approve this vendor?"
+						onConfirm={() => handleApproveVendor(record.id)}
+						okText="Approve"
+						cancelText="Cancel"
+						placement="topRight"
+					>
+						<Button
+							type="link"
+							size="small"
+							disabled={record.is_approved || isApproving}
+							loading={isApproving}
+						>
+							{record.is_approved ? "Approved" : "Approve"}
+						</Button>
+					</Popconfirm>
+				</Space>
 			),
 		},
 	];
@@ -93,14 +120,22 @@ const PendingApproval = () => {
 						type="link"
 						icon={<ReloadOutlined />}
 						title="Refresh"
+						onClick={refetch}
 					/>
-					<Button size="small" type="link">
+					<Button size="small" type="link" onClick={() => navigate("/vendors")}>
 						View All
 					</Button>
 				</Space>
 			}
 		>
-			<Table columns={columns} dataSource={data} pagination={false} />
+			<Table
+				columns={columns}
+				dataSource={vendors?.results}
+				pagination={false}
+				loading={isLoading}
+				scroll={{ x: "max-content" }}
+			/>
+
 			{/* Add any other components or logic here */}
 		</Card>
 	);

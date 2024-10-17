@@ -5,6 +5,10 @@ import Login from "@pages/auth/login";
 import ResetPassword from "@pages/auth/resetPassword";
 import Dashboard from "@pages/dashboard";
 import NotFound from "@pages/NotFound";
+import StaffDetail from "@pages/user/staffDetail";
+import UserDetail from "@pages/user/userDetail";
+import UserList from "@pages/user/userList";
+import StaffList from "@pages/user/userList/StaffList";
 import VendorDetail from "@pages/vendor/vendorDetail";
 import VendorList from "@pages/vendor/vendorList";
 import { createBrowserRouter } from "react-router-dom";
@@ -25,6 +29,22 @@ export const router = createBrowserRouter([
 			{
 				path: "/vendors/:vendorId",
 				element: <VendorDetail />,
+			},
+			{
+				path: "/users",
+				element: <UserList />,
+			},
+			{
+				path: "/users/:userId",
+				element: <UserDetail />,
+			},
+			{
+				path: "/staffs",
+				element: <StaffList />,
+			},
+			{
+				path: "/staffs/:staffId",
+				element: <StaffDetail />,
 			},
 			{
 				path: "*",

@@ -53,3 +53,10 @@ class StaffDetailSerializer(StaffListSerializer):
 
     class Meta(StaffListSerializer.Meta):
         fields = StaffListSerializer.Meta.fields + ["profile"]
+
+
+class CreateStaffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "email", "first_name", "last_name", "is_superuser"]
+        read_only_fields = ["id"]

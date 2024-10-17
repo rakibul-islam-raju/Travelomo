@@ -41,11 +41,7 @@ const VendorDetail = () => {
 		<>
 			<Flex justify="space-between" align="center">
 				<Space align="center">
-					<Button
-						shape="circle"
-						onClick={() => navigate(-1)}
-						icon={<IoMdArrowRoundBack />}
-					/>
+					<Button onClick={() => navigate(-1)} icon={<IoMdArrowRoundBack />} />
 					<Typography.Title level={2} className="mb-0">
 						Vendor Detail
 					</Typography.Title>

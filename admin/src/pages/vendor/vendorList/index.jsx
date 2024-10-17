@@ -20,19 +20,21 @@ import {
 	Typography,
 } from "antd";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const VendorList = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
+	const pendingVendors = location.state?.pendingVendors;
 
 	const { qParams, updateParams } = useQueryParams({
 		limit: RESULT_PER_PAGE,
 		offset: 0,
 		search: "",
-		is_approved: "",
+		is_approved: pendingVendors ? false : "",
 	});
 
-	const { data: vendors, isLoading } = useGetVendorsQuery(qParams);
+	const { data: vendors, isLoading, refetch } = useGetVendorsQuery(qParams);
 	const [approveVendor, { isLoading: isApproving }] =
 		useApproveVendorMutation();
 
@@ -125,10 +127,9 @@ const VendorList = () => {
 			<Typography.Title level={2}>Vendor List</Typography.Title>
 			<Divider />
 
-			<FilterBox>
+			<FilterBox refresh={refetch}>
 				<SearchInput />
 				<Select
-					size="large"
 					style={{ width: 200 }}
 					value={qParams.is_approved}
 					onChange={handleChangeApproveStatus}
@@ -156,6 +157,7 @@ const VendorList = () => {
 						setPage(page);
 					},
 				}}
+				scroll={{ x: "max-content" }}
 			/>
 		</>
 	);

@@ -10,6 +10,7 @@ import { userLoggedOut } from "@redux/auth/authSlice";
 import { Button, Dropdown, Layout, Menu, theme } from "antd";
 import clsx from "clsx";
 import { useState } from "react";
+import { FaUserFriends, FaUserShield } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import styles from "./index.module.scss";
@@ -49,9 +50,21 @@ const DashboardLayout = () => {
 			label: "Events",
 		},
 		{
-			key: "/users",
-			icon: <DashboardOutlined />,
+			// key: "/users",
+			icon: <FaUserFriends />,
 			label: "Users",
+			children: [
+				{
+					key: "/users",
+					icon: <FaUserFriends />,
+					label: "Users",
+				},
+				{
+					key: "/staffs",
+					icon: <FaUserShield />,
+					label: "Staffs",
+				},
+			],
 		},
 	];
 
