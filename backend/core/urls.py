@@ -22,4 +22,5 @@ urlpatterns = [
     path("api/v1/auth/", include("authentication.urls", namespace="authentication")),
     path("api/v1/", include("vendor.urls", namespace="vendor")),
     path("api/v1/", include("user.urls", namespace="user")),
+    path("api/v1/", include("event.urls", namespace="event")),
 ]

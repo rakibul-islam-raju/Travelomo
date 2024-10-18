@@ -25,7 +25,7 @@ from .serializers import (
 
 
 class UserListView(generics.ListAPIView):
-    queryset = User.objects.filter(role="customer")
+    queryset = User.objects.filter(role__in=["customer", "vendor"])
     serializer_class = UserListSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]

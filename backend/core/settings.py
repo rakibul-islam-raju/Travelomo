@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "user.apps.UserConfig",
     "authentication.apps.AuthenticationConfig",
     "vendor.apps.VendorConfig",
+    "event.apps.EventConfig",
     # third party apps
     "rest_framework",
     "corsheaders",
