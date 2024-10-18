@@ -1,6 +1,12 @@
 from django.urls import path
 
-from .views import UserListView, UserDetailView, StaffListCreateView, StaffDetailView
+from .views import (
+    UserListView,
+    UserDetailView,
+    StaffListCreateView,
+    StaffDetailView,
+    DeactivateUserView,
+)
 
 app_name = "user"
 
@@ -12,5 +18,10 @@ urlpatterns = [
         "staffs/<str:pk>/",
         StaffDetailView.as_view(),
         name="staff-detail",
+    ),
+    path(
+        "deactivate-user/<str:pk>/",
+        DeactivateUserView.as_view(),
+        name="deactivate-user",
     ),
 ]
