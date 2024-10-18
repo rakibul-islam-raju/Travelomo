@@ -3,6 +3,7 @@ import string
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -85,11 +86,9 @@ class ActivateAccountView(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         email = request.GET.get("email")
         token = request.GET.get("token")
-        print("token =>", token)
 
         try:
             user = User.objects.get(email=email)
-            print("user.token =>", token)
             if user.token != token:
                 return Response(
                     {"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
@@ -142,17 +141,20 @@ class ResetPasswordView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         token = serializer.validated_data.get("token")
         password = serializer.validated_data.get("password")
+        email = serializer.validated_data.get("email")
 
         try:
-            user = User.objects.get(password_reset_token=token)
-            if user:
-                user.set_password(password)
-                user.password_reset_token = None
-                user.save()
-                return Response({"message": "Password reset successful"})
-            return Response(
-                {"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            user = get_object_or_404(User, email=email)
+            if user.token != token:
+                return Response(
+                    {"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            user.set_password(password)
+            user.token = None
+            user.save()
+            return Response({"message": "Password reset successful"})
+
         except User.DoesNotExist:
             return Response(
                 {"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST

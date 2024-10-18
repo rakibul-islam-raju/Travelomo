@@ -6,6 +6,7 @@ from .views import (
     StaffListCreateView,
     StaffDetailView,
     DeactivateUserView,
+    SendPasswordResetLinkView,
 )
 
 app_name = "user"
@@ -23,5 +24,10 @@ urlpatterns = [
         "deactivate-user/<str:pk>/",
         DeactivateUserView.as_view(),
         name="deactivate-user",
+    ),
+    path(
+        "send-password-reset-link/<str:pk>/",
+        SendPasswordResetLinkView.as_view(),
+        name="send-password-reset-link",
     ),
 ]

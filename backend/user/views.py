@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,8 +9,9 @@ from rest_framework.permissions import IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 
 from utils.generate_token import generate_token
-from notification.emails import send_activation_email, send_email
+from notification.emails import send_password_reset_email
 
+from .mails.user_mails import send_set_staff_password_email, send_user_deactivate_email
 from .permissions import IsSuperUser
 from .models import User
 from .serializers import (
@@ -73,10 +75,13 @@ class StaffListCreateView(generics.ListCreateAPIView):
         user.token = token
         user.save()
 
-        activation_url = f"{settings.FRONTEND_BASE_URL}/activate-account/?email={user.email}&token={token}"
+        activation_url = f"{settings.FRONTEND_BASE_URL}/reset-password/?email={user.email}&token={token}"
+        send_set_staff_password_email(user, activation_url)
 
-        # Send activation email
-        send_activation_email(user.email, activation_url)
+        return Response(
+            {"message": "Staff user created successfully"},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class StaffDetailView(generics.RetrieveAPIView):
@@ -93,20 +98,6 @@ class DeactivateUserView(generics.GenericAPIView):
             return User.objects.all()
         return User.objects.filter(is_staff=False, role="customer")
 
-    def deactivate_user(self, user):
-        subject = "Account Disabled"
-        plain_message = f"Your account has been disabled by the admin.\nFor more information, please contact to admin at {settings.ADMIN_CONTACT_EMAIL}"
-        html_content = f"<p>{plain_message}</p>"
-
-        return subject, plain_message, html_content
-
-    def activate_user(self, user):
-        subject = "Account Activated"
-        plain_message = f"Hello {user.first_name}, Welcome back to the platform.\nYour account has been activated by the admin."
-        html_content = f"<p>{plain_message}</p>"
-
-        return subject, plain_message, html_content
-
     def post(self, request, *args, **kwargs):
         user = self.get_queryset().get(pk=kwargs.get("pk"))
 
@@ -115,20 +106,32 @@ class DeactivateUserView(generics.GenericAPIView):
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        user = serializer.save()
 
-        if serializer.validated_data.get("is_active") == False:
-            subject, plain_message, html_content = self.deactivate_user(user)
+        if user.is_active == False:
+            send_user_deactivate_email(user, "deactivate")
         else:
-            subject, plain_message, html_content = self.activate_user(user)
-
-        send_email(
-            subject=subject,
-            plain_message=plain_message,
-            html_content=html_content,
-            to_email=[user.email],
-        )
+            send_user_deactivate_email(user, "activate")
 
         return Response(
             {"message": "User status updated successfully"},
             status=status.HTTP_200_OK,
+        )
+
+
+class SendPasswordResetLinkView(generics.GenericAPIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        pk = kwargs.get("pk")
+        user = get_object_or_404(User, pk=pk)
+        token = generate_token(length=100)
+        user.token = token
+        user.save()
+
+        password_reset_url = f"{settings.FRONTEND_BASE_URL}/reset-password/?email={user.email}&token={token}"
+        send_password_reset_email(user.email, password_reset_url)
+
+        return Response(
+            {"message": "Password reset link sent"}, status=status.HTTP_200_OK
         )

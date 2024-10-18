@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>
+			Account {% if type == "activate" %}Activated{% else %}Disabled{% endif %}
+		</title>
+	</head>
+	<body>
+		<h1>
+			Account {% if type == "activate" %}Activated{% else %}Disabled{% endif %}
+		</h1>
+		<hr />
+		<p>Hello {{ user.first_name }},</p>
+		<p>
+			{% if type == "activate" %} Your account has been activated by the admin.
+			{% else %} Your account has been deactived by the admin. {% endif %}
+		</p>
+		<p>
+			For more information, please contact to admin at {{
+			settings.ADMIN_CONTACT_EMAIL }}
+		</p>
+	</body>
+</html>
