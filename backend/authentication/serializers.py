@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from user.models import User
 from vendor.serializers import VendorShortSerializer
+from vendor.models import Vendor
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -41,14 +43,25 @@ class AdminCreateSerializer(serializers.ModelSerializer):
 
 class VendorRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=128, required=True, write_only=True)
+    store_name = serializers.CharField(max_length=100, required=True)
 
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name", "password", "role"]
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "password",
+            "role",
+            "store_name",
+        ]
         read_only_fields = ["id", "role"]
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data, role="vendor")
+        # create vendor
+        Vendor.objects.create(user=user, store_name=validated_data["store_name"])
         return user
 
 

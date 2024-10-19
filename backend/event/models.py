@@ -13,7 +13,7 @@ def generate_image_path(instance, filename):
 class Event(BaseModel):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True, null=False, blank=True)
+    slug = models.SlugField(null=False, blank=True)
     description = models.TextField()
     start_date = models.DateField()
     end_date = models.DateField()
@@ -25,6 +25,7 @@ class Event(BaseModel):
     )
     image = models.ImageField(upload_to=generate_image_path, blank=True, null=True)
     features = models.JSONField(default=list, blank=True, null=True)
+    tags = models.CharField(max_length=100, blank=True, null=True)
 
     is_featured = models.BooleanField(default=False)
     is_published = models.BooleanField(default=False)

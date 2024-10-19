@@ -21,6 +21,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
             "discount_price",
             "image",
             "features",
+            "tags",
             "is_featured",
             "is_published",
             "vendor",
@@ -52,8 +53,9 @@ class EventListSerializer(serializers.ModelSerializer):
             "discount_price",
             "image",
             "is_featured",
-            "vendor",
+            "tags",
             "created_at",
+            "vendor",
         ]
 
     def get_vendor(self, obj):
@@ -69,3 +71,22 @@ class EventDetailSerializer(serializers.ModelSerializer):
         model = Event
         fields = "__all__"
         read_only_fields = ["id", "vendor", "created_at", "updated_at"]
+
+
+class VendorEventListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "start_date",
+            "end_date",
+            "location",
+            "seat_available",
+            "actual_price",
+            "discount_price",
+            "image",
+            "is_featured",
+            "is_published",
+        ]

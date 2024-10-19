@@ -31,4 +31,10 @@ class EventFilter(filters.FilterSet):
             Q(title__icontains=value)
             | Q(description__icontains=value)
             | Q(location__icontains=value)
+            | Q(tags__icontains=value)
         )
+
+
+class VendorEventFilter(EventFilter):
+    class Meta(EventFilter.Meta):
+        fields = EventFilter.Meta.fields + ["is_published", "is_archived"]
