@@ -28,19 +28,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 
-class AdminCreateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(max_length=128, required=True, write_only=True)
-
-    class Meta:
-        model = User
-        fields = ["id", "email", "first_name", "last_name", "password", "role"]
-        read_only_fields = ["id", "role"]
-
-    def create(self, validated_data):
-        user = User.objects.create_user(**validated_data, role="admin")
-        return user
-
-
 class VendorRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=128, required=True, write_only=True)
     store_name = serializers.CharField(max_length=100, required=True)

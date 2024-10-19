@@ -14,7 +14,6 @@ from notification.emails import send_activation_email
 from utils.generate_token import generate_token
 
 from .serializers import (
-    AdminCreateSerializer,
     ForgetPasswordSerializer,
     ResetPasswordSerializer,
     ChangePasswordSerializer,
@@ -38,11 +37,6 @@ class MeView(generics.GenericAPIView):
 class LoginView(TokenObtainPairView):
     permission_classes = [permissions.AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
-
-
-# class AdminCreateView(generics.CreateAPIView):
-#     permission_classes = [IsSystemAdmin]
-#     serializer_class = AdminCreateSerializer
 
 
 class VendorRegistrationView(generics.CreateAPIView):
