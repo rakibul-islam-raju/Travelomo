@@ -10,7 +10,7 @@ export default function Header() {
 				<div className="flex justify-end mb-3">
 					<div className="flex items-center gap-x-6">
 						<Link href={"/become-a-host"}>Become a host</Link>
-						<Link href={"/register"}>Register</Link>
+						<Link href={"/register"}>Create an account</Link>
 						<Link href={"/help-support"}>Help & Support</Link>
 					</div>
 				</div>
