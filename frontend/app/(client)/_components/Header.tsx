@@ -1,3 +1,10 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { siteConfig } from "@/config/siteConfig";
 import { LogIn } from "lucide-react";
 import Link from "next/link";
@@ -25,11 +32,28 @@ export default function Header() {
 						<h1 className="text-xl font-bold text-white">{siteConfig.name}</h1>
 					</Link>
 
-					<Link href="/login">
-						<Button variant="default">
-							<LogIn /> Login
-						</Button>
-					</Link>
+					<div className="flex items-center gap-x-2">
+						<Link href="/login">
+							<Button variant="default">
+								<LogIn /> Login
+							</Button>
+						</Link>
+						<DropdownMenu>
+							<DropdownMenuTrigger>
+								<Avatar>
+									<AvatarImage src="https://github.com/shadcn.png" />
+									<AvatarFallback>CN</AvatarFallback>
+								</Avatar>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent>
+								<DropdownMenuItem>Profile</DropdownMenuItem>
+								<DropdownMenuItem>Dashboard</DropdownMenuItem>
+								<DropdownMenuItem className="text-red-500">
+									Logout
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</div>
 				</div>
 			</div>
 		</header>
