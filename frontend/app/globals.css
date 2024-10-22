@@ -89,11 +89,37 @@
 	}
 }
 
-@layer base {
-  * {
-    @apply border-border;
+/* Modern Scrollbar Styles */
+@layer utilities {
+	/* Webkit browsers (Chrome, Safari, newer versions of Edge) */
+	::-webkit-scrollbar {
+		width: 10px;
 	}
-  body {
-    @apply bg-background text-foreground;
+
+	::-webkit-scrollbar-track {
+		background: hsl(var(--background));
+		border-radius: 5px;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: hsl(var(--muted-foreground) / 0.5);
+		border-radius: 5px;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: hsl(var(--muted-foreground) / 0.8);
+	}
+
+	/* Firefox */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: hsl(var(--muted-foreground) / 0.5) hsl(var(--background));
+	}
+
+	/* Firefox - Custom Properties for rounded corners */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: hsl(var(--muted-foreground) / 0.5) hsl(var(--background));
+		--scrollbar-border-radius: 5px;
 	}
 }

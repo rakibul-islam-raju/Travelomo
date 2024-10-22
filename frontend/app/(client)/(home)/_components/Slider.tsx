@@ -3,13 +3,13 @@
 import Image from "next/image";
 
 // Import Swiper React components
+import { Autoplay, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay } from "swiper/modules";
 
 // Import Swiper styles
 import "swiper/css";
-import "swiper/css/pagination";
 import "swiper/css/autoplay";
+import "swiper/css/pagination";
 // Import custom styles
 import "./index.css";
 
@@ -35,7 +35,7 @@ export default function Slider() {
 							alt="slider"
 							width={1000}
 							height={500}
-							className="w-full h-full object-cover"
+							className="w-full h-full object-cover rounded"
 						/>
 					</SwiperSlide>
 				))}
