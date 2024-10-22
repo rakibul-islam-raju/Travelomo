@@ -1,8 +1,7 @@
-import Slider from "@/components/home/Slider";
-import Section from "@/components/Section";
-import React from "react";
+import Slider from "@/app/(client)/(home)/_components/Slider";
+import EventCard from "@/app/(client)/_components/EventCard";
+import Section from "@/app/(client)/_components/Section";
 import { events } from "@/data/events";
-import EventCard from "@/components/EventCard";
 
 export default function Home() {
 	return (

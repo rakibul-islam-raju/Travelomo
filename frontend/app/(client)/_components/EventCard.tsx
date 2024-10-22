@@ -1,8 +1,8 @@
-import React from "react";
-import Image from "next/image";
 import { formatDate } from "@/lib/dates";
-import { Button } from "./ui/button";
 import { Armchair } from "lucide-react";
+import Image from "next/image";
+import React from "react";
+import { Button } from "../../../components/ui/button";
 
 type Props = {
 	title: string;
