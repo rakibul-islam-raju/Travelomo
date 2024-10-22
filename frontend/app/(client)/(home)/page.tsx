@@ -47,7 +47,7 @@ export default function Home() {
 			<Section title="Featured Events">
 				<div className="grid grild-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 					{events.slice(0, 8).map((event) => (
-						<EventCard key={event.title} {...event} />
+						<EventCard key={event.id} event={event} />
 					))}
 				</div>
 			</Section>
@@ -55,7 +55,7 @@ export default function Home() {
 			<Section title="Upcoming Events">
 				<div className="grid grild-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 					{events.slice(0, 8).map((event) => (
-						<EventCard key={event.title} {...event} />
+						<EventCard key={event.id} event={event} />
 					))}
 				</div>
 			</Section>

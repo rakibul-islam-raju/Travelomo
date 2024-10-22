@@ -9,7 +9,7 @@ export default function ClientLayout({
 	return (
 		<>
 			<Header />
-			<main className="container">{children}</main>
+			<main className="container py-6">{children}</main>
 			<Footer />
 		</>
 	);
