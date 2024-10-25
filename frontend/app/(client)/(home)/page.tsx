@@ -4,10 +4,15 @@ import Section from "@/app/(client)/_components/Section";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { events } from "@/data/events";
+import { eventService } from "@/services/eventService";
 import { Search } from "lucide-react";
 
-export default function Home() {
+export default async function Home() {
+	const featuredEvents = await eventService.fetchFeaturedEvents();
+	const events = await eventService.fetchEvents(8, 0);
+
+	console.log(featuredEvents);
+
 	return (
 		<>
 			<section className="grid grid-cols-1 md:grid-cols-2 items-center gap-12 my-12">
@@ -46,7 +51,7 @@ export default function Home() {
 
 			<Section title="Featured Events">
 				<div className="grid grild-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-					{events.slice(0, 8).map((event) => (
+					{featuredEvents?.results?.map((event) => (
 						<EventCard key={event.id} event={event} />
 					))}
 				</div>
@@ -54,7 +59,7 @@ export default function Home() {
 
 			<Section title="Upcoming Events">
 				<div className="grid grild-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-					{events.slice(0, 8).map((event) => (
+					{events?.results?.map((event) => (
 						<EventCard key={event.id} event={event} />
 					))}
 				</div>

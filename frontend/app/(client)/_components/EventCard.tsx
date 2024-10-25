@@ -1,5 +1,5 @@
-import { Event } from "@/data/events";
 import { formatDate } from "@/lib/dates";
+import { EventListItem } from "@/types/event";
 import { Armchair } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,7 +7,7 @@ import React from "react";
 import { Button } from "../../../components/ui/button";
 
 type Props = {
-	event: Event;
+	event: EventListItem;
 };
 
 export default function EventCard({ event }: Props): React.ReactNode {
@@ -16,7 +16,7 @@ export default function EventCard({ event }: Props): React.ReactNode {
 			<div className="rounded-lg overflow-hidden shadow group hover:shadow-md transition-all duration-300 cursor-pointer">
 				<div className="relative h-[200px] overflow-hidden">
 					<Image
-						src={event.image}
+						src={event.image || "https://via.placeholder.com/300"}
 						alt={event.title}
 						layout="fill"
 						className=" w-full object-cover group-hover:scale-110 transition-all duration-300 h-[200px]"
@@ -27,11 +27,11 @@ export default function EventCard({ event }: Props): React.ReactNode {
 						{event.title}
 					</h2>
 					<p className="text-sm text-muted-foreground">
-						{formatDate(event.startDate)} - {formatDate(event.endDate)}
+						{formatDate(event.start_date)} - {formatDate(event.end_date)}
 					</p>
 					<div className="flex justify-between items-center mt-2">
 						<div className="bg-primary/10 text-primary py-1 px-2 rounded-md text-sm font-semibold">
-							{event.seatAvailable} seats available
+							{event.seat_available} seats available
 						</div>
 						<div className="bg-primary/10 text-primary py-1 px-2 rounded-md text-sm font-semibold">
 							${event.price} per seat
