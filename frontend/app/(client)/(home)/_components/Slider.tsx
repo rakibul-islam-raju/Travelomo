@@ -13,6 +13,8 @@ import "swiper/css/pagination";
 // Import custom styles
 import "./index.css";
 
+import { image2, image3, image4 } from "@/assets/images";
+
 export default function Slider() {
 	return (
 		<>
@@ -28,17 +30,39 @@ export default function Slider() {
 					disableOnInteraction: false,
 				}}
 			>
-				{Array.from({ length: 5 }).map((_, index) => (
-					<SwiperSlide key={index}>
+				<SwiperSlide>
+					<div className="relative">
 						<Image
-							src={`https://picsum.photos/1000/500?${index}`}
+							src={image2}
 							alt="slider"
-							width={1000}
-							height={500}
-							className="w-full h-full object-cover rounded"
+							width={500}
+							height={600}
+							className="w-full h-[600px] object-cover rounded"
 						/>
-					</SwiperSlide>
-				))}
+					</div>
+				</SwiperSlide>
+				<SwiperSlide>
+					<div className="relative">
+						<Image
+							src={image3}
+							alt="slider"
+							width={500}
+							height={600}
+							className="w-full h-[600px] object-cover rounded"
+						/>
+					</div>
+				</SwiperSlide>
+				<SwiperSlide>
+					<div className="relative">
+						<Image
+							src={image4}
+							alt="slider"
+							width={500}
+							height={600}
+							className="w-full h-[600px] object-cover rounded"
+						/>
+					</div>
+				</SwiperSlide>
 			</Swiper>
 		</>
 	);

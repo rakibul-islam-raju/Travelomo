@@ -1,17 +1,17 @@
 export const siteConfig = {
-	name: "Cholo Na Ghure Asi",
+	name: "Travel More",
 	subtitle: "Explore the beauty of nature and culture",
-	url: "https://cholonaghureasi.com",
-	ogImage: "https://cholonaghureasi.com/og.png",
+	url: "https://travelmore.com",
+	ogImage: "https://travelmore.com/og.png",
 	description:
-		"Cholo Na Ghure Asi is a platform for finding tour events and activities.",
+		"Travel More is a platform for finding tour events and activities.",
 	links: {
-		twitter: "https://twitter.com/cholonaghureasi",
-		facebook: "https://facebook.com/cholonaghureasi",
-		instagram: "https://instagram.com/cholonaghureasi",
-		linkedin: "https://linkedin.com/company/cholonaghureasi",
+		twitter: "https://twitter.com/travelmore",
+		facebook: "https://facebook.com/travelmore",
+		instagram: "https://instagram.com/travelmore",
+		linkedin: "https://linkedin.com/company/travelmore",
 	},
-	email: "info@cholonaghureasi.com",
+	email: "info@travelmore.com",
 	phone: "+8801712345678",
 };
 
