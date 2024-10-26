@@ -56,6 +56,7 @@ class EventListSerializer(serializers.ModelSerializer):
             "tags",
             "created_at",
             "vendor",
+            "price",
         ]
 
     def get_vendor(self, obj):

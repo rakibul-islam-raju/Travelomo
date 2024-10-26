@@ -24,6 +24,7 @@ class EventFilter(filters.FilterSet):
             "seat_available",
             "start_price",
             "end_price",
+            "is_featured",
         ]
 
     def search_filter(self, queryset, name, value):

@@ -10,7 +10,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-	title: "CNGA",
+	title: "Travel More",
 	description: siteConfig.description,
 };
 

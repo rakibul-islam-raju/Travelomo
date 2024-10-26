@@ -16,7 +16,9 @@ export default function EventCard({ event }: Props): React.ReactNode {
 			<div className="rounded-lg overflow-hidden shadow group hover:shadow-md transition-all duration-300 cursor-pointer">
 				<div className="relative h-[200px] overflow-hidden">
 					<Image
-						src={event.image || "https://via.placeholder.com/300"}
+						src={
+							event.image || `https://picsum.photos/300/200?event=${event.id}`
+						}
 						alt={event.title}
 						layout="fill"
 						className=" w-full object-cover group-hover:scale-110 transition-all duration-300 h-[200px]"

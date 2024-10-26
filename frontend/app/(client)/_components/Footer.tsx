@@ -1,11 +1,10 @@
 import { siteConfig } from "@/config/siteConfig";
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
 export default function Footer() {
 	return (
-		<footer className="bg-primary/10 pt-6">
+		<footer className="bg-primary/10 pt-8 mt-12">
 			<div className="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				<div className="">
 					<Link href="/">
