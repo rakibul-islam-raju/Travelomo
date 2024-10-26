@@ -1,5 +1,5 @@
 import { RESULT_PER_PAGE } from "@/config/siteConfig";
-import { apiFetch } from "@/lib/fatchInstance";
+import { apiFetch } from "@/lib/fetchInstance";
 import { GenericListResponse } from "@/types/common";
 import { EventListItem } from "@/types/event";
 

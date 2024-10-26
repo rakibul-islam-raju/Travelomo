@@ -59,12 +59,9 @@ export default function ForgetPasswordPage() {
 				</Form>
 
 				<div className="mt-4 text-center">
-					<p className="text-sm text-muted-foreground">
+					<p className="text-muted-foreground">
 						Remember your password?{" "}
-						<Link
-							className="text-primary text-sm hover:underline inline-block"
-							href="/login"
-						>
+						<Link className="" href="/login">
 							Login
 						</Link>
 					</p>

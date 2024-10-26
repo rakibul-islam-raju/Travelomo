@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import React from "react";
 
 type Props = {
 	text: string;
@@ -10,7 +9,7 @@ const SectionTitle = (props: Props) => {
 	return (
 		<div
 			className={cn(
-				"text-2xl font-bold mb-4 mt-2 text-gray-700 font-poppins",
+				"text-2xl font-bold text-gray-700 font-poppins",
 				props.className
 			)}
 		>

@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.utils.text import slugify
 
@@ -32,7 +34,7 @@ class Event(BaseModel):
     is_deleted = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
     def save(self, *args, **kwargs):
@@ -44,7 +46,7 @@ class Event(BaseModel):
         ordering = ["-created_at"]
 
     @property
-    def price(self):
+    def price(self) -> Decimal:
         if self.discount_price:
             return self.discount_price
         return self.actual_price

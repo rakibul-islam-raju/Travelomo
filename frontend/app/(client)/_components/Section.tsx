@@ -14,8 +14,8 @@ export default function Section({
 }: Props): React.ReactNode {
 	return (
 		<section className="py-10">
-			<div className="flex justify-between items-center">
-				{title && <SectionTitle text={title} className="mb-6" />}
+			<div className="flex justify-between items-start mb-6">
+				{title && <SectionTitle text={title} className="" />}
 				{action && <div className="ml-auto">{action}</div>}
 			</div>
 			{children}

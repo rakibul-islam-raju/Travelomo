@@ -11,6 +11,9 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { apiFetch } from "@/lib/fetchInstance";
+import { extractErrorMessage } from "@/utils/extractErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -26,12 +29,46 @@ const formSchema = z.object({
 });
 
 export default function RegistrationPage() {
+	const { toast } = useToast();
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 	});
 
-	const onSubmit = (data: z.infer<typeof formSchema>) => {
+	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		console.log(data);
+
+		try {
+			const res = await apiFetch(`/auth/register/customer/`, {
+				method: "POST",
+				body: JSON.stringify(data),
+			});
+
+			if (res?.id) {
+				toast({
+					variant: "success",
+					title: "Registration Successful",
+					description: "Please check your email for verification",
+				});
+			}
+
+			form.reset();
+			// If reset() is not working, we can manually clear the form fields
+			form.setValue("first_name", "");
+			form.setValue("last_name", "");
+			form.setValue("email", "");
+			form.setValue("password", "");
+			// Clear any existing form errors
+			form.clearErrors();
+		} catch (error) {
+			console.log("error =>", error);
+
+			toast({
+				variant: "destructive",
+				title: "Error",
+				description: extractErrorMessage(error),
+			});
+		}
 	};
 
 	return (
@@ -103,15 +140,15 @@ export default function RegistrationPage() {
 				</Form>
 
 				<div className="mt-4 text-center">
-					<p className="text-sm text-muted-foreground">
+					<p className="text-muted-foreground">
 						Already have an account?{" "}
-						<Link
-							className="text-primary text-sm hover:underline inline-block"
-							href="/login"
-						>
+						<Link className="" href="/login">
 							Login
 						</Link>
 					</p>
+					<Link className="" href="/vendor-registration">
+						Create Vendor Account
+					</Link>
 				</div>
 			</CardContent>
 		</Card>

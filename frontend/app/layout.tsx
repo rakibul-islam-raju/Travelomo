@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/toaster";
 import { siteConfig } from "@/config/siteConfig";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
@@ -21,7 +22,10 @@ export default function DashboardLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={`${poppins.variable} antialiased`}>{children}</body>
+			<body className={`${poppins.variable} antialiased`}>
+				{children}
+				<Toaster />
+			</body>
 		</html>
 	);
 }

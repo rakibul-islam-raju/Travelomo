@@ -46,9 +46,20 @@ export default function Header() {
 								</Avatar>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent>
-								<DropdownMenuItem>Profile</DropdownMenuItem>
-								<DropdownMenuItem>Dashboard</DropdownMenuItem>
-								<DropdownMenuItem className="text-red-500">
+								<DropdownMenuItem asChild>
+									<Link className="cursor-pointer text-inherit" href="/profile">
+										Profile
+									</Link>
+								</DropdownMenuItem>
+								<DropdownMenuItem>
+									<Link
+										className="cursor-pointer text-inherit"
+										href="/dashboard"
+									>
+										Dashboard
+									</Link>
+								</DropdownMenuItem>
+								<DropdownMenuItem className="cursor-pointer text-red-600 hover:!text-red-600 hover:!bg-red-100">
 									Logout
 								</DropdownMenuItem>
 							</DropdownMenuContent>
