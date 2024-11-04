@@ -1,4 +1,4 @@
-import { RESULT_PER_PAGE } from "@/config/siteConfig";
+import { RESULT_PER_PAGE } from "@/config";
 import { apiFetch } from "@/lib/fetchInstance";
 import { GenericListResponse } from "@/types/common";
 import { EventListItem } from "@/types/event";

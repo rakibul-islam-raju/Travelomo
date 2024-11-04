@@ -1,4 +1,4 @@
-import { BASE_API_URL } from "@/config/siteConfig";
+import { BASE_API_URL } from "@/config";
 import { tokenService } from "@/services/tokenService";
 import { AuthTokens } from "@/types/common";
 
