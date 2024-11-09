@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -28,8 +29,15 @@ export default function LoginPage() {
 		resolver: zodResolver(formSchema),
 	});
 
-	const onSubmit = (data: z.infer<typeof formSchema>) => {
-		console.log(data);
+	const onSubmit = async (data: z.infer<typeof formSchema>) => {
+		const res = await signIn("credentials", {
+			email: data.email,
+			password: data.password,
+			redirect: false,
+			callbackUrl: "/",
+		});
+
+		console.log("login res =>", res);
 	};
 
 	return (

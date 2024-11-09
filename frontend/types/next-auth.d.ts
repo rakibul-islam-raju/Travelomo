@@ -5,13 +5,13 @@ import "next-auth";
 declare module "next-auth" {
 	interface User {
 		id: string;
+		user_id: string;
 		email: string;
 		first_name: string;
 		last_name: string;
 		is_active: boolean;
 		role: "customer" | "vendor" | "admin";
-		access: string;
-		refresh: string;
+		tokens: { access: string; refresh: string };
 		exp: number;
 	}
 
@@ -25,11 +25,9 @@ declare module "next-auth" {
 // Extend JWT type
 declare module "next-auth/jwt" {
 	interface JWT {
-		access: string;
-		refresh: string;
+		tokens: { access: string; refresh: string };
 		exp: number;
 		error?: string;
-		role: "customer" | "vendor" | "admin";
 		user: User;
 	}
 }
