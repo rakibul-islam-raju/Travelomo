@@ -23,7 +23,7 @@ jobs:
       - name: Deploy code to VPS
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-          cd /root/tourEvent &&
+          cd /root/Multivedor-Travel-Agency &&
           git pull origin main &&
           docker-compose down &&
           docker-compose up --build -d
