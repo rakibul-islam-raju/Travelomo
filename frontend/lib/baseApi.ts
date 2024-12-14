@@ -91,4 +91,5 @@ export const baseApi = createApi({
 	reducerPath: "baseApi",
 	baseQuery: baseQueryWithRefresh,
 	endpoints: () => ({}),
+	tagTypes: ["Events"],
 });

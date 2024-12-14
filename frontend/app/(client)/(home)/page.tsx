@@ -1,8 +1,18 @@
 import Slider from "@/app/(client)/(home)/_components/Slider";
 import CTA from "@/components/CTA";
+import { initialParams } from "@/config";
+import { eventApi } from "@/lib/features/events/eventApi";
+import { store } from "@/lib/store";
 import SearchForm from "./_components/SearchForm";
 
 export default async function Home() {
+	const { data, isLoading } = await store.dispatch(
+		eventApi.endpoints.getEvents.initiate(initialParams)
+	);
+
+	console.log("data ->", data);
+	console.log("isLoading ->", isLoading);
+
 	return (
 		<>
 			<section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 items-center gap-12 my-12">
