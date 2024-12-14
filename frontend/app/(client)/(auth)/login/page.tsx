@@ -21,19 +21,23 @@ const formSchema = z.object({
 	email: z.string().email({ message: "Invalid email address." }),
 	password: z
 		.string()
-		.min(6, { message: "Password must be at least 6 characters." }),
+		.min(4, { message: "Password must be at least 4 characters." }),
 });
 
 export default function LoginPage() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
+		defaultValues: {
+			email: "",
+			password: "",
+		},
 	});
 
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		const res = await signIn("credentials", {
 			email: data.email,
 			password: data.password,
-			redirect: false,
+			redirect: true,
 			callbackUrl: "/",
 		});
 
