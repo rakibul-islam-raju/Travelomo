@@ -30,7 +30,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class VendorRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=128, required=True, write_only=True)
-    store_name = serializers.CharField(max_length=100, required=True)
+    store_name = serializers.CharField(max_length=100, required=True, write_only=True)
 
     class Meta:
         model = User
@@ -46,9 +46,12 @@ class VendorRegistrationSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "role"]
 
     def create(self, validated_data):
+        store = validated_data.pop('store_name')
+        print("store -->", store)
         user = User.objects.create_user(**validated_data, role="vendor")
+
         # create vendor
-        Vendor.objects.create(user=user, store_name=validated_data["store_name"])
+        Vendor.objects.create(user=user, store_name=store)
         return user
 
 

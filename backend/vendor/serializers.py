@@ -41,10 +41,19 @@ class VendorListSerializer(serializers.ModelSerializer):
 
 
 class VendorDetailSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
     class Meta:
         model = Vendor
         fields = "__all__"
         read_only_fields = ["id", "is_approved", "approved_by", "approved_at"]
+
+    def get_user(self, obj):
+        return {
+            "id": obj.user.id,
+            "full_name": obj.user.full_name,
+            "email": obj.user.email,
+        }
 
 
 class VendorApprovalSerializer(serializers.ModelSerializer):
