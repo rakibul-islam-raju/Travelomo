@@ -5,7 +5,7 @@ import { GenericListResponse } from "@/types/common";
 export const eventApi = baseApi.injectEndpoints({
 	endpoints: (builder) => ({
 		getEvents: builder.query<
-			GenericListResponse<IEventListItem[]>,
+			GenericListResponse<IEventListItem>,
 			IEventListParams
 		>({
 			query: (params) => ({

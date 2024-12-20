@@ -3,15 +3,17 @@ import CTA from "@/components/CTA";
 import { initialParams } from "@/config";
 import { eventApi } from "@/lib/features/events/eventApi";
 import { store } from "@/lib/store";
+import { Suspense } from "react";
+import Section from "../_components/Section";
+import EventList from "./_components/EventList";
+import EventListSkeleton from "./_components/EventListSkeleton";
 import SearchForm from "./_components/SearchForm";
+import ViewAllBtn from "./_components/ViewAllBtn";
 
 export default async function Home() {
-	const { data, isLoading } = await store.dispatch(
+	const { data: initialEventsData } = await store.dispatch(
 		eventApi.endpoints.getEvents.initiate(initialParams)
 	);
-
-	console.log("data ->", data);
-	console.log("isLoading ->", isLoading);
 
 	return (
 		<>
@@ -31,13 +33,11 @@ export default async function Home() {
 				</div>
 			</section>
 
-			{/* <Section title="Featured Events" action={<ViewAllBtn />}>
-				<div className="grid grild-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-					{featuredEvents?.results?.map((event) => (
-						<EventCard key={event.id} event={event} />
-					))}
-				</div>
-			</Section> */}
+			<Section title="Featured Events" action={<ViewAllBtn />}>
+				<Suspense fallback={<EventListSkeleton />}>
+					<EventList initialEventsData={initialEventsData} />
+				</Suspense>
+			</Section>
 
 			{/* <Section title="Ending Soon" action={<ViewAllBtn />}>
 				<div className="grid grild-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

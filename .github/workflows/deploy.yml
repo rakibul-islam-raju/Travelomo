@@ -4,9 +4,14 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "frontend/**"
+      - "backend/**"
+      - "admin/**"
 
 jobs:
-  deploy:
+  deploy-frontend:
+    if: contains(github.event.head_commit.message, 'frontend')
     runs-on: ubuntu-latest
 
     steps:
@@ -20,10 +25,58 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy code to VPS
+      - name: Deploy frontend to VPS
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-          cd /root/Multivedor-Travel-Agency &&
+          cd /root/Multivedor-Travel-Agency/frontend &&
+          git pull origin main &&
+          docker-compose down &&
+          docker-compose up --build -d
+          "
+
+  deploy-backend:
+    if: contains(github.event.head_commit.message, 'backend')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy backend to VPS
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          cd /root/Multivedor-Travel-Agency/backend &&
+          git pull origin main &&
+          docker-compose down &&
+          docker-compose up --build -d
+          "
+
+  deploy-admin:
+    if: contains(github.event.head_commit.message, 'admin')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy admin to VPS
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          cd /root/Multivedor-Travel-Agency/admin &&
           git pull origin main &&
           docker-compose down &&
           docker-compose up --build -d
