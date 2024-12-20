@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { apiFetch } from "@/lib/fetchInstance";
 import { extractErrorMessage } from "@/utils/extractErrorMessages";
 import { CircleCheck, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -26,7 +25,7 @@ export default function ActivateAccount() {
 				setSuccess(false);
 				setError(null);
 				setIsLoading(true);
-				await apiFetch(`/auth/activate-account/?email=${email}&token=${token}`);
+				await fetch(`/auth/activate-account/?email=${email}&token=${token}`);
 				setSuccess(true);
 				toast({
 					variant: "success",

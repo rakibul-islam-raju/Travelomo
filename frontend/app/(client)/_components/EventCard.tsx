@@ -1,5 +1,5 @@
 import { formatDate } from "@/lib/dates";
-import { EventListItem } from "@/types/event";
+import { IEventListItem } from "@/models/Event";
 import { Armchair } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,7 +7,7 @@ import React from "react";
 import { Button } from "../../../components/ui/button";
 
 type Props = {
-	event: EventListItem;
+	event: IEventListItem;
 };
 
 export default function EventCard({ event }: Props): React.ReactNode {

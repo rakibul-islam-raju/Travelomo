@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { apiFetch } from "@/lib/fetchInstance";
 import { extractErrorMessage } from "@/utils/extractErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -39,12 +38,13 @@ export default function RegistrationPage() {
 		console.log(data);
 
 		try {
-			const res = await apiFetch(`/auth/register/customer/`, {
+			const res = await fetch(`/auth/register/customer/`, {
 				method: "POST",
 				body: JSON.stringify(data),
 			});
+			const result = await res.json();
 
-			if (res?.id) {
+			if (result?.id) {
 				toast({
 					variant: "success",
 					title: "Registration Successful",
