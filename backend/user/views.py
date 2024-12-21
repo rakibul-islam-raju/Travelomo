@@ -1,9 +1,10 @@
+from typing import Any, Type
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework import generics, filters
 from rest_framework.permissions import IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
@@ -34,7 +35,7 @@ class UserListView(generics.ListAPIView):
 
 
 class UserDetailView(generics.RetrieveAPIView):
-    queryset = User.objects.filter(role="customer")
+    queryset = User.objects.filter(role__in=["customer", "vendor"])
     serializer_class = UserDetailSerializer
     permission_classes = [IsAdminUser]
 
@@ -89,33 +90,45 @@ class StaffDetailView(generics.RetrieveAPIView):
     serializer_class = StaffDetailSerializer
 
 
-class DeactivateUserView(generics.GenericAPIView):
+class DeactivateUserView(generics.UpdateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = DisableUserSerializer
-
+    
+    def get_object(self):
+        user = super().get_object()
+        
+        # Only superusers can modify superusers/staff and staff cant modify other users
+        if user.is_staff and not self.request.user.is_superuser:
+            raise PermissionDenied("You don't have permission to modify this user.")
+            
+        return user
+    
     def get_queryset(self):
         if self.request.user.is_superuser:
             return User.objects.all()
-        return User.objects.filter(is_staff=False, role="customer")
-
-    def post(self, request, *args, **kwargs):
-        user = self.get_queryset().get(pk=kwargs.get("pk"))
-
-        if user.is_superuser or (user.is_staff and request.user.is_staff):
-            raise ValidationError("You are not authorized to disable this user.")
-
-        serializer = self.get_serializer(data=request.data)
+        
+        return User.objects.filter(
+            is_staff=False,
+        )
+    
+    def update(self, request: Any, *args: Any, **kwargs: Any):
+        instance = self.get_object()
+        
+        serializer = self.get_serializer(
+            instance,
+            data=request.data, 
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-
-        if user.is_active == False:
-            send_user_deactivate_email(user, "deactivate")
-        else:
-            send_user_deactivate_email(user, "activate")
-
+        
+        # Send notification email based on new status
+        action = "deactivate" if not user.is_active else "activate"
+        send_user_deactivate_email(user, action)
+        
         return Response(
-            {"message": "User status updated successfully"},
-            status=status.HTTP_200_OK,
+            serializer.data,
+            status=status.HTTP_200_OK
         )
 
 
