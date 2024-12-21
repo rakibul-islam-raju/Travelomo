@@ -68,6 +68,46 @@ export const userApi = baseApi.injectEndpoints({
 			},
 			// invalidatesTags: ["Staff"],
 		}),
+
+		deactivateUser: builder.mutation({
+			query: ({ id, data }) => ({
+				url: `/deactivate-user/${id}/`,
+				method: "PATCH",
+				data,
+			}),
+
+			async onQueryStarted(_, { queryFulfilled, dispatch }) {
+				try {
+					const result = await queryFulfilled;
+
+					// update user or staff details
+					dispatch(
+						baseApi.util.updateQueryData(
+							result?.data?.role === "admin"
+								? "getStaffDetails"
+								: "getUserDetails",
+							result.data.id,
+							(draft) => {
+								return {
+									...draft,
+									is_active: result.data.is_active,
+								};
+							}
+						)
+					);
+
+					// update user or staff list
+					dispatch(
+						baseApi.util.invalidateTags([
+							result?.data?.role === "admin" ? "Staff" : "User",
+						])
+					);
+				} catch (error) {
+					console.log(error);
+				}
+			},
+			// invalidatesTags: ["Staff"],
+		}),
 	}),
 });
 
@@ -77,4 +117,5 @@ export const {
 	useGetStaffsQuery,
 	useGetStaffDetailsQuery,
 	useCreateStaffMutation,
+	useDeactivateUserMutation,
 } = userApi;

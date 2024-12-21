@@ -73,5 +73,5 @@ class CreateStaffSerializer(serializers.ModelSerializer):
 class DisableUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "is_active"]
-        read_only_fields = ["id"]
+        fields = ["id", "is_active", "role"]
+        read_only_fields = ["id", "role"]

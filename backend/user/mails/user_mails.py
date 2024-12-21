@@ -23,7 +23,11 @@ def send_set_staff_password_email(user, set_password_url):
 
 
 def send_user_deactivate_email(user, type):
-    subject = "Account Deactivation"
+    if type == "deactivate":
+        subject = "Account Deactivation"
+    else:
+        subject = "Account Activation"
+
     template_name = "mail/user/user_deactivate.html"
 
     html_content = render_to_string(

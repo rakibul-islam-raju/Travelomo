@@ -7,6 +7,7 @@ const AppConfirmModal = ({
 	onCancel,
 	onOk,
 	deleteConfirm,
+	okText = "Confirm",
 }) => {
 	return (
 		<Modal
@@ -14,7 +15,7 @@ const AppConfirmModal = ({
 			onCancel={onCancel}
 			onOk={onOk}
 			title={title}
-			okText={deleteConfirm ? "Delete" : "Confirm"}
+			okText={okText}
 			okType={deleteConfirm ? "danger" : "primary"}
 		>
 			<Typography.Text>

@@ -1,6 +1,9 @@
 import { MoreOutlined } from "@ant-design/icons";
 import AppConfirmModal from "@components/AppConfirmModal";
-import { useGetUserDetailsQuery } from "@redux/user/userApi";
+import {
+	useDeactivateUserMutation,
+	useGetUserDetailsQuery,
+} from "@redux/user/userApi";
 import { Button, Divider, Dropdown, Flex, Space, Typography } from "antd";
 import { useState } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
@@ -13,6 +16,7 @@ const UserDetail = () => {
 	const { data: user } = useGetUserDetailsQuery(userId, {
 		skip: !userId,
 	});
+	const [deactivateUser] = useDeactivateUserMutation();
 
 	const [isResetModalVisible, setIsResetModalVisible] = useState(false);
 	const [isDisableModalVisible, setIsDisableModalVisible] = useState(false);
@@ -21,8 +25,11 @@ const UserDetail = () => {
 		// setSendResetList(true);
 	};
 
-	const handleDisableUser = () => {
-		console.log("disable");
+	const handleDisableUser = async () => {
+		await deactivateUser({
+			id: user?.id,
+			data: { is_active: !user.is_active },
+		}).unwrap();
 		setIsDisableModalVisible(false);
 	};
 
@@ -46,9 +53,9 @@ const UserDetail = () => {
 								onClick: () => setIsResetModalVisible(true),
 							},
 							{
-								label: "Deactivate User",
+								label: user?.is_active ? "Disable User" : "Enable User",
 								key: "disable-user",
-								danger: true,
+								danger: user?.is_active ? true : false,
 								onClick: () => setIsDisableModalVisible(true),
 							},
 						],
@@ -74,21 +81,31 @@ const UserDetail = () => {
 			</Flex>
 
 			<AppConfirmModal
-				title={
-					isDisableModalVisible ? "Disable User" : "Send Password Reset Link"
-				}
-				description={
-					isDisableModalVisible
-						? "Are you sure you want to deactivate this user?"
-						: "Are you sure you want to send a password reset link to this user?"
-				}
-				open={isDisableModalVisible || isResetModalVisible}
+				title={user?.is_active ? "Disable User" : "Enable User"}
+				description={`Are you sure you want to ${
+					user?.is_active ? "disable" : "activate"
+				} this user?`}
+				open={isDisableModalVisible}
 				onCancel={() => {
 					setIsDisableModalVisible(false);
+				}}
+				onOk={handleDisableUser}
+				deleteConfirm={Boolean(user?.is_active)}
+				okText={user?.is_active ? "Disable" : "Enable"}
+			/>
+
+			<AppConfirmModal
+				title={"Send Password Reset Link"}
+				description={
+					"Are you sure you want to send a password reset link to this user?"
+				}
+				open={isResetModalVisible}
+				onCancel={() => {
 					setIsResetModalVisible(false);
 				}}
-				onOk={isDisableModalVisible ? handleDisableUser : handleSendResetLink}
-				deleteConfirm={isDisableModalVisible}
+				onOk={handleSendResetLink}
+				deleteConfirm={false}
+				okText={"Send"}
 			/>
 		</>
 	);

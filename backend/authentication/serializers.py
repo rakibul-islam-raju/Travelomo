@@ -92,4 +92,7 @@ class MeSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "role",
+            "is_active",
+            "is_staff",
+            "is_superuser",
         ]
