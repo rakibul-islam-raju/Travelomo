@@ -28,6 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     password = models.CharField(max_length=128)
     token = models.CharField(max_length=100, blank=True, null=True, unique=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="customer")
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -61,7 +62,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Profile(PrimaryKeyModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     phone_number = PhoneNumberField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)

@@ -18,16 +18,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class UserListSerializer(UserSerializer):
-    profile = serializers.SerializerMethodField()
-
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ["profile", "is_vendor"]
+        fields = UserSerializer.Meta.fields + ["avatar", "is_vendor"]
 
-    def get_profile(self, obj):
-        return {
-            "avatar": obj.profile.avatar.url if obj.profile.avatar else None,
-            "phone_number": obj.profile.phone_number,
-        }
+
 
 
 class UserDetailSerializer(UserSerializer):
@@ -38,7 +32,6 @@ class UserDetailSerializer(UserSerializer):
 
 
 class StaffListSerializer(UserSerializer):
-    profile = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + [
@@ -46,14 +39,8 @@ class StaffListSerializer(UserSerializer):
             "is_active",
             "is_staff",
             "is_superuser",
-            "profile",
+            "avatar"
         ]
-
-    def get_profile(self, obj):
-        return {
-            "avatar": obj.profile.avatar.url if obj.profile.avatar else None,
-            "phone_number": obj.profile.phone_number,
-        }
 
 
 class StaffDetailSerializer(StaffListSerializer):

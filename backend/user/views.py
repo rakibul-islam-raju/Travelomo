@@ -31,7 +31,7 @@ class UserListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["email", "first_name", "last_name", "profile__phone_number"]
-    filterset_fields = ["is_active"]
+    filterset_fields = ["is_active", "role"]
 
 
 class UserDetailView(generics.RetrieveAPIView):
@@ -93,39 +93,39 @@ class StaffDetailView(generics.RetrieveAPIView):
 class DeactivateUserView(generics.UpdateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class = DisableUserSerializer
-    
+
     def get_object(self):
         user = super().get_object()
-        
+
         # Only superusers can modify superusers/staff and staff cant modify other users
         if user.is_staff and not self.request.user.is_superuser:
             raise PermissionDenied("You don't have permission to modify this user.")
-            
+
         return user
-    
+
     def get_queryset(self):
         if self.request.user.is_superuser:
             return User.objects.all()
-        
+
         return User.objects.filter(
             is_staff=False,
         )
-    
+
     def update(self, request: Any, *args: Any, **kwargs: Any):
         instance = self.get_object()
-        
+
         serializer = self.get_serializer(
             instance,
-            data=request.data, 
+            data=request.data,
             partial=True
         )
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        
+
         # Send notification email based on new status
         action = "deactivate" if not user.is_active else "activate"
         send_user_deactivate_email(user, action)
-        
+
         return Response(
             serializer.data,
             status=status.HTTP_200_OK
