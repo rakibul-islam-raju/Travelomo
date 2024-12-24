@@ -3,6 +3,7 @@ import FilterBox from "@components/FilterBox";
 import SearchInput from "@components/Inputs/SearchInput";
 import { RESULT_PER_PAGE } from "@config/index";
 import { useQueryParams } from "@hooks/useQueryParams";
+import useSearch from "@hooks/useSearch";
 import { useGetUsersQuery } from "@redux/user/userApi";
 import {
 	Avatar,
@@ -26,6 +27,7 @@ const UserList = () => {
 		search: "",
 		is_active: null,
 	});
+	const { searchText, onChange } = useSearch(null, updateParams);
 
 	const { data, isLoading, refetch } = useGetUsersQuery(qParams);
 
@@ -36,6 +38,14 @@ const UserList = () => {
 			updateParams({ is_active: "" });
 		} else {
 			updateParams({ is_active: value });
+		}
+	};
+
+	const handleSelectRole = (value) => {
+		if (value === "") {
+			updateParams({ role: "" });
+		} else {
+			updateParams({ role: value });
 		}
 	};
 
@@ -63,14 +73,14 @@ const UserList = () => {
 			key: "last_name",
 		},
 		{
-			title: "Phone Number",
-			dataIndex: ["profile", "phone_number"],
-			key: "phone_number",
-		},
-		{
 			title: "Email",
 			dataIndex: ["email"],
 			key: "email",
+		},
+		{
+			title: "Phone Number",
+			dataIndex: ["profile", "phone_number"],
+			key: "phone_number",
 		},
 		{
 			title: "Active",
@@ -108,17 +118,29 @@ const UserList = () => {
 			<Divider />
 
 			<FilterBox refresh={refetch}>
-				<SearchInput />
+				<SearchInput value={searchText} onChange={onChange} />
 				<Select
 					style={{ width: 200 }}
 					value={qParams.is_active}
 					onChange={handleChangeActiveStatus}
 					label="Active Status"
-					placeholder="Select active status"
+					placeholder="Select Active Status"
 					options={[
-						{ value: "", label: "Active Status" },
+						{ value: "", label: "Select Active Status" },
 						{ value: true, label: "Active" },
 						{ value: false, label: "Inactive" },
+					]}
+				/>
+				<Select
+					style={{ width: 200 }}
+					value={qParams.role}
+					onChange={handleSelectRole}
+					label="User Role"
+					placeholder="Select User Role"
+					options={[
+						{ value: "", label: "Select User Role" },
+						{ value: "vendor", label: "Vendor" },
+						{ value: "customer", label: "Customer" },
 					]}
 				/>
 			</FilterBox>

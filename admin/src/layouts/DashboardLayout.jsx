@@ -95,7 +95,7 @@ const DashboardLayout = () => {
 					onClick={() => setCollapsed(!collapsed)}
 				/>
 				<div>
-					<Dropdown menu={{ items: userMenuItems, style: { width: 150 } }}>
+					<Dropdown trigger={['click']} menu={{ items: userMenuItems, style: { width: 150 } }}>
 						<Button shape="circle" icon={<UserOutlined />} />
 					</Dropdown>
 				</div>

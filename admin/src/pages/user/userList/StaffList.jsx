@@ -22,6 +22,7 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddStaffModal from "./components/AddStaffModal";
+import useSearch from "@hooks/useSearch";
 
 const StaffList = () => {
 	const navigate = useNavigate();
@@ -33,6 +34,8 @@ const StaffList = () => {
 		is_active: null,
 		is_superuser: null,
 	});
+
+	const { searchText, onChange } = useSearch(null, updateParams);
 
 	const { data, isLoading, refetch } = useGetStaffsQuery(qParams);
 
@@ -146,15 +149,15 @@ const StaffList = () => {
 			<Divider />
 
 			<FilterBox refresh={refetch}>
-				<SearchInput />
+				<SearchInput value={searchText} onChange={onChange} />
 				<Select
 					style={{ width: 200 }}
 					value={qParams.is_active}
 					onChange={handleChangeActiveStatus}
 					label="Active Status"
-					placeholder="Select active status"
+					placeholder="Select Active Status"
 					options={[
-						{ value: "", label: "Active Status" },
+						{ value: "", label: "Select Active Status" },
 						{ value: true, label: "Active" },
 						{ value: false, label: "Inactive" },
 					]}
@@ -164,9 +167,9 @@ const StaffList = () => {
 					value={qParams.is_superuser}
 					onChange={handleChangeSuperUserStatus}
 					label="Super User Status"
-					placeholder="Select super user status"
+					placeholder="Select Super User Status"
 					options={[
-						{ value: "", label: "Super User Status" },
+						{ value: "", label: "Select Super User Status" },
 						{ value: true, label: "Super User" },
 						{ value: false, label: "Staff User" },
 					]}

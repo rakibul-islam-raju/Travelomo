@@ -3,6 +3,7 @@ import FilterBox from "@components/FilterBox";
 import SearchInput from "@components/Inputs/SearchInput";
 import { RESULT_PER_PAGE } from "@config/index";
 import { useQueryParams } from "@hooks/useQueryParams";
+import useSearch from "@hooks/useSearch";
 import {
 	useApproveVendorMutation,
 	useGetVendorsQuery,
@@ -33,6 +34,7 @@ const VendorList = () => {
 		search: "",
 		is_approved: pendingVendors ? false : "",
 	});
+	const { searchText, onChange } = useSearch(null, updateParams);
 
 	const { data: vendors, isLoading, refetch } = useGetVendorsQuery(qParams);
 	const [approveVendor, { isLoading: isApproving }] =
@@ -128,7 +130,7 @@ const VendorList = () => {
 			<Divider />
 
 			<FilterBox refresh={refetch}>
-				<SearchInput />
+				<SearchInput value={searchText} onChange={onChange} />
 				<Select
 					style={{ width: 200 }}
 					value={qParams.is_approved}

@@ -114,11 +114,7 @@ class DeactivateUserView(generics.UpdateAPIView):
     def update(self, request: Any, *args: Any, **kwargs: Any):
         instance = self.get_object()
 
-        serializer = self.get_serializer(
-            instance,
-            data=request.data,
-            partial=True
-        )
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
@@ -126,10 +122,7 @@ class DeactivateUserView(generics.UpdateAPIView):
         action = "deactivate" if not user.is_active else "activate"
         send_user_deactivate_email(user, action)
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SendPasswordResetLinkView(generics.GenericAPIView):

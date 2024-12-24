@@ -14,9 +14,10 @@ from .serializers import (
 
 class VendorListCreateView(generics.ListCreateAPIView):
     queryset = Vendor.objects.all()
-    filterset_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["store_name", "store_description"]
     filterset_fields = ["is_approved"]
+    permission_classes = [IsSystemAdmin]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

@@ -1,11 +1,20 @@
 import { Input } from "antd";
 import { MdOutlineSearch } from "react-icons/md";
 
-const SearchInput = () => {
+const SearchInput = ({
+	value,
+	onChange,
+	placeholder = "Search here",
+	fullWidth = false,
+}) => {
 	return (
 		<Input
-			style={{ width: 300 }}
-			placeholder="Search..."
+			placeholder={placeholder}
+			value={value}
+			onChange={onChange}
+			style={{
+				width: fullWidth ? "100%" : 300,
+			}}
 			prefix={<MdOutlineSearch />}
 		/>
 	);
