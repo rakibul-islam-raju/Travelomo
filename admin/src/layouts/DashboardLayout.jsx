@@ -12,8 +12,15 @@ import clsx from "clsx";
 import { useState } from "react";
 import { FaUserFriends, FaUserShield } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import {
+	Link,
+	Navigate,
+	Outlet,
+	useLocation,
+	useNavigate,
+} from "react-router-dom";
 import styles from "./index.module.scss";
+import { siteConfig } from "@config/siteConfig";
 const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = () => {
@@ -88,14 +95,22 @@ const DashboardLayout = () => {
 	return isLoggedIn ? (
 		<Layout className={styles.dashboardLayout}>
 			<Header className={styles.dashboardHeader}>
-				<Button
-					size="large"
-					type="text"
-					icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-					onClick={() => setCollapsed(!collapsed)}
-				/>
+				<div className={styles.dashboardHeaderLeft}>
+					<Link to={"/"} className={styles.brandTitle}>
+						{siteConfig.brandName}
+					</Link>
+					<Button
+						size="large"
+						type="text"
+						icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+						onClick={() => setCollapsed(!collapsed)}
+					/>
+				</div>
 				<div>
-					<Dropdown trigger={['click']} menu={{ items: userMenuItems, style: { width: 150 } }}>
+					<Dropdown
+						trigger={["click"]}
+						menu={{ items: userMenuItems, style: { width: 150 } }}
+					>
 						<Button shape="circle" icon={<UserOutlined />} />
 					</Dropdown>
 				</div>
