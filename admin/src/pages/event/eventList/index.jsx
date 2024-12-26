@@ -147,7 +147,7 @@ const EventList = () => {
 					<Button
 						type="link"
 						size="small"
-						onClick={() => navigate(`/vendors/${record.id}`)}
+						onClick={() => navigate(`/events/${record.id}`)}
 					>
 						View
 					</Button>
