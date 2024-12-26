@@ -50,3 +50,7 @@ class Event(BaseModel):
         if self.discount_price:
             return self.discount_price
         return self.actual_price
+
+    @property
+    def is_completed(self) -> bool:
+        return self.end_date < timezone.now().date()

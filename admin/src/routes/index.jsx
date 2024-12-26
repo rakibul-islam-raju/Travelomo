@@ -4,6 +4,8 @@ import ForgetPassword from "@pages/auth/forgetPassword";
 import Login from "@pages/auth/login";
 import ResetPassword from "@pages/auth/resetPassword";
 import Dashboard from "@pages/dashboard";
+import EventDetails from "@pages/event/eventDetails";
+import EventList from "@pages/event/eventList";
 import NotFound from "@pages/NotFound";
 import StaffDetail from "@pages/user/staffDetail";
 import UserDetail from "@pages/user/userDetail";
@@ -29,6 +31,14 @@ export const router = createBrowserRouter([
 			{
 				path: "/vendors/:vendorId",
 				element: <VendorDetail />,
+			},
+			{
+				path: "/events",
+				element: <EventList />,
+			},
+			{
+				path: "/events/:eventId",
+				element: <EventDetails />,
 			},
 			{
 				path: "/users",

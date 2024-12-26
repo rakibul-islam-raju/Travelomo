@@ -5,11 +5,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend, OrderingFilter
 
-from user.permissions import IsVendor
+from user.permissions import IsVendor, IsSystemAdmin
 
 from .models import Event
 from .permissions import IsEventOwner
-from .filters import EventFilter, VendorEventFilter
+from .filters import EventFilter, VendorEventFilter, AdminEventFilter
 from .serializers import (
     EventCreateSerializer,
     EventListSerializer,
@@ -42,11 +42,17 @@ class EventListCreateView(generics.ListCreateAPIView):
 
 
 class EventDetailView(generics.RetrieveAPIView):
-    queryset = Event.objects.filter(
-        is_deleted=False, is_archived=False, is_published=True
-    )
     serializer_class = EventDetailSerializer
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        # If the user is an admin, return all events
+        if self.request.user.role == 'admin':
+            return Event.objects.all()
+
+        return Event.objects.filter(
+            is_deleted=False, is_archived=False, is_published=True
+        )
 
 
 #  View only for vendor owner
@@ -142,3 +148,13 @@ class UndoDeleteEventView(generics.GenericAPIView):
         event.is_deleted = False
         event.save()
         return Response(status=status.HTTP_200_OK)
+
+
+# view for admin
+class AdminEventListView(generics.ListAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventListSerializer
+    permission_classes = [IsSystemAdmin]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = AdminEventFilter
+    ordering = ["-created_at"]

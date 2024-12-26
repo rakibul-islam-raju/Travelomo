@@ -8,11 +8,15 @@ from .views import (
     VendorEventUpdateView,
     VendorEventDeleteView,
     UndoDeleteEventView,
+    AdminEventListView,
 )
 
 app_name = "event"
 
 urlpatterns = [
+    path(
+        "events/admin-event/", AdminEventListView.as_view(), name="admin-event-list"
+    ),
     path(
         "events/vendor-event/", VendorEventListView.as_view(), name="vendor-event-list"
     ),

@@ -1,0 +1,12 @@
+.filterContainer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+
+	:global {
+		.ant-form-item {
+			margin-bottom: 0;
+		}
+	}
+}
