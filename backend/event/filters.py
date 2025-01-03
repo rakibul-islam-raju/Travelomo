@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils import timezone
 
 from django_filters import rest_framework as filters
 
@@ -40,12 +41,18 @@ class VendorEventFilter(EventFilter):
     class Meta(EventFilter.Meta):
         fields = EventFilter.Meta.fields + ["is_published", "is_archived"]
 
+
 class AdminEventFilter(EventFilter):
     is_completed = filters.BooleanFilter(method="is_completed_filter")
 
     class Meta(EventFilter.Meta):
-        fields = EventFilter.Meta.fields + ["is_published", "is_archived", "is_deleted","is_completed" ]
-    
+        fields = EventFilter.Meta.fields + [
+            "is_published",
+            "is_archived",
+            "is_deleted",
+            "is_completed",
+        ]
+
     def is_completed_filter(self, queryset, name, value):
         if value:
             return queryset.filter(end_date__lt=timezone.now().date())

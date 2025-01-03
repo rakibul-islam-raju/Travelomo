@@ -13,6 +13,7 @@ import {
 	Select,
 	Space,
 	Table,
+	Tag,
 	Typography,
 } from "antd";
 import { useState } from "react";
@@ -78,9 +79,19 @@ const UserList = () => {
 			key: "email",
 		},
 		{
-			title: "Phone Number",
-			dataIndex: ["profile", "phone_number"],
-			key: "phone_number",
+			title: "Phone",
+			dataIndex: ["phone"],
+			key: "phone",
+		},
+		{
+			title: "Role",
+			dataIndex: ["is_vendor"],
+			key: "is_vendor",
+			render: (is_vendor) => (
+				<Tag color={is_vendor ? "blue" : "purple"}>
+					{is_vendor ? "Vendor" : "Customer"}
+				</Tag>
+			),
 		},
 		{
 			title: "Active",

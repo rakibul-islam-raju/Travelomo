@@ -82,14 +82,14 @@ const StaffList = () => {
 			key: "last_name",
 		},
 		{
-			title: "Phone Number",
-			dataIndex: ["profile", "phone_number"],
-			key: "phone_number",
-		},
-		{
 			title: "Email",
 			dataIndex: ["email"],
 			key: "email",
+		},
+		{
+			title: "Phone",
+			dataIndex: ["phone"],
+			key: "phone",
 		},
 		{
 			title: "Active",
