@@ -20,6 +20,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     email = models.EmailField(unique=True, db_index=True)
+    phone = PhoneNumberField(blank=True, null=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     is_active = models.BooleanField(default=False)
@@ -62,7 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Profile(PrimaryKeyModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    phone_number = PhoneNumberField(blank=True, null=True)
+
     address = models.TextField(blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)

@@ -3,12 +3,10 @@ from rest_framework import serializers
 from .models import User, Profile
 
 
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name", "is_active"]
+        fields = ["id", "email", "first_name", "last_name", "phone", "is_active"]
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -20,8 +18,6 @@ class ProfileSerializer(serializers.ModelSerializer):
 class UserListSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + ["avatar", "is_vendor"]
-
-
 
 
 class UserDetailSerializer(UserSerializer):
@@ -39,7 +35,7 @@ class StaffListSerializer(UserSerializer):
             "is_active",
             "is_staff",
             "is_superuser",
-            "avatar"
+            "avatar",
         ]
 
 

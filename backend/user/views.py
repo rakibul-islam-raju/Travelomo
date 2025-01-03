@@ -30,7 +30,7 @@ class UserListView(generics.ListAPIView):
     serializer_class = UserListSerializer
     permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    search_fields = ["email", "first_name", "last_name", "profile__phone_number"]
+    search_fields = ["email", "first_name", "last_name", "phone"]
     filterset_fields = ["is_active", "role"]
 
 
@@ -44,7 +44,7 @@ class StaffListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.filter(is_staff=True, role="admin")
     serializer_class = StaffListSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    search_fields = ["email", "first_name", "last_name", "profile__phone_number"]
+    search_fields = ["email", "first_name", "last_name", "phone"]
     filterset_fields = ["is_active", "is_superuser"]
 
     def get_queryset(self):
