@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework_simplejwt",
     "phonenumber_field",
-    # "drf_spectacular",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -164,14 +164,14 @@ REST_FRAMEWORK = {
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    # "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "PAGE_SIZE": int(PAGE_SIZE),
 }
 
 # Spectacular configs
 SPECTACULAR_SETTINGS = {
-    "TITLE": "E-Commerce API",
-    "DESCRIPTION": "API for E-Commerce",
+    "TITLE": "Travelomo API",
+    "DESCRIPTION": "API for Travelomo",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }

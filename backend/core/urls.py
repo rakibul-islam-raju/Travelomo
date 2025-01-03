@@ -3,21 +3,24 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 
-# from drf_spectacular.views import (
-#     SpectacularAPIView,
-#     SpectacularRedocView,
-#     SpectacularSwaggerView,
-# )
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+)
+
+admin.site.site_header = "Travelomo Administration"
+
+admin.site.index_title = "Welcome to Travelomo"
+admin.site.site_title = "Travelomo adminsitration"
 
 urlpatterns = [
-    # # swagger
-    # path(
-    #     "",
-    #     SpectacularSwaggerView.as_view(url_name="schema"),
-    #     name="swagger-ui",
-    # ),
-    # # YOUR PATTERNS
-    # path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    # swagger
+    path(
+        "",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # admin
     path("admin/", admin.site.urls),
     # modules
