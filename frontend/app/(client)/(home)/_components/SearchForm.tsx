@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -14,6 +13,7 @@ import { useState } from "react";
 import { DateRange } from "react-day-picker";
 
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import {
 	Popover,
 	PopoverContent,
@@ -30,76 +30,89 @@ export default function SearchForm() {
 	});
 
 	return (
-		<div className="bg-emerald-100/60 p-4 rounded shadow">
-			<div className="flex flex-col xl:flex-row items-center gap-4">
-				{/* Date Range Picker */}
-				<div className="w-full xl:w-[350px]">
-					<div className={cn("grid gap-2 w-full")}>
-						<Popover>
-							<PopoverTrigger asChild>
-								<Button
-									id="date"
-									variant={"outline"}
-									className={cn(
-										"w-full justify-start text-left font-normal p-6 text-lg",
-										!date && "text-muted-foreground p-6 text-lg"
-									)}
-								>
-									<CalendarIcon />
-									{date?.from ? (
-										date.to ? (
-											<>
-												{format(date.from, "LLL dd, y")} -{" "}
-												{format(date.to, "LLL dd, y")}
-											</>
+		<div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-100">
+			<div className="flex flex-col gap-4">
+				{/* First Row */}
+				<div className="flex items-stretch gap-4">
+					{/* Date Range Picker */}
+					<div className="flex-1">
+						<div className={cn("grid gap-2")}>
+							<Popover>
+								<PopoverTrigger asChild>
+									<Button
+										id="date"
+										variant={"outline"}
+										className={cn(
+											"w-full justify-start text-left font-normal h-14",
+											!date && "text-muted-foreground"
+										)}
+									>
+										<CalendarIcon className="mr-3 h-5 w-5 shrink-0" />
+										{date?.from ? (
+											date.to ? (
+												<>
+													{format(date.from, "MMM d")} -{" "}
+													{format(date.to, "MMM d, yyyy")}
+												</>
+											) : (
+												format(date.from, "MMM d, yyyy")
+											)
 										) : (
-											format(date.from, "LLL dd, y")
-										)
-									) : (
-										<span>Pick a date</span>
-									)}
-								</Button>
-							</PopoverTrigger>
-							<PopoverContent className="w-auto p-0" align="start">
-								<Calendar
-									initialFocus
-									mode="range"
-									defaultMonth={date?.from}
-									selected={date}
-									onSelect={setDate}
-									numberOfMonths={2}
-								/>
-							</PopoverContent>
-						</Popover>
+											<span>Select dates</span>
+										)}
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent className="w-auto p-0" align="start">
+									<Calendar
+										initialFocus
+										mode="range"
+										defaultMonth={date?.from}
+										selected={date}
+										onSelect={setDate}
+										numberOfMonths={2}
+										className="rounded-lg border shadow-lg"
+									/>
+								</PopoverContent>
+							</Popover>
+						</div>
+					</div>
+
+					{/* Guests Select */}
+					<div className="relative flex-1">
+						<Armchair className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+						<Select>
+							<SelectTrigger className="h-14 pl-10">
+								<SelectValue placeholder="Guests" />
+							</SelectTrigger>
+							<SelectContent>
+								{Array.from({ length: 10 }).map((_, index) => (
+									<SelectItem
+										key={index}
+										value={(index + 1).toString()}
+										className="cursor-pointer hover:bg-gray-50"
+									>
+										{index + 1} {index === 0 ? "Guest" : "Guests"}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</div>
 				</div>
 
-				{/* Location */}
+				{/* Second Row - Location */}
 				<div className="relative">
-					<LocateIcon className="w-6 h-6 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-					<Input placeholder="Location" className="p-6 pl-12 text-lg" />
+					<LocateIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+					<Input
+						type="text"
+						placeholder="Where to?"
+						className="h-14 pl-10 w-full"
+					/>
 				</div>
 
-				{/* Seat for */}
-				<div className="relative w-full xl:w-[200px]">
-					<Armchair className="w-6 h-6 absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-					<Select>
-						<SelectTrigger className="p-6 pl-12 text-lg w-full">
-							<SelectValue placeholder="Seat for" />
-						</SelectTrigger>
-						<SelectContent className="w-full">
-							{Array.from({ length: 7 }).map((_, index) => (
-								<SelectItem key={index} value={(index + 1).toString()}>
-									{index + 1} Seat
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
-			</div>
-
-			<div className="flex justify-end mt-6">
-				<Button className="px-10 py-6 text-xl">Search</Button>
+				{/* Third Row - Search Button */}
+				<Button className="h-14 px-8 text-base font-medium w-full">
+					Search
+				</Button>
 			</div>
 		</div>
 	);

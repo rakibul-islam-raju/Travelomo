@@ -17,20 +17,58 @@ export default async function Home() {
 
 	return (
 		<>
-			<section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 items-center gap-12 my-12">
-				<div className="col-span-1 xl:col-span-2 text-center">
-					<h6 className="text-lg font-semibold text-muted-foreground mb-2 uppercase tracking-widest">
-						Choose the best destinaton
-					</h6>
-					<h2 className="text-3xl md:text-4xl mb-12 text-primary font-semibold">
-						Plan Your Next Trip Now
-					</h2>
+			<section className="relative bg-white rounded-3xl shadow-lg p-4 sm:p-6 md:p-8 lg:p-12 my-6 sm:my-8 md:my-10 lg:my-12">
+				<div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-16">
+					<div className="">
+						<div className="relative h-[450px] lg:h-[600px] w-full rounded-2xl overflow-hidden">
+							<Slider />
+							<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+						</div>
+					</div>
 
-					<SearchForm />
+					<div className="space-y-6 text-center lg:text-left">
+						<span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+							<span className="relative flex h-2 w-2">
+								<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+								<span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+							</span>
+							Live Events Available
+						</span>
+
+						<div className="space-y-4">
+							<h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">
+								Experience <span className="text-primary">Unforgettable</span>{" "}
+								Moments
+							</h1>
+							<p className="text-gray-600 text-lg">
+								Join thousands of adventure seekers and discover events that
+								will create lasting memories
+							</p>
+						</div>
+
+						<SearchForm />
+
+						<div className="flex items-center justify-center lg:justify-start gap-8 pt-4">
+							<div className="text-center">
+								<p className="text-2xl font-bold text-primary">1000+</p>
+								<p className="text-sm text-gray-600">Events</p>
+							</div>
+							<div className="h-12 w-px bg-gray-200"></div>
+							<div className="text-center">
+								<p className="text-2xl font-bold text-primary">50+</p>
+								<p className="text-sm text-gray-600">Countries</p>
+							</div>
+							<div className="h-12 w-px bg-gray-200"></div>
+							<div className="text-center">
+								<p className="text-2xl font-bold text-primary">100k+</p>
+								<p className="text-sm text-gray-600">Users</p>
+							</div>
+						</div>
+					</div>
 				</div>
-				<div className="col-span-1">
-					<Slider />
-				</div>
+
+				<div className="absolute -z-10 top-1/4 -left-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]"></div>
+				<div className="absolute -z-10 bottom-1/4 -right-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]"></div>
 			</section>
 
 			<Section title="Featured Events" action={<ViewAllBtn />}>

@@ -1,25 +1,44 @@
+"use client";
 import { siteConfig } from "@/config/siteConfig";
 import Link from "next/link";
 import HeaderLoginButton from "./HeaderLoginButton";
 
+const headerTopLinks: { label: string; href: string }[] = [
+	{
+		label: "Become a host",
+		href: "/become-a-host",
+	},
+	{
+		label: "Create an account",
+		href: "/register",
+	},
+	{
+		label: "Help & Support",
+		href: "/help-support",
+	},
+];
+
 export default function Header() {
 	return (
-		<header className="bg-primary text-primary-foreground sticky top-0 z-20 shadow-sm pb-4">
+		<header className="bg-primary text-primary-foreground sticky top-0 z-20 shadow-sm transition-all duration-300">
 			<div className="container">
-				<div className="flex justify-end mb-3 pt-1">
-					<div className="flex items-center gap-x-6 text-sm">
-						<Link className="text-white" href={"/become-a-host"}>
-							Become a host
-						</Link>
-						<Link className="text-white" href={"/register"}>
-							Create an account
-						</Link>
-						<Link className="text-white" href={"/help-support"}>
-							Help & Support
-						</Link>
+				{/* header top section */}
+				<div className="flex justify-end transition-all duration-300 h-12 opacity-100">
+					<div className="flex items-center gap-x-6 text-sm py-3">
+						{headerTopLinks.map((link) => (
+							<Link
+								key={link.href}
+								className="text-white hover:text-primary-foreground/80 transition-colors"
+								href={link.href}
+							>
+								{link.label}
+							</Link>
+						))}
 					</div>
 				</div>
-				<div className="flex items-center justify-between gap-6">
+
+				{/* header main section */}
+				<div className="flex items-center justify-between gap-6 transition-all duration-300 py-2">
 					<Link href="/">
 						<h1 className="text-xl font-bold text-white">{siteConfig.name}</h1>
 					</Link>
