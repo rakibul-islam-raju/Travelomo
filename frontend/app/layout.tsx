@@ -2,10 +2,11 @@ import { siteConfig } from "@/config/siteConfig";
 
 import type { Metadata } from "next";
 
-import { Toaster } from "@/components/ui/toaster";
 import AppProvider from "@/context/AppProvider";
+import AuthProvider from "@/context/AuthProvider";
 import { getServerSession } from "next-auth";
 import { Poppins } from "next/font/google";
+import { authOptions } from "./api/auth/[...nextauth]/options";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -19,19 +20,20 @@ export const metadata: Metadata = {
 	description: siteConfig.description,
 };
 
-export default async function DashboardLayout({
+export default async function RootLayout({
 	children,
 }: {
 	children: React.ReactNode;
 }) {
-	// Get server-side session
-	const session = await getServerSession();
+	// Get server-side session with authOptions
+	const session = await getServerSession(authOptions);
 
 	return (
 		<html lang="en">
 			<body className={`${poppins.variable} antialiased`}>
-				<Toaster />
-				<AppProvider session={session}>{children}</AppProvider>
+				<AuthProvider session={session}>
+					<AppProvider session={session}>{children}</AppProvider>
+				</AuthProvider>
 			</body>
 		</html>
 	);

@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -30,6 +30,7 @@ const formSchema = z.object({
 export default function LoginPage() {
 	const router = useRouter();
 	const { toast } = useToast();
+	const { data: session, status } = useSession();
 
 	const [isLoading, setIsLoading] = useState(false);
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -40,6 +41,14 @@ export default function LoginPage() {
 		},
 	});
 
+	// Check if user is already logged in
+	// useEffect(() => {
+	// 	if (status === "authenticated" && session) {
+	// 		console.log("User already logged in, redirecting to home");
+	// 		router.push("/");
+	// 	}
+	// }, [status, session, router]);
+
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		try {
 			setIsLoading(true);
@@ -48,6 +57,8 @@ export default function LoginPage() {
 				password: data.password,
 				redirect: false,
 			});
+
+			console.log("Login result:", result);
 
 			if (result?.error) {
 				toast({
@@ -58,9 +69,18 @@ export default function LoginPage() {
 			}
 
 			if (result?.ok) {
-				router.push("/");
+				toast({
+					title: "Login successful",
+					description: "Redirecting to home page...",
+				});
+
+				// Small delay to ensure session is updated
+				setTimeout(() => {
+					router.push("/");
+				}, 500);
 			}
 		} catch (error) {
+			console.error("Login error:", error);
 			toast({
 				title: "Login failed",
 				description: "An unexpected error occurred. Please try again.",

@@ -3,42 +3,52 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 export { default } from "next-auth/middleware";
 
+const publicRoutes = [
+	"/login",
+	"/registration",
+	"/vendor-registration",
+	"/activate-account",
+	"/forget-password",
+];
+
 export const config = {
 	matcher: [
+		"/",
+		"/dashboard(.*)",
 		"/login",
 		"/registration",
 		"/vendor-registration",
 		"/activate-account",
 		"/forget-password",
-		"/",
-		"/dashboard/:path*",
 	],
 };
 
 export async function middleware(request: NextRequest) {
-	const token = await getToken({ req: request });
+	// Get the token with proper configuration
+	const token = await getToken({
+		req: request,
+		secret: process.env.NEXTAUTH_SECRET,
+	});
+
 	const url = request.nextUrl;
 
+	// Check if user is not logged in and trying to access protected routes
 	if (!token && url.pathname.startsWith("/dashboard")) {
 		return NextResponse.redirect(new URL("/login", request.url));
 	}
 
+	// Check if user is logged in but not a vendor and trying to access vendor dashboard
 	if (
 		token &&
-		token.role !== "vendor" &&
+		token.user &&
+		token.user.role !== "vendor" &&
 		url.pathname.startsWith("/dashboard")
 	) {
 		return NextResponse.redirect(new URL("/", request.url));
 	}
 
-	if (
-		token &&
-		(url.pathname.startsWith("/login") ||
-			url.pathname.startsWith("/registration") ||
-			url.pathname.startsWith("/vendor-registration") ||
-			url.pathname.startsWith("/activate-account") ||
-			url.pathname.startsWith("/forget-password"))
-	) {
+	// Check if user is logged in and trying to access auth pages
+	if (token && publicRoutes.includes(url.pathname)) {
 		return NextResponse.redirect(new URL("/", request.url));
 	}
 

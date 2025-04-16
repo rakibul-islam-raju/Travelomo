@@ -20,6 +20,18 @@ interface DecodedToken {
 	user: UserInfo;
 }
 
+// Extend the token type to include our custom properties
+interface ExtendedToken {
+	sub?: string;
+	tokens?: { access: string; refresh: string };
+	email?: string;
+	name?: string;
+	exp?: number;
+	user?: any;
+	role?: "customer" | "vendor" | "admin";
+	user_id?: string;
+}
+
 export const authOptions: NextAuthOptions = {
 	providers: [
 		CredentialsProvider({
@@ -32,6 +44,7 @@ export const authOptions: NextAuthOptions = {
 				},
 				password: { label: "Password", type: "password" },
 			},
+
 			async authorize(credentials: any, req) {
 				try {
 					if (!credentials?.email || !credentials?.password) {
@@ -100,14 +113,14 @@ export const authOptions: NextAuthOptions = {
 				token.name = user.name;
 				token.exp = user.exp;
 				token.user = user;
+				token.role = user.role;
+				token.user_id = user.user_id;
 
 				return token;
 			}
 
 			// Token expiration check
-			if (Date.now() < user?.exp) {
-				// TODO::
-				console.log("Token has expired, consider refreshing");
+			if (Date.now() < token.exp) {
 				return token;
 			}
 
@@ -116,8 +129,17 @@ export const authOptions: NextAuthOptions = {
 
 		async session({ session, token }) {
 			if (session) {
+				const extendedToken = token as ExtendedToken;
 				session.user = token.user;
 				session.expires = new Date(token.exp).toISOString();
+
+				if (extendedToken.role) {
+					session.user.role = extendedToken.role;
+				}
+
+				if (extendedToken.user_id) {
+					session.user.user_id = extendedToken.user_id;
+				}
 			}
 			return session;
 		},
@@ -128,6 +150,7 @@ export const authOptions: NextAuthOptions = {
 	},
 	session: {
 		strategy: "jwt",
+		maxAge: 30 * 24 * 60 * 60, // 30 days
 	},
 	secret: process.env.NEXTAUTH_SECRET,
 };

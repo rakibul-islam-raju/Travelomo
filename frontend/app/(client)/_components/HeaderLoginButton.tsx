@@ -15,9 +15,11 @@ import Link from "next/link";
 export default function HeaderLoginButton() {
 	const { data: session } = useSession();
 
+	const loggedIn = session?.user;
+
 	return (
 		<>
-			{!session ? (
+			{!loggedIn ? (
 				<Link href="/login">
 					<Button variant="default">
 						<LogIn /> Login
@@ -28,7 +30,7 @@ export default function HeaderLoginButton() {
 					<DropdownMenuTrigger>
 						<Avatar>
 							<AvatarImage src="https://github.com/shadcn.png" />
-							<AvatarFallback>CN</AvatarFallback>
+							<AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
 						</Avatar>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
