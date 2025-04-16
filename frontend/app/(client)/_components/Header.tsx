@@ -5,12 +5,12 @@ import HeaderLoginButton from "./HeaderLoginButton";
 
 const headerTopLinks: { label: string; href: string }[] = [
 	{
-		label: "Become a host",
-		href: "/become-a-host",
+		label: "Become a vendor",
+		href: "/vendor-registration",
 	},
 	{
 		label: "Create an account",
-		href: "/register",
+		href: "/registration",
 	},
 	{
 		label: "Help & Support",

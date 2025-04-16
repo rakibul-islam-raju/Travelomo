@@ -46,8 +46,7 @@ class VendorRegistrationSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "role"]
 
     def create(self, validated_data):
-        store = validated_data.pop('store_name')
-        print("store -->", store)
+        store = validated_data.pop("store_name")
         user = User.objects.create_user(**validated_data, role="vendor")
 
         # create vendor

@@ -66,9 +66,6 @@ export default async function Home() {
 						</div>
 					</div>
 				</div>
-
-				<div className="absolute -z-10 top-1/4 -left-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]"></div>
-				<div className="absolute -z-10 bottom-1/4 -right-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]"></div>
 			</section>
 
 			<Section title="Featured Events" action={<ViewAllBtn />}>

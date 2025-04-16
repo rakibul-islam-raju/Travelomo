@@ -11,9 +11,12 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -25,6 +28,10 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
+	const router = useRouter();
+	const { toast } = useToast();
+
+	const [isLoading, setIsLoading] = useState(false);
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -34,14 +41,34 @@ export default function LoginPage() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
-		const res = await signIn("credentials", {
-			email: data.email,
-			password: data.password,
-			redirect: true,
-			callbackUrl: "/",
-		});
+		try {
+			setIsLoading(true);
+			const result = await signIn("credentials", {
+				email: data.email,
+				password: data.password,
+				redirect: false,
+			});
 
-		console.log("login res =>", res);
+			if (result?.error) {
+				toast({
+					title: "Login failed",
+					description: result.error,
+					variant: "destructive",
+				});
+			}
+
+			if (result?.ok) {
+				router.push("/");
+			}
+		} catch (error) {
+			toast({
+				title: "Login failed",
+				description: "An unexpected error occurred. Please try again.",
+				variant: "destructive",
+			});
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -80,8 +107,8 @@ export default function LoginPage() {
 								)}
 							/>
 						</div>
-						<Button className="w-full mt-6" type="submit">
-							Login
+						<Button className="w-full mt-6" type="submit" disabled={isLoading}>
+							{isLoading ? "Logging in..." : "Login"}
 						</Button>
 					</form>
 				</Form>

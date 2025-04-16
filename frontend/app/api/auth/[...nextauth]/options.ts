@@ -34,9 +34,12 @@ export const authOptions: NextAuthOptions = {
 			},
 			async authorize(credentials: any, req) {
 				try {
-					if (!credentials?.email || !credentials?.password) return null;
+					if (!credentials?.email || !credentials?.password) {
+						throw new Error("Email and password are required");
+					}
 
 					const { email, password } = credentials;
+
 					const response = await fetch(BASE_API_URL + "/auth/login/", {
 						method: "POST",
 						body: JSON.stringify({
@@ -48,14 +51,19 @@ export const authOptions: NextAuthOptions = {
 						},
 					});
 
-					if (response.status !== 200) {
-						return null;
+					const data = await response.json();
+
+					if (response.status === 401) {
+						throw new Error(data?.detail || "Invalid email or password");
 					}
 
-					const data = await response.json();
 					const { access, refresh } = data;
 
 					const decodedToken: DecodedToken = jwtDecode(access);
+
+					if (decodedToken.user.role === "admin") {
+						throw new Error("Admin login not allowed");
+					}
 
 					const user: User = {
 						id: decodedToken.jti,
@@ -71,9 +79,8 @@ export const authOptions: NextAuthOptions = {
 					};
 
 					return user;
-				} catch (err) {
-					console.log("err =>", err);
-					return null;
+				} catch (err: any) {
+					throw new Error(err.message || "Authentication failed");
 				}
 			},
 		}),
@@ -94,7 +101,6 @@ export const authOptions: NextAuthOptions = {
 				token.exp = user.exp;
 				token.user = user;
 
-				console.log("token ->", token);
 				return token;
 			}
 
@@ -118,6 +124,7 @@ export const authOptions: NextAuthOptions = {
 	},
 	pages: {
 		signIn: "/login",
+		error: "/login",
 	},
 	session: {
 		strategy: "jwt",

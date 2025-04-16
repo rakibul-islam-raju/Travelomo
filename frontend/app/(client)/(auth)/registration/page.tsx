@@ -12,9 +12,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useRegisterCustomerMutation } from "@/lib/features/auth/authApi";
 import { extractErrorMessage } from "@/utils/extractErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -28,45 +30,38 @@ const formSchema = z.object({
 });
 
 export default function RegistrationPage() {
+	const router = useRouter();
 	const { toast } = useToast();
+	const [registerCustomer, { isLoading }] = useRegisterCustomerMutation();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
+		defaultValues: {
+			first_name: "",
+			last_name: "",
+			email: "",
+			password: "",
+		},
 	});
 
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
-		console.log(data);
-
 		try {
-			const res = await fetch(`/auth/register/customer/`, {
-				method: "POST",
-				body: JSON.stringify(data),
-			});
-			const result = await res.json();
-
-			if (result?.id) {
-				toast({
-					variant: "success",
-					title: "Registration Successful",
-					description: "Please check your email for verification",
-				});
-			}
-
-			form.reset();
-			// If reset() is not working, we can manually clear the form fields
-			form.setValue("first_name", "");
-			form.setValue("last_name", "");
-			form.setValue("email", "");
-			form.setValue("password", "");
-			// Clear any existing form errors
-			form.clearErrors();
-		} catch (error) {
-			console.log("error =>", error);
+			await registerCustomer(data).unwrap();
 
 			toast({
+				variant: "success",
+				title: "Registration successful",
+				description: "An email has been sent to verify your account",
+			});
+
+			// Redirect to login page after successful registration
+			router.push("/login");
+		} catch (error: any) {
+			const errorMessage = extractErrorMessage(error?.data);
+			toast({
 				variant: "destructive",
-				title: "Error",
-				description: extractErrorMessage(error),
+				title: "Registration failed",
+				description: errorMessage,
 			});
 		}
 	};
@@ -133,8 +128,8 @@ export default function RegistrationPage() {
 								)}
 							/>
 						</div>
-						<Button className="w-full mt-6" type="submit">
-							Login
+						<Button className="w-full mt-6" type="submit" disabled={isLoading}>
+							{isLoading ? "Registering..." : "Register"}
 						</Button>
 					</form>
 				</Form>
@@ -146,9 +141,6 @@ export default function RegistrationPage() {
 							Login
 						</Link>
 					</p>
-					<Link className="" href="/vendor-registration">
-						Create Vendor Account
-					</Link>
 				</div>
 			</CardContent>
 		</Card>

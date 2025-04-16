@@ -11,8 +11,12 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { useRegisterVendorMutation } from "@/lib/features/auth/authApi";
+import { extractErrorMessage } from "@/utils/extractErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -27,12 +31,41 @@ const formSchema = z.object({
 });
 
 export default function VendorRegistrationPage() {
+	const router = useRouter();
+	const { toast } = useToast();
+	const [registerVendor, { isLoading }] = useRegisterVendorMutation();
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
+		defaultValues: {
+			first_name: "",
+			last_name: "",
+			store_name: "",
+			email: "",
+			password: "",
+		},
 	});
 
-	const onSubmit = (data: z.infer<typeof formSchema>) => {
-		console.log(data);
+	const onSubmit = async (data: z.infer<typeof formSchema>) => {
+		try {
+			await registerVendor(data).unwrap();
+
+			toast({
+				variant: "success",
+				title: "Registration successful",
+				description: "An email has been sent to verify your account",
+			});
+
+			// Redirect to login page after successful registration
+			router.push("/login");
+		} catch (error) {
+			const errorMessage = extractErrorMessage(error);
+			toast({
+				variant: "destructive",
+				title: "Registration failed",
+				description: errorMessage,
+			});
+		}
 	};
 
 	return (
@@ -110,8 +143,8 @@ export default function VendorRegistrationPage() {
 								)}
 							/>
 						</div>
-						<Button className="w-full mt-6" type="submit">
-							Login
+						<Button className="w-full mt-6" type="submit" disabled={isLoading}>
+							{isLoading ? "Registering..." : "Register"}
 						</Button>
 					</form>
 				</Form>

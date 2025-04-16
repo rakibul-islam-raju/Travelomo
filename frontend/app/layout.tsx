@@ -2,6 +2,7 @@ import { siteConfig } from "@/config/siteConfig";
 
 import type { Metadata } from "next";
 
+import { Toaster } from "@/components/ui/toaster";
 import AppProvider from "@/context/AppProvider";
 import { getServerSession } from "next-auth";
 import { Poppins } from "next/font/google";
@@ -29,6 +30,7 @@ export default async function DashboardLayout({
 	return (
 		<html lang="en">
 			<body className={`${poppins.variable} antialiased`}>
+				<Toaster />
 				<AppProvider session={session}>{children}</AppProvider>
 			</body>
 		</html>

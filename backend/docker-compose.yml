@@ -20,7 +20,7 @@ services:
       # - POSTGRES_USER=postgres
       # - POSTGRES_DB=gnf
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - event-db-data:/var/lib/postgresql/data
     networks:
       - event-network
 
@@ -63,6 +63,9 @@ services:
       - api
     networks:
       - event-network
+
+volumes:
+  event-db-data:
 
 networks:
   event-network:
