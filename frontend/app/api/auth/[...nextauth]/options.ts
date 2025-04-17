@@ -3,6 +3,13 @@ import { jwtDecode } from "jwt-decode";
 import { NextAuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+// Types for vendor info
+export interface VendorInfo {
+	id: string;
+	store_name: string;
+	logo: string | null;
+}
+
 // Types for decoded token payload
 interface UserInfo {
 	email: string;
@@ -10,6 +17,7 @@ interface UserInfo {
 	last_name: string;
 	is_active: boolean;
 	role: "customer" | "vendor" | "admin";
+	vendor?: VendorInfo;
 }
 
 interface DecodedToken {
@@ -80,8 +88,8 @@ export const authOptions: NextAuthOptions = {
 
 					const user: User = {
 						id: decodedToken.jti,
-						name: `${decodedToken.user.first_name} ${decodedToken.user.last_name}`,
 						user_id: decodedToken.user_id,
+						name: `${decodedToken.user.first_name} ${decodedToken.user.last_name}`,
 						first_name: decodedToken.user.first_name,
 						last_name: decodedToken.user.last_name,
 						email: decodedToken.user.email,
@@ -89,6 +97,7 @@ export const authOptions: NextAuthOptions = {
 						is_active: decodedToken.user.is_active,
 						tokens: { access, refresh },
 						exp: decodedToken.exp * 1000,
+						vendor: decodedToken.user.vendor,
 					};
 
 					return user;
@@ -115,6 +124,7 @@ export const authOptions: NextAuthOptions = {
 				token.user = user;
 				token.role = user.role;
 				token.user_id = user.user_id;
+				token.vendor = user.vendor;
 
 				return token;
 			}
@@ -141,6 +151,7 @@ export const authOptions: NextAuthOptions = {
 					session.user.user_id = extendedToken.user_id;
 				}
 			}
+
 			return session;
 		},
 	},

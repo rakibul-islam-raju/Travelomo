@@ -1,12 +1,9 @@
 "use client";
 
 import {
-	AudioWaveform,
 	BookOpen,
 	Bot,
-	Command,
 	Frame,
-	GalleryVerticalEnd,
 	Map,
 	PieChart,
 	Settings2,
@@ -17,7 +14,7 @@ import * as React from "react";
 import { NavMain } from "@/app/dashboard/_components/nav-main";
 import { NavProjects } from "@/app/dashboard/_components/nav-projects";
 import { NavUser } from "@/app/dashboard/_components/nav-user";
-import { TeamSwitcher } from "@/app/dashboard/_components/team-switcher";
+import { StoreInfo } from "@/app/dashboard/_components/team-switcher";
 import {
 	Sidebar,
 	SidebarContent,
@@ -33,23 +30,7 @@ const data = {
 		email: "m@example.com",
 		avatar: "/avatars/shadcn.jpg",
 	},
-	teams: [
-		{
-			name: "Acme Inc",
-			logo: GalleryVerticalEnd,
-			plan: "Enterprise",
-		},
-		{
-			name: "Acme Corp.",
-			logo: AudioWaveform,
-			plan: "Startup",
-		},
-		{
-			name: "Evil Corp.",
-			logo: Command,
-			plan: "Free",
-		},
-	],
+
 	navMain: [
 		{
 			title: "Playground",
@@ -162,7 +143,7 @@ export function DashboardSidebar({
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
-				<TeamSwitcher teams={data.teams} />
+				<StoreInfo />
 			</SidebarHeader>
 			<SidebarContent>
 				<NavMain items={data.navMain} />

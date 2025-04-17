@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
@@ -64,9 +64,14 @@ export default function LoginPage() {
 					});
 
 					// Small delay to ensure session is updated
-					setTimeout(() => {
-						router.push("/");
-					}, 500);
+					setTimeout(async () => {
+						const session = await getSession();
+						if (session?.user?.role === "vendor") {
+							router.push("/dashboard");
+						} else {
+							router.push("/");
+						}
+					}, 300);
 				}
 			} catch (error) {
 				toast({

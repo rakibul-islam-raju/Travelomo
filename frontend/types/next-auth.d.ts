@@ -1,4 +1,5 @@
 // types/next-auth.d.ts
+import { VendorInfo } from "@/app/api/auth/[...nextauth]/options";
 import "next-auth";
 
 // Extend the User type
@@ -13,6 +14,7 @@ declare module "next-auth" {
 		role: "customer" | "vendor" | "admin";
 		tokens: { access: string; refresh: string };
 		exp: number;
+		vendor?: VendorInfo;
 	}
 
 	interface Session {
