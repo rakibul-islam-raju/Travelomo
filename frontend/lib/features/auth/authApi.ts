@@ -50,8 +50,21 @@ export const authApi = baseApi.injectEndpoints({
 				body: credentials,
 			}),
 		}),
+
+		activateAccount: builder.mutation<
+			{ message: string },
+			{ email: string; token: string }
+		>({
+			query: ({ email, token }) => ({
+				url: `/auth/activate-account/?email=${email}&token=${token}`,
+				method: "GET",
+			}),
+		}),
 	}),
 });
 
-export const { useRegisterCustomerMutation, useRegisterVendorMutation } =
-	authApi;
+export const {
+	useRegisterCustomerMutation,
+	useRegisterVendorMutation,
+	useActivateAccountMutation,
+} = authApi;

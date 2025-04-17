@@ -13,10 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -30,9 +30,8 @@ const formSchema = z.object({
 export default function LoginPage() {
 	const router = useRouter();
 	const { toast } = useToast();
-	const { data: session, status } = useSession();
+	const [isPending, startTransition] = useTransition();
 
-	const [isLoading, setIsLoading] = useState(false);
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -41,54 +40,42 @@ export default function LoginPage() {
 		},
 	});
 
-	// Check if user is already logged in
-	// useEffect(() => {
-	// 	if (status === "authenticated" && session) {
-	// 		console.log("User already logged in, redirecting to home");
-	// 		router.push("/");
-	// 	}
-	// }, [status, session, router]);
-
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
-		try {
-			setIsLoading(true);
-			const result = await signIn("credentials", {
-				email: data.email,
-				password: data.password,
-				redirect: false,
-			});
+		startTransition(async () => {
+			try {
+				const result = await signIn("credentials", {
+					email: data.email,
+					password: data.password,
+					redirect: false,
+				});
 
-			console.log("Login result:", result);
+				if (result?.error) {
+					toast({
+						title: "Login failed",
+						description: result.error,
+						variant: "destructive",
+					});
+				}
 
-			if (result?.error) {
+				if (result?.ok) {
+					toast({
+						variant: "success",
+						title: "Login successful",
+					});
+
+					// Small delay to ensure session is updated
+					setTimeout(() => {
+						router.push("/");
+					}, 500);
+				}
+			} catch (error) {
 				toast({
 					title: "Login failed",
-					description: result.error,
+					description: "An unexpected error occurred. Please try again.",
 					variant: "destructive",
 				});
 			}
-
-			if (result?.ok) {
-				toast({
-					title: "Login successful",
-					description: "Redirecting to home page...",
-				});
-
-				// Small delay to ensure session is updated
-				setTimeout(() => {
-					router.push("/");
-				}, 500);
-			}
-		} catch (error) {
-			console.error("Login error:", error);
-			toast({
-				title: "Login failed",
-				description: "An unexpected error occurred. Please try again.",
-				variant: "destructive",
-			});
-		} finally {
-			setIsLoading(false);
-		}
+		});
 	};
 
 	return (
@@ -127,8 +114,8 @@ export default function LoginPage() {
 								)}
 							/>
 						</div>
-						<Button className="w-full mt-6" type="submit" disabled={isLoading}>
-							{isLoading ? "Logging in..." : "Login"}
+						<Button className="w-full mt-6" type="submit" disabled={isPending}>
+							{isPending ? "Logging in..." : "Login"}
 						</Button>
 					</form>
 				</Form>

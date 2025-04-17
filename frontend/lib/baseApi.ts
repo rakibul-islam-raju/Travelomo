@@ -14,6 +14,25 @@ interface TokenRefreshResponse {
 	refresh: string;
 }
 
+// Define custom error type
+export interface ApiError {
+	status: number;
+	data: any;
+}
+
+// Type guard to check if error is an ApiError
+export function isApiError(error: any): error is ApiError {
+	return (
+		error &&
+		typeof error === "object" &&
+		"status" in error &&
+		"data" in error &&
+		typeof error.data === "object" &&
+		error.data !== null &&
+		"message" in error.data
+	);
+}
+
 const baseQuery = fetchBaseQuery({
 	baseUrl: BASE_API_URL,
 	prepareHeaders: async (headers) => {
