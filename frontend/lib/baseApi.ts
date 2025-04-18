@@ -110,5 +110,12 @@ export const baseApi = createApi({
 	reducerPath: "baseApi",
 	baseQuery: baseQueryWithRefresh,
 	endpoints: () => ({}),
-	tagTypes: ["Events", "Vendor"],
+	tagTypes: [
+		"Events",
+		// Vendor
+		"Vendor",
+		"VendorSummary",
+		"VendorEventsPieChart",
+		"VendorRegisteredTravelers",
+	],
 });
