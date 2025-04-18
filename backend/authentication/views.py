@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.views import APIView
 
 from user.models import User
 from notification.emails import send_activation_email
@@ -81,8 +82,12 @@ class ActivateAccountView(generics.GenericAPIView):
         email = request.GET.get("email")
         token = request.GET.get("token")
 
+        print("emaill -->", email)
+        print("token -->", token)
+
         try:
             user = User.objects.get(email=email)
+            print('user -->', user)
             if user.token != token:
                 return Response(
                     {"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST

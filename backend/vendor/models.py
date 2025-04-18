@@ -10,6 +10,7 @@ class Vendor(BaseModel):
     # basic information
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="vendor")
     store_name = models.CharField(max_length=100, unique=True)
+    tagline = models.CharField(max_length=100, blank=True, null=True)
     store_description = models.TextField(blank=True, null=True)
     logo = models.ImageField(upload_to="vendor_logos/", blank=True, null=True)
     store_email = models.EmailField(blank=True, null=True)
@@ -25,7 +26,11 @@ class Vendor(BaseModel):
 
     # Social Media Links
     website = models.URLField(blank=True, null=True)
-    social_media_links = models.JSONField(blank=True, null=True)
+    facebook = models.URLField(blank=True, null=True)
+    instagram = models.URLField(blank=True, null=True)
+    youtube = models.URLField(blank=True, null=True)
+    tiktok = models.URLField(blank=True, null=True)
+    whatsapp = models.URLField(blank=True, null=True)
 
     # Additional Information
     is_approved = models.BooleanField(default=False)

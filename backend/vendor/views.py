@@ -9,7 +9,9 @@ from .serializers import (
     VendorDetailSerializer,
     VendorApprovalSerializer,
     VendorCreateSerializer,
+    VendorDetailSerializerForAdmin,
 )
+from .permission import IsVendorOwnerOrAdmin
 
 
 class VendorListCreateView(generics.ListCreateAPIView):
@@ -51,10 +53,13 @@ class VendorDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = VendorDetailSerializer
 
     def get_permissions(self):
-        if self.request.method == "GET":
-            self.permission_classes = [IsVendor | IsSystemAdmin]
+        if self.request.method in ["GET", "PUT", "PATCH"]:
+            self.permission_classes = [IsVendorOwnerOrAdmin]
         elif self.request.method == "DELETE":
             self.permission_classes = [IsSystemAdmin]
-        else:
-            self.permission_classes = [IsVendor]
         return super().get_permissions()
+
+    def get_serializer_class(self):
+        if self.request.user.role == "admin":
+            return VendorDetailSerializerForAdmin
+        return self.serializer_class

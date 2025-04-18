@@ -47,7 +47,7 @@ class EventDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         # If the user is an admin, return all events
-        if self.request.user.role == 'admin':
+        if self.request.user.role == "admin":
             return Event.objects.all()
 
         return Event.objects.filter(
@@ -72,7 +72,7 @@ class DuplicateEventView(generics.GenericAPIView):
             "start_date": event.start_date,
             "end_date": event.end_date,
             "location": event.location,
-            "seat_available": event.seat_available,
+            "available_seats": event.available_seats,
             "actual_price": event.actual_price,
             "discount_price": event.discount_price,
             "features": event.features,

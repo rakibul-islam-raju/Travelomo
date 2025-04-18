@@ -10,8 +10,8 @@ class EventFilter(filters.FilterSet):
     start_date = filters.DateFilter(field_name="start_date", lookup_expr="gte")
     end_date = filters.DateFilter(field_name="end_date", lookup_expr="lte")
     search = filters.CharFilter(method="search_filter")
-    seat_available = filters.NumberFilter(
-        field_name="seat_available", lookup_expr="gte"
+    available_seats = filters.NumberFilter(
+        field_name="available_seats", lookup_expr="gte"
     )
     start_price = filters.NumberFilter(field_name="price", lookup_expr="gte")
     end_price = filters.NumberFilter(field_name="price", lookup_expr="lte")
@@ -22,7 +22,7 @@ class EventFilter(filters.FilterSet):
             "start_date",
             "end_date",
             "search",
-            "seat_available",
+            "available_seats",
             "start_price",
             "end_price",
             "is_featured",
