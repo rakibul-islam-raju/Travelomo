@@ -29,7 +29,9 @@ export default function HeaderLoginButton() {
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<Avatar>
-							<AvatarImage src="https://github.com/shadcn.png" />
+							{session?.user?.image && (
+								<AvatarImage src={session?.user?.image} />
+							)}
 							<AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
 						</Avatar>
 					</DropdownMenuTrigger>
