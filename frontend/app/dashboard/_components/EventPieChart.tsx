@@ -1,6 +1,9 @@
 "use client";
 
+import { AppLoader } from "@/components/AppLoader";
+import { NoDataFound } from "@/components/NoDataFound";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	ChartConfig,
@@ -8,57 +11,171 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Calendar } from "lucide-react";
-import { useMemo } from "react";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { useGetVendorEventsPieChartDataQuery } from "@/lib/features/vendor/vendorApi";
+import { cn } from "@/lib/utils";
+import { format, subDays } from "date-fns";
+import _ from "lodash";
+import { CalendarIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { DateRange } from "react-day-picker";
 import { Label, Pie, PieChart } from "recharts";
 
 export const EventPieChart = () => {
-	const data = [
-		{ browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-		{ browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-		{ browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
-		{ browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-		{ browser: "other", visitors: 190, fill: "var(--color-other)" },
-	];
-
 	const chartConfig = {
-		visitors: {
-			label: "Visitors",
-		},
-		chrome: {
-			label: "Chrome",
+		total_published_events: {
+			label: "Published Events",
 			color: "hsl(var(--chart-1))",
 		},
-		safari: {
-			label: "Safari",
+		total_draft_events: {
+			label: "Draft Events",
 			color: "hsl(var(--chart-2))",
 		},
-		firefox: {
-			label: "Firefox",
+		total_completed_events: {
+			label: "Completed Events",
 			color: "hsl(var(--chart-3))",
 		},
-		edge: {
-			label: "Edge",
+		total_cancelled_events: {
+			label: "Cancelled Events",
 			color: "hsl(var(--chart-4))",
 		},
-		other: {
-			label: "Other",
+		total_archived_events: {
+			label: "Archived Events",
 			color: "hsl(var(--chart-5))",
 		},
 	} satisfies ChartConfig;
-	const totalVisitors = useMemo(() => {
-		return data.reduce((acc, curr) => acc + curr.visitors, 0);
-	}, []);
+
+	const [date, setDate] = useState<DateRange>({
+		from: subDays(new Date(), 7),
+		to: new Date(),
+	});
+
+	const {
+		data: eventData,
+		isLoading,
+		error,
+	} = useGetVendorEventsPieChartDataQuery(
+		{
+			start_date: format(date?.from!, "yyyy-MM-dd"),
+			end_date: format(date?.to!, "yyyy-MM-dd"),
+		},
+		{
+			skip: !date,
+		}
+	);
+
+	const chartData = useMemo(() => {
+		return eventData
+			? Object.keys(eventData).map((key) => ({
+					event: _.startCase(key),
+					count: eventData[key],
+			  }))
+			: [];
+	}, [eventData]);
+
+	const totalEvents = useMemo(() => {
+		if (!eventData) return 0;
+		return Object.values(eventData).reduce((total, count) => total + count, 0);
+	}, [eventData]);
+
+	const renderContent = () => {
+		if (isLoading) return <AppLoader />;
+		if (totalEvents === 0) return <NoDataFound />;
+		return (
+			<PieChart>
+				<ChartTooltip
+					cursor={false}
+					content={<ChartTooltipContent hideLabel />}
+				/>
+				<Pie
+					data={chartData}
+					dataKey="count"
+					nameKey="event"
+					innerRadius={60}
+					strokeWidth={5}
+				>
+					<Label
+						content={({ viewBox }) => {
+							if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+								return (
+									<text
+										x={viewBox.cx}
+										y={viewBox.cy}
+										textAnchor="middle"
+										dominantBaseline="middle"
+									>
+										<tspan
+											x={viewBox.cx}
+											y={viewBox.cy}
+											className="fill-foreground text-3xl font-bold"
+										>
+											{totalEvents?.toLocaleString()}
+										</tspan>
+										<tspan
+											x={viewBox.cx}
+											y={(viewBox.cy || 0) + 24}
+											className="fill-muted-foreground"
+										>
+											Events
+										</tspan>
+									</text>
+								);
+							}
+						}}
+					/>
+				</Pie>
+			</PieChart>
+		);
+	};
 
 	return (
 		<Card className="">
 			<CardHeader>
 				<CardTitle>
-					<div className="flex items-center justify-between">
+					<div className="flex flex-wrap gap-2 items-center justify-between">
 						<span>Total Events</span>
-						<Button variant="outline" size="icon">
-							<Calendar />
-						</Button>
+						<div className={cn("grid gap-2")}>
+							<Popover>
+								<PopoverTrigger asChild>
+									<Button
+										id="date"
+										variant={"outline"}
+										className={cn(
+											"text-sm justify-start text-left font-normal",
+											!date && "text-muted-foreground"
+										)}
+									>
+										<CalendarIcon />
+										{date?.from ? (
+											date.to ? (
+												<>
+													{format(date.from, "LLL dd, y")} -{" "}
+													{format(date.to, "LLL dd, y")}
+												</>
+											) : (
+												format(date.from, "LLL dd, y")
+											)
+										) : (
+											<span>Pick a date</span>
+										)}
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent className="w-auto p-0" align="start">
+									<Calendar
+										initialFocus
+										mode="range"
+										defaultMonth={date?.from}
+										selected={date}
+										onSelect={(range) => setDate(range as DateRange)}
+										numberOfMonths={2}
+									/>
+								</PopoverContent>
+							</Popover>
+						</div>
 					</div>
 				</CardTitle>
 			</CardHeader>
@@ -67,49 +184,7 @@ export const EventPieChart = () => {
 					config={chartConfig}
 					className="mx-auto aspect-square max-h-[250px]"
 				>
-					<PieChart>
-						<ChartTooltip
-							cursor={false}
-							content={<ChartTooltipContent hideLabel />}
-						/>
-						<Pie
-							data={data}
-							dataKey="visitors"
-							nameKey="browser"
-							innerRadius={60}
-							strokeWidth={5}
-						>
-							<Label
-								content={({ viewBox }) => {
-									if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-										return (
-											<text
-												x={viewBox.cx}
-												y={viewBox.cy}
-												textAnchor="middle"
-												dominantBaseline="middle"
-											>
-												<tspan
-													x={viewBox.cx}
-													y={viewBox.cy}
-													className="fill-foreground text-3xl font-bold"
-												>
-													{totalVisitors.toLocaleString()}
-												</tspan>
-												<tspan
-													x={viewBox.cx}
-													y={(viewBox.cy || 0) + 24}
-													className="fill-muted-foreground"
-												>
-													Visitors
-												</tspan>
-											</text>
-										);
-									}
-								}}
-							/>
-						</Pie>
-					</PieChart>
+					{renderContent()}
 				</ChartContainer>
 			</CardContent>
 		</Card>

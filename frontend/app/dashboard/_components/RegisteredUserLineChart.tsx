@@ -2,6 +2,9 @@
 
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
+import { AppLoader } from "@/components/AppLoader";
+import { NoDataFound } from "@/components/NoDataFound";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -60,7 +63,43 @@ export const RegisteredUserLineChart = () => {
 		skip: !type,
 	});
 
-	console.log("line data -->", data);
+	let content: React.ReactNode = <NoDataFound />;
+
+	if (isLoading) {
+		content = <AppLoader />;
+	}
+	if (data?.length) {
+		content = (
+			<AreaChart
+				accessibilityLayer
+				data={data}
+				margin={{
+					left: 12,
+					right: 12,
+				}}
+			>
+				<CartesianGrid vertical={false} />
+				<XAxis
+					dataKey="key"
+					tickLine={false}
+					axisLine={false}
+					tickMargin={8}
+					tickFormatter={(value) => value.slice(0, 3)}
+				/>
+				<ChartTooltip
+					cursor={false}
+					content={<ChartTooltipContent indicator="dot" hideLabel />}
+				/>
+				<Area
+					dataKey="count"
+					type="linear"
+					fill="var(--color-desktop)"
+					fillOpacity={0.4}
+					stroke="var(--color-desktop)"
+				/>
+			</AreaChart>
+		);
+	}
 
 	return (
 		<Card>
@@ -68,9 +107,11 @@ export const RegisteredUserLineChart = () => {
 				<div className="flex items-center justify-between">
 					<CardTitle>Registered Travelers</CardTitle>
 					<Select onValueChange={handleTypeChange} value={type}>
-						<SelectTrigger className="w-[180px] border rounded-lg py-1 px-2 flex items-center gap-2">
-							<Calendar className="mr-2 h-4 w-4" />
-							<SelectValue />
+						<SelectTrigger asChild className="">
+							<Button variant="outline">
+								<Calendar className="mr-2 h-4 w-4" />
+								<SelectValue />
+							</Button>
 						</SelectTrigger>
 						<SelectContent>
 							<SelectGroup>
@@ -90,34 +131,7 @@ export const RegisteredUserLineChart = () => {
 			</CardHeader>
 			<CardContent>
 				<ChartContainer config={chartConfig} className="max-h-[550px] w-full">
-					<AreaChart
-						accessibilityLayer
-						data={data}
-						margin={{
-							left: 12,
-							right: 12,
-						}}
-					>
-						<CartesianGrid vertical={false} />
-						<XAxis
-							dataKey="key"
-							tickLine={false}
-							axisLine={false}
-							tickMargin={8}
-							tickFormatter={(value) => value.slice(0, 3)}
-						/>
-						<ChartTooltip
-							cursor={false}
-							content={<ChartTooltipContent indicator="dot" hideLabel />}
-						/>
-						<Area
-							dataKey="count"
-							type="linear"
-							fill="var(--color-desktop)"
-							fillOpacity={0.4}
-							stroke="var(--color-desktop)"
-						/>
-					</AreaChart>
+					{content}
 				</ChartContainer>
 			</CardContent>
 		</Card>

@@ -14,6 +14,7 @@ interface IVendorEventsPieChart {
 	total_completed_events: number;
 	total_cancelled_events: number;
 	total_archived_events: number;
+	[key: string]: number;
 }
 
 interface IVendorRegisteredTravelers {
@@ -40,11 +41,12 @@ export const vendorApi = baseApi.injectEndpoints({
 
 		getVendorEventsPieChartData: builder.query<
 			IVendorEventsPieChart,
-			undefined
+			{ start_date: string; end_date: string }
 		>({
-			query: () => ({
+			query: ({ start_date, end_date }) => ({
 				url: `/stats/vendor/event-pie-chart/`,
 				method: "GET",
+				params: { start_date, end_date },
 			}),
 			providesTags: ["VendorEventsPieChart"],
 		}),

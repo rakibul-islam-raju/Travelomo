@@ -16,9 +16,6 @@ export const VendorInfo = () => {
 		skip: !vendor?.id,
 	});
 
-	console.log("vendorDetails =>", vendorDetails);
-	console.log("vendor =>", vendor);
-
 	return (
 		<Card className="relative">
 			<CardContent className="p-6">
