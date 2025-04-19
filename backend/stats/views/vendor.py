@@ -19,18 +19,22 @@ class VendorDashboardSummaryView(GenericAPIView):
     serializer_class = VendorDashboardSummarySerializer
     permission_classes = [IsVendor]
 
-    def get(self):
+    def get(self, request, *args, **kwargs):
         total_completed_events = Event.objects.filter(
-            vendor=self.request.user.vendor, is_completed=True
+            vendor=self.request.user.vendor, status="completed"
         ).count()
-        total_running_events = Event.objects.filter(
-            vendor=self.request.user.vendor,
-            is_completed=False,
-            start_date__lte=datetime.now(),
-            end_date__gte=datetime.now(),
-        ).count()
+        total_running_events = (
+            Event.objects.filter(
+                vendor=self.request.user.vendor,
+                start_date__lte=datetime.now(),
+                end_date__gte=datetime.now(),
+            )
+            .exclude(status__in=["draft", "completed", "cancelled", "paused"])
+            .count()
+        )
         total_user_travelled = SeatBooking.objects.filter(
-            event__vendor=self.request.user.vendor, is_completed=True
+            event__vendor=self.request.user.vendor,
+            event__status="completed",
         ).count()
         total_earnings = 00.00
 
@@ -151,22 +155,22 @@ class VendorEventPieChartView(GenericAPIView):
 
         total_published_events = Event.objects.filter(
             vendor=self.request.user.vendor,
-            is_published=True,
+            status="published",
             created_at__range=(start_date, end_date),
         ).count()
         total_draft_events = Event.objects.filter(
             vendor=self.request.user.vendor,
-            is_published=False,
+            status="draft",
             created_at__range=(start_date, end_date),
         ).count()
         total_completed_events = Event.objects.filter(
             vendor=self.request.user.vendor,
-            is_completed=True,
+            status="completed",
             created_at__range=(start_date, end_date),
         ).count()
         total_cancelled_events = Event.objects.filter(
             vendor=self.request.user.vendor,
-            is_cancelled=True,
+            status="cancelled",
             created_at__range=(start_date, end_date),
         ).count()
         total_archived_events = Event.objects.filter(

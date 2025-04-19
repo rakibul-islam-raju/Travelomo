@@ -26,6 +26,7 @@ class EventFilter(filters.FilterSet):
             "start_price",
             "end_price",
             "is_featured",
+            "status",
         ]
 
     def search_filter(self, queryset, name, value):
@@ -39,21 +40,12 @@ class EventFilter(filters.FilterSet):
 
 class VendorEventFilter(EventFilter):
     class Meta(EventFilter.Meta):
-        fields = EventFilter.Meta.fields + ["is_published", "is_archived"]
+        fields = EventFilter.Meta.fields + ["is_archived"]
 
 
 class AdminEventFilter(EventFilter):
-    is_completed = filters.BooleanFilter(method="is_completed_filter")
-
     class Meta(EventFilter.Meta):
         fields = EventFilter.Meta.fields + [
-            "is_published",
             "is_archived",
             "is_deleted",
-            "is_completed",
         ]
-
-    def is_completed_filter(self, queryset, name, value):
-        if value:
-            return queryset.filter(end_date__lt=timezone.now().date())
-        return queryset.filter(end_date__gte=timezone.now().date())

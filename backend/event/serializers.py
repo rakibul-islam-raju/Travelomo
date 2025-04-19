@@ -23,10 +23,17 @@ class EventCreateSerializer(serializers.ModelSerializer):
             "features",
             "tags",
             "is_featured",
-            "is_published",
+            "status",
             "vendor",
         ]
         read_only_fields = ["id", "vendor"]
+
+    def validate_status(self, value):
+        if value not in ["draft", "published"]:
+            raise serializers.ValidationError(
+                "Invalid status. Must be one of: draft, published"
+            )
+        return value
 
     def get_vendor(self, obj):
         return {
@@ -89,5 +96,5 @@ class VendorEventListSerializer(serializers.ModelSerializer):
             "discount_price",
             "image",
             "is_featured",
-            "is_published",
+            "status",
         ]

@@ -15,6 +15,13 @@ def generate_image_path(instance, filename):
 
 
 class Event(BaseModel):
+    STATUS_CHOICES = [
+        ("draft", "Draft"),
+        ("published", "Published"),
+        ("paused", "Paused"),
+        ("cancelled", "Cancelled"),
+        ("completed", "Completed"),
+    ]
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     slug = models.SlugField(null=False, blank=True)
@@ -31,12 +38,11 @@ class Event(BaseModel):
     image = models.ImageField(upload_to=generate_image_path, blank=True, null=True)
     features = models.JSONField(default=list, blank=True, null=True)
     tags = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default="draft")
 
     is_featured = models.BooleanField(default=False)
-    is_published = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
-    is_cancelled = models.BooleanField(default=False)
 
     objects = models.Manager()
 
@@ -52,12 +58,6 @@ class Event(BaseModel):
 
         if self.available_seats > self.total_seats:
             raise ValueError("Available seats cannot be greater than total seats")
-
-        if self.is_cancelled:
-            self.is_published = False
-
-        if self.is_completed and self.is_cancelled:
-            raise ValueError("Event cannot be both completed and cancelled")
 
         super().save(*args, **kwargs)
 

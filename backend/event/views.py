@@ -22,7 +22,7 @@ class EventListCreateView(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = EventFilter
     queryset = Event.objects.filter(
-        is_deleted=False, is_archived=False, is_published=True
+        is_deleted=False, is_archived=False, status="published"
     )
 
     def get_serializer_class(self):
@@ -51,14 +51,14 @@ class EventDetailView(generics.RetrieveAPIView):
             return Event.objects.all()
 
         return Event.objects.filter(
-            is_deleted=False, is_archived=False, is_published=True
+            is_deleted=False, is_archived=False, status="published"
         )
 
 
 #  View only for vendor owner
 class DuplicateEventView(generics.GenericAPIView):
     queryset = Event.objects.filter(
-        is_deleted=False, is_archived=False, is_published=True
+        is_deleted=False, is_archived=False, status="published"
     )
     serializer_class = EventDetailSerializer
     permission_classes = [IsEventOwner]
@@ -77,7 +77,7 @@ class DuplicateEventView(generics.GenericAPIView):
             "discount_price": event.discount_price,
             "features": event.features,
             "tags": event.tags,
-            "is_published": False,
+            "status": "draft",
         }
 
         # Check if the original event has an image
