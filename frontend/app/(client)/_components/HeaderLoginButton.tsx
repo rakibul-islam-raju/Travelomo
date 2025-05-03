@@ -1,5 +1,6 @@
 "use client";
 
+import { logoutAction } from "@/actions/authActions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,18 +9,23 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuthStore } from "@/stores/authStore";
 import { LogIn } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function HeaderLoginButton() {
-	const { data: session } = useSession();
+	const router = useRouter();
+	const { isAuthenticated, user } = useAuthStore();
 
-	const loggedIn = session?.user;
+	const handleLogout = async () => {
+		await logoutAction();
+		router.push("/login");
+	};
 
 	return (
 		<>
-			{!loggedIn ? (
+			{!isAuthenticated ? (
 				<Link href="/login">
 					<Button variant="default">
 						<LogIn /> Login
@@ -29,10 +35,8 @@ export default function HeaderLoginButton() {
 				<DropdownMenu>
 					<DropdownMenuTrigger>
 						<Avatar>
-							{session?.user?.image && (
-								<AvatarImage src={session?.user?.image} />
-							)}
-							<AvatarFallback>{session?.user?.name?.charAt(0)}</AvatarFallback>
+							{user?.avatar && <AvatarImage src={user?.avatar} />}
+							<AvatarFallback>{user?.first_name?.charAt(0)}</AvatarFallback>
 						</Avatar>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
@@ -47,7 +51,7 @@ export default function HeaderLoginButton() {
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem
-							onClick={() => signOut({ callbackUrl: "/login" })}
+							onClick={handleLogout}
 							className="cursor-pointer text-red-600 hover:!text-red-600 hover:!bg-red-100"
 						>
 							Logout

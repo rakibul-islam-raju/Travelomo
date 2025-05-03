@@ -14,7 +14,6 @@ import { authServices } from "@/services/authServices";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -43,11 +42,7 @@ const formSchema = z
 
 export default function RegistrationForm() {
 	const router = useRouter();
-	const {
-		mutate: register,
-		isPending,
-		isSuccess,
-	} = useMutation({
+	const { mutate: register, isPending } = useMutation({
 		mutationFn: authServices.register,
 	});
 
@@ -66,18 +61,17 @@ export default function RegistrationForm() {
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		if (data?.confirm_password) {
 			const { confirm_password, ...registrationData } = data;
-			register(registrationData);
+			register(registrationData, {
+				onSuccess: () => {
+					toast.success("Registration successful", {
+						description:
+							"An email has been sent to verify your account to continue",
+					});
+					router.push("/login");
+				},
+			});
 		}
 	};
-
-	useEffect(() => {
-		if (isSuccess) {
-			toast.success("Registration successful");
-
-			// Redirect to login page after successful registration
-			router.push("/login");
-		}
-	}, [isSuccess]);
 
 	return (
 		<Form {...form}>

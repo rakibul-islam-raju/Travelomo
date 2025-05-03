@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { authServices } from "@/services/authServices";
+import { useAuthStore } from "@/stores/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -28,12 +28,8 @@ const formSchema = z.object({
 
 export default function LoginForm() {
 	const router = useRouter();
-	const {
-		mutate: login,
-		isPending,
-		isSuccess,
-		error,
-	} = useMutation({
+	const { setUser } = useAuthStore();
+	const { mutate: login, isPending } = useMutation({
 		mutationFn: authServices.login,
 	});
 
@@ -46,15 +42,14 @@ export default function LoginForm() {
 	});
 
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
-		login(data);
+		login(data, {
+			onSuccess: (response) => {
+				toast.success("Login successful");
+				setUser(response.data.user);
+				router.replace("/");
+			},
+		});
 	};
-
-	useEffect(() => {
-		if (isSuccess) {
-			toast.success("Login successful");
-			router.replace("/");
-		}
-	}, [isSuccess, router]);
 
 	return (
 		<Form {...form}>
