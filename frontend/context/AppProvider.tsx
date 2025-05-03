@@ -1,19 +1,18 @@
-"use client";
-
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import { ReduxProvider } from "@/context/ReduxProvider";
+import QueryProvider from "./QueryProvider";
 
 export default function AppProvider({
 	children,
-	session,
 }: {
 	children: React.ReactNode;
-	session: any;
 }) {
 	return (
-		<ReduxProvider>
-			{children}
-			<Toaster />
-		</ReduxProvider>
+		<QueryProvider>
+			<ReduxProvider>
+				{children}
+				<Toaster richColors closeButton theme="light" />
+			</ReduxProvider>
+		</QueryProvider>
 	);
 }

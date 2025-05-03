@@ -16,7 +16,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-	title: "Travel More",
+	title: siteConfig.name,
 	description: siteConfig.description,
 };
 
@@ -32,7 +32,7 @@ export default async function RootLayout({
 		<html lang="en">
 			<body className={`${poppins.variable} antialiased`}>
 				<AuthProvider session={session}>
-					<AppProvider session={session}>{children}</AppProvider>
+					<AppProvider>{children}</AppProvider>
 				</AuthProvider>
 			</body>
 		</html>
