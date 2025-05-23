@@ -11,11 +11,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         user_data = {
-            "email": user.email,
+            "id": str(user.id),
             "first_name": user.first_name,
             "last_name": user.last_name,
-            "is_active": user.is_active,
+            "email": user.email,
             "role": user.role,
+            "is_active": user.is_active,
+            "is_staff": user.is_staff,
+            "is_superuser": user.is_superuser,
         }
 
         # if user is vendor and has vendor model then add vendor data to user data
@@ -26,6 +29,33 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         token["user"] = user_data
         return token
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Add user data to response
+        user = self.user
+        user_data = {
+            "id": str(user.id),
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "role": user.role,
+            "is_active": user.is_active,
+            "is_staff": user.is_staff,
+            "is_superuser": user.is_superuser,
+            "avatar": user.avatar.url if user.avatar else None,
+        }
+
+        # Add vendor data if user is a vendor
+        if user.role == "vendor" and hasattr(user, "vendor"):
+            vendor = user.vendor
+            vendor_data = VendorShortSerializer(vendor).data
+            user_data["vendor"] = vendor_data
+
+        data["user"] = user_data
+
+        return data
 
 
 class VendorRegistrationSerializer(serializers.ModelSerializer):

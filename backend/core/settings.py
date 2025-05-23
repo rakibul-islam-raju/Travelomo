@@ -61,6 +61,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "authentication.middleware.JWTCookieMiddleware",  # JWT cookie middleware
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -158,7 +159,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "authentication.authentication.CookieJWTAuthentication",
     ),
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
@@ -193,6 +194,34 @@ SIMPLE_JWT = {
 
 # cors headers
 CORS_ALLOW_ALL_ORIGINS = env("CORS_ALLOW_ALL_ORIGINS")
+CORS_ALLOW_CREDENTIALS = True  # Allow cookies in cross-origin requests
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+CORS_ALLOWED_ORIGIN_REGEXES = env.list("CORS_ALLOWED_ORIGIN_REGEXES", default=[])
+
+# Cookie settings
+AUTH_COOKIES = {
+    "access": {
+        "name": "access",
+        "httponly": True,
+        "secure": True,
+        "samesite": "Lax",
+        "max_age": 86400,  # 1 * 60 * 60 * 24 = 1 day in seconds
+    },
+    "refresh": {
+        "name": "refresh",
+        "httponly": True,
+        "secure": True,
+        "samesite": "Lax",
+        "max_age": 259200,  #  3 * 60 * 60 * 24 = 3 days in seconds
+    },
+    "role": {
+        "name": "role",
+        "httponly": True,
+        "secure": True,
+        "samesite": "Lax",
+        "max_age": 86400,  # 1 * 60 * 60 * 24 = 1 day in seconds
+    },
+}
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

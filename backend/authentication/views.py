@@ -39,6 +39,46 @@ class LoginView(TokenObtainPairView):
     permission_classes = [permissions.AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
 
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == 200:
+            access_token = response.data.get("access")
+            refresh_token = response.data.get("refresh")
+            user = response.data.get("user")
+
+            # set access token cookie
+            response.set_cookie(
+                settings.AUTH_COOKIES["access"]["name"],
+                access_token,
+                httponly=settings.AUTH_COOKIES["access"]["httponly"],
+                secure=settings.AUTH_COOKIES["access"]["secure"],
+                samesite=settings.AUTH_COOKIES["access"]["samesite"],
+                max_age=settings.AUTH_COOKIES["access"]["max_age"],
+            )
+
+            # set refresh token cookie
+            response.set_cookie(
+                settings.AUTH_COOKIES["refresh"]["name"],
+                refresh_token,
+                httponly=settings.AUTH_COOKIES["refresh"]["httponly"],
+                secure=settings.AUTH_COOKIES["refresh"]["secure"],
+                samesite=settings.AUTH_COOKIES["refresh"]["samesite"],
+                max_age=settings.AUTH_COOKIES["refresh"]["max_age"],
+            )
+
+            # set role cookie
+            response.set_cookie(
+                settings.AUTH_COOKIES["role"]["name"],
+                user.get("role"),
+                httponly=settings.AUTH_COOKIES["role"]["httponly"],
+                secure=settings.AUTH_COOKIES["role"]["secure"],
+                samesite=settings.AUTH_COOKIES["role"]["samesite"],
+                max_age=settings.AUTH_COOKIES["role"]["max_age"],
+            )
+
+        return response
+
 
 class VendorRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -87,7 +127,7 @@ class ActivateAccountView(generics.GenericAPIView):
 
         try:
             user = User.objects.get(email=email)
-            print('user -->', user)
+            print("user -->", user)
             if user.token != token:
                 return Response(
                     {"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
