@@ -1,11 +1,10 @@
 "use client";
 
-import { logoutAction } from "@/actions/authActions";
-import { COOKIE_CONSTS } from "@/config";
-import { internalApi } from "@/lib/axiosInstance";
+import { COOKIE_CONSTS } from "@/constants";
+import { authServices } from "@/services/authServices";
 import { useAuthStore } from "@/stores/authStore";
-import { useQuery } from "@tanstack/react-query";
 import Cookies from "js-cookie";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 /**
@@ -17,44 +16,41 @@ export default function AuthInitializer({
 }: {
 	children: React.ReactNode;
 }) {
-	const { setUser, clearUser } = useAuthStore();
-	const [isInitialized, setIsInitialized] = useState(false);
-
 	const isLoggedIn = Cookies.get(COOKIE_CONSTS.IS_LOGGED_IN);
+	const [isRefreshing, setIsRefreshing] = useState(true);
 
-	const {
-		data: user,
-		isError,
-		isSuccess,
-	} = useQuery({
-		queryKey: ["me"],
-		queryFn: () => internalApi.get("/auth/me"),
-		enabled: !!isLoggedIn,
-		retry: false,
-	});
+	const { setUser, clearUser } = useAuthStore();
 
 	useEffect(() => {
-		if (isSuccess && user) {
-			setUser(user.data);
-			setIsInitialized(true);
-		}
-	}, [user, isSuccess]);
-
-	useEffect(() => {
-		const logout = async () => {
-			await logoutAction();
+		const fetchUser = async () => {
+			try {
+				const response = await authServices.me();
+				if (response) {
+					setUser(response);
+				}
+			} catch {
+				clearUser();
+			} finally {
+				setIsRefreshing(false);
+			}
 		};
 
-		if (isError) {
+		if (isLoggedIn) {
+			fetchUser();
+		} else {
 			clearUser();
-			setIsInitialized(true);
-			clearUser();
-			// logout
-			logout();
+			setIsRefreshing(false);
 		}
-	}, [isError]);
+	}, [setUser, isLoggedIn, clearUser]);
 
-	const content = isInitialized ? children : "Loading...";
+	// Show loading state only during initial authentication or token refresh
+	if (isRefreshing) {
+		return (
+			<div className="flex h-screen w-full items-center justify-center">
+				<Loader2 className="h-8 w-8 animate-spin text-primary" />
+			</div>
+		);
+	}
 
-	return content;
+	return children;
 }

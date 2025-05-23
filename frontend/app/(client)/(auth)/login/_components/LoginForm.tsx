@@ -45,7 +45,7 @@ export default function LoginForm() {
 		login(data, {
 			onSuccess: (response) => {
 				toast.success("Login successful");
-				setUser(response.data.user);
+				setUser(response.user);
 				router.replace("/");
 			},
 		});

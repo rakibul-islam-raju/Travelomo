@@ -1,6 +1,7 @@
 export const BASE_API_URL: string =
 	process.env.BASE_API_URL || "http://localhost:8000/api/v1";
 export const RESULT_PER_PAGE: number = 12;
+export const NODE_ENV = process.env.NODE_ENV;
 
 export const initialParams = {
 	limit: RESULT_PER_PAGE,
@@ -8,7 +9,7 @@ export const initialParams = {
 };
 
 export const COOKIE_CONSTS = {
-	ACCESS_TOKEN: "access_token",
-	REFRESH_TOKEN: "refresh_token",
-	IS_LOGGED_IN: "is_logged_in",
+	ACCESS: "access",
+	REFRESH: "refresh",
+	IS_LOGGED_IN: "logged_in",
 };

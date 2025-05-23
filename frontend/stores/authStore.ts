@@ -1,10 +1,10 @@
-import { IUser } from "@/types";
+import { User } from "@/types";
 import { create } from "zustand";
 
 interface AuthStore {
 	isAuthenticated: boolean;
-	user?: IUser;
-	setUser: (user: IUser) => void;
+	user?: User;
+	setUser: (user: User) => void;
 	clearUser: () => void;
 }
 
