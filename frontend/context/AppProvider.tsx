@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/sonner";
-import { ReduxProvider } from "@/context/ReduxProvider";
 import AuthInitializer from "./AuthInitializer";
 import QueryProvider from "./QueryProvider";
 
@@ -11,10 +10,8 @@ export default function AppProvider({
 	return (
 		<QueryProvider>
 			<AuthInitializer>
-				<ReduxProvider>
-					<Toaster richColors closeButton theme="light" />
-					{children}
-				</ReduxProvider>
+				<Toaster richColors closeButton theme="light" />
+				{children}
 			</AuthInitializer>
 		</QueryProvider>
 	);

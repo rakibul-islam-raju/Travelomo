@@ -1,6 +1,5 @@
 "use client";
 
-import { logoutAction } from "@/actions/authActions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +8,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { authServices } from "@/services/authServices";
 import { useAuthStore } from "@/stores/authStore";
 import { LogIn } from "lucide-react";
 import Link from "next/link";
@@ -19,7 +19,7 @@ export default function HeaderLoginButton() {
 	const { isAuthenticated, user } = useAuthStore();
 
 	const handleLogout = async () => {
-		await logoutAction();
+		await authServices.logout();
 		router.push("/login");
 	};
 

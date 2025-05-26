@@ -1,184 +1,30 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { useRegisterVendorMutation } from "@/lib/features/auth/authApi";
-import { extractErrorMessage } from "@/utils/extractErrorMessages";
-import { zodResolver } from "@hookform/resolvers/zod";
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Metadata } from "next";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import VendorRegistrationForm from "./_components/VendorRegistrationForm";
 
-const formSchema = z
-	.object({
-		first_name: z.string().min(1, { message: "First name is required." }),
-		last_name: z.string().min(1, { message: "Last name is required." }),
-		store_name: z.string().min(1, { message: "Company name is required." }),
-		email: z.string().email({ message: "Invalid email address." }),
-		password: z
-			.string()
-			.min(6, { message: "Password must be at least 6 characters." }),
-		confirm_password: z
-			.string()
-			.min(1, { message: "Confirm password is required." }),
-	})
-	.superRefine((data, ctx) => {
-		if (data.password !== data.confirm_password) {
-			ctx.addIssue({
-				code: z.ZodIssueCode.custom,
-				message: "Passwords do not match",
-				path: ["confirm_password"],
-			});
-		}
-	});
+export const metadata: Metadata = {
+	title: "Vendor Registration",
+	description: "Vendor Registration",
+};
 
 export default function VendorRegistrationPage() {
-	const router = useRouter();
-	const { toast } = useToast();
-	const [registerVendor, { isLoading }] = useRegisterVendorMutation();
-
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
-		mode: "onBlur",
-		defaultValues: {
-			first_name: "",
-			last_name: "",
-			store_name: "",
-			email: "",
-			password: "",
-			confirm_password: "",
-		},
-	});
-
-	const onSubmit = async (data: z.infer<typeof formSchema>) => {
-		try {
-			if (data?.confirm_password) {
-				const { confirm_password, ...registrationData } = data;
-				await registerVendor(registrationData).unwrap();
-			}
-
-			toast({
-				variant: "success",
-				title: "Registration successful",
-				description: "An email has been sent to verify your account",
-			});
-
-			// Redirect to login page after successful registration
-			router.push("/login");
-		} catch (error) {
-			const errorMessage = extractErrorMessage(error);
-			toast({
-				variant: "destructive",
-				title: "Registration failed",
-				description: errorMessage,
-			});
-		}
-	};
-
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Become a vendor</CardTitle>
+				<CardTitle>List your business</CardTitle>
+				<CardDescription>
+					Create an account to start your business
+				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)}>
-						<div className="space-y-4">
-							<FormField
-								control={form.control}
-								name="first_name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>First Name</FormLabel>
-										<FormControl>
-											<Input {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="last_name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Last Name</FormLabel>
-										<FormControl>
-											<Input {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="store_name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Company Name</FormLabel>
-										<FormControl>
-											<Input {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="email"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Email Address</FormLabel>
-										<FormControl>
-											<Input {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="password"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Password</FormLabel>
-										<FormControl>
-											<Input {...field} type="password" />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="confirm_password"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Confirm Password</FormLabel>
-										<FormControl>
-											<Input {...field} type="password" />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-						<Button className="w-full mt-6" type="submit" disabled={isLoading}>
-							{isLoading ? "Registering..." : "Register"}
-						</Button>
-					</form>
-				</Form>
+				<VendorRegistrationForm />
 
 				<div className="mt-4 text-center">
 					<p className="text-muted-foreground">

@@ -1,10 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { isApiError } from "@/lib/baseApi";
-import { useActivateAccountMutation } from "@/lib/features/auth/authApi";
+import { authServices } from "@/services/authServices";
+import { useMutation } from "@tanstack/react-query";
 import { CircleCheck, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,27 +23,35 @@ export default function ActivateAccount() {
 
 	const [redirectInterval, setRedirectInterval] = useState<number>(3);
 
-	const [activateAccount, { isLoading, error, data }] =
-		useActivateAccountMutation();
+	const {
+		mutate: activateAccount,
+		isPending: isLoading,
+		error,
+		data,
+	} = useMutation({
+		mutationFn: (data: { email: string; token: string }) =>
+			authServices.activateAccount(data),
+	});
 
 	useEffect(() => {
 		const handleActivate = async (email: string, token: string) => {
-			await activateAccount({ email, token }).unwrap();
-			toast({
-				variant: "success",
-				title: "Account activated successfully",
-				description: "You can now login to your account",
-			});
-			const interval = setInterval(() => {
-				setRedirectInterval((prev) => {
-					if (prev <= 1) {
-						clearInterval(interval);
-						router.push("/login");
-						return 0;
-					}
-					return prev - 1;
-				});
-			}, 1000);
+			activateAccount(
+				{ email, token },
+				{
+					onSuccess: () => {
+						const interval = setInterval(() => {
+							setRedirectInterval((prev) => {
+								if (prev <= 1) {
+									clearInterval(interval);
+									router.push("/login");
+									return 0;
+								}
+								return prev - 1;
+							});
+						}, 1000);
+					},
+				}
+			);
 		};
 
 		const urlParams = new URLSearchParams(window.location.search);
@@ -44,7 +59,7 @@ export default function ActivateAccount() {
 		const token = urlParams.get("token") || urlParams.get("amp;token");
 
 		if (!email || !token) {
-			// router.push("/login");
+			router.push("/login");
 		}
 		if (email && token) {
 			handleActivate(email, token);
@@ -55,6 +70,9 @@ export default function ActivateAccount() {
 		<Card>
 			<CardHeader>
 				<CardTitle className="text-center">Activate Account</CardTitle>
+				<CardDescription className="text-center">
+					Activate your account to continue
+				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				{isLoading ? (

@@ -12,20 +12,21 @@ import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { toast } from "sonner";
 import {
-	RegistrationFormValues,
-	registrationInitialValues,
-	registrationSchema,
+	VendorRegistrationFormValues,
+	vendorRegistrationInitialValues,
+	vendorRegistrationSchema,
 } from "./schema";
 
-export default function RegistrationForm() {
+export default function VendorRegistrationForm() {
 	const router = useRouter();
 
 	const { mutate: register, isPending } = useMutation({
-		mutationFn: (data: Omit<RegistrationFormValues, "confirm_password">) =>
-			authServices.register(data, "customer"),
+		mutationFn: (
+			data: Omit<VendorRegistrationFormValues, "confirm_password">
+		) => authServices.register(data, "vendor"),
 	});
 
-	const formRef = useRef<GenericFormRef<RegistrationFormValues>>(null);
+	const formRef = useRef<GenericFormRef<VendorRegistrationFormValues>>(null);
 
 	const onSubmit = async () => {
 		const data = formRef.current?.form.getValues();
@@ -47,38 +48,44 @@ export default function RegistrationForm() {
 		<>
 			<GenericForm
 				ref={formRef}
-				schema={registrationSchema}
-				initialValues={registrationInitialValues}
+				schema={vendorRegistrationSchema}
+				initialValues={vendorRegistrationInitialValues}
 				onSubmit={onSubmit}
 			>
 				<div className="space-y-4">
 					<div className="grid grid-cols-2 gap-4">
-						<TextField<RegistrationFormValues>
+						<TextField<VendorRegistrationFormValues>
 							name="first_name"
 							label="First Name"
 							placeholder="Enter First Name"
 							required
 						/>
-						<TextField<RegistrationFormValues>
+						<TextField<VendorRegistrationFormValues>
 							name="last_name"
 							label="Last Name"
 							placeholder="Enter Last Name"
 							required
 						/>
 					</div>
-					<TextField<RegistrationFormValues>
+					<TextField<VendorRegistrationFormValues>
 						name="email"
 						label="Email Address"
 						placeholder="Enter Email Address"
 						required
 					/>
-					<TextField<RegistrationFormValues>
+					<TextField<VendorRegistrationFormValues>
+						name="store_name"
+						label="Store Name"
+						placeholder="Enter Store Name"
+						required
+					/>
+					<TextField<VendorRegistrationFormValues>
 						name="password"
 						label="Password"
 						placeholder="Enter Password"
 						required
 					/>
-					<TextField<RegistrationFormValues>
+					<TextField<VendorRegistrationFormValues>
 						name="confirm_password"
 						label="Confirm Password"
 						placeholder="Enter Confirm Password"

@@ -1,3 +1,4 @@
+import { ForgetPasswordFormValues } from "@/app/(client)/(auth)/forget-password/_componemts/schema";
 import { fetcher } from "@/lib/fetcher";
 import {
 	CustomerRegisterRequest,
@@ -16,8 +17,15 @@ export const authServices = {
 		});
 	},
 
-	register: async (data: CustomerRegisterRequest | VendorRegisterRequest) => {
-		return await fetcher<RegistrationResponse>("/auth/registration/", {
+	register: async (
+		data: CustomerRegisterRequest | VendorRegisterRequest,
+		type: "customer" | "vendor"
+	) => {
+		const url =
+			type === "customer"
+				? "/auth/register/customer/"
+				: "/auth/register/vendor/";
+		return await fetcher<RegistrationResponse>(url, {
 			method: "POST",
 			body: data,
 		});
@@ -28,14 +36,31 @@ export const authServices = {
 	},
 
 	logout: async () => {
-		return await fetcher<void>("/auth/logout/", {
+		return await fetcher("/auth/logout/", {
 			method: "POST",
 		});
 	},
 
 	refresh: async () => {
-		return await fetcher<void>("/auth/refresh/", {
+		return await fetcher<{ access: string; refresh: string }>(
+			"/auth/refresh/",
+			{
+				method: "POST",
+			}
+		);
+	},
+
+	forgetPassword: async (data: ForgetPasswordFormValues) => {
+		return await fetcher("/auth/forget-password/", {
 			method: "POST",
+			body: data,
+		});
+	},
+
+	activateAccount: async (data: { email: string; token: string }) => {
+		return await fetcher("/auth/activate-account/", {
+			method: "POST",
+			body: data,
 		});
 	},
 };
