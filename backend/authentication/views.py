@@ -77,6 +77,42 @@ class LoginView(TokenObtainPairView):
                 max_age=settings.AUTH_COOKIES["role"]["max_age"],
             )
 
+            # set role cookie
+            response.set_cookie(
+                settings.AUTH_COOKIES["role"]["name"],
+                user.get("role"),
+                httponly=settings.AUTH_COOKIES["role"]["httponly"],
+                secure=settings.AUTH_COOKIES["role"]["secure"],
+                samesite=settings.AUTH_COOKIES["role"]["samesite"],
+                max_age=settings.AUTH_COOKIES["role"]["max_age"],
+            )
+
+            # set logged in cookie
+            response.set_cookie(
+                settings.AUTH_COOKIES["logged_in"]["name"],
+                "true",
+                httponly=settings.AUTH_COOKIES["logged_in"]["httponly"],
+                secure=settings.AUTH_COOKIES["logged_in"]["secure"],
+                samesite=settings.AUTH_COOKIES["logged_in"]["samesite"],
+                max_age=settings.AUTH_COOKIES["logged_in"]["max_age"],
+            )
+
+        return response
+
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        response = Response(
+            {"message": "Logged out successfully"}, status=status.HTTP_200_OK
+        )
+
+        response.delete_cookie(settings.AUTH_COOKIES["access"]["name"])
+        response.delete_cookie(settings.AUTH_COOKIES["refresh"]["name"])
+        response.delete_cookie(settings.AUTH_COOKIES["role"]["name"])
+        response.delete_cookie(settings.AUTH_COOKIES["logged_in"]["name"])
+
         return response
 
 
