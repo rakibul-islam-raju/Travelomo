@@ -4,6 +4,7 @@ import {
 	GenericForm,
 	GenericFormRef,
 } from "@/components/molecules/form/GenericForm";
+import { PasswordField } from "@/components/molecules/form/PasswordField";
 import { TextField } from "@/components/molecules/form/TextField";
 import { Button } from "@/components/ui/button";
 import { authServices } from "@/services/authServices";
@@ -37,7 +38,7 @@ export default function RegistrationForm() {
 						description:
 							"An email has been sent to verify your account to continue",
 					});
-					router.push("/login");
+					// router.push("/login");
 				},
 			});
 		}
@@ -72,7 +73,7 @@ export default function RegistrationForm() {
 						placeholder="Enter Email Address"
 						required
 					/>
-					<TextField<RegistrationFormValues>
+					<PasswordField<RegistrationFormValues>
 						name="password"
 						label="Password"
 						placeholder="Enter Password"

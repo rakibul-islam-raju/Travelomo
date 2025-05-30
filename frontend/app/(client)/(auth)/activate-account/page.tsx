@@ -11,9 +11,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { isApiError } from "@/lib/baseApi";
 import { authServices } from "@/services/authServices";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { CircleCheck, ShieldAlert } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BeatLoader } from "react-spinners";
 
@@ -21,50 +21,41 @@ export default function ActivateAccount() {
 	const router = useRouter();
 	const { toast } = useToast();
 
-	const [redirectInterval, setRedirectInterval] = useState<number>(3);
+	const [redirectInterval, setRedirectInterval] = useState<number>(5);
+	const searchParams = useSearchParams();
+	const email = searchParams.get("email");
+	const token = searchParams.get("token");
 
 	const {
-		mutate: activateAccount,
+		isSuccess,
 		isPending: isLoading,
 		error,
-		data,
-	} = useMutation({
-		mutationFn: (data: { email: string; token: string }) =>
-			authServices.activateAccount(data),
+	} = useQuery({
+		queryKey: ["activate-account"],
+		queryFn: () =>
+			authServices.activateAccount({
+				email: email!,
+				token: token!,
+			}),
+		enabled: !!email && !!token,
 	});
 
 	useEffect(() => {
-		const handleActivate = async (email: string, token: string) => {
-			activateAccount(
-				{ email, token },
-				{
-					onSuccess: () => {
-						const interval = setInterval(() => {
-							setRedirectInterval((prev) => {
-								if (prev <= 1) {
-									clearInterval(interval);
-									router.push("/login");
-									return 0;
-								}
-								return prev - 1;
-							});
-						}, 1000);
-					},
-				}
-			);
-		};
+		if (isSuccess) {
+			const interval = setInterval(() => {
+				setRedirectInterval((prev) => {
+					if (prev <= 1) {
+						clearInterval(interval);
+						router.push("/login");
+						return 0;
+					}
+					return prev - 1;
+				});
 
-		const urlParams = new URLSearchParams(window.location.search);
-		const email = urlParams.get("email");
-		const token = urlParams.get("token") || urlParams.get("amp;token");
-
-		if (!email || !token) {
-			router.push("/login");
+				return () => clearInterval(interval);
+			}, 1000); //
 		}
-		if (email && token) {
-			handleActivate(email, token);
-		}
-	}, [window.location]);
+	}, [isSuccess]);
 
 	return (
 		<Card>
@@ -94,7 +85,7 @@ export default function ActivateAccount() {
 						</p>
 					</div>
 				) : (
-					data && (
+					isSuccess && (
 						<div className="text-center bg-green-500/10 p-4 rounded-md">
 							<CircleCheck className="w-10 h-10 text-primary mx-auto" />
 							<p className="text-lg mb-4 text-primary mt-4">
@@ -103,7 +94,9 @@ export default function ActivateAccount() {
 							<p className="text-sm text-muted-foreground">
 								Redirecting to login page in {redirectInterval} seconds...
 							</p>
-							<Button onClick={() => router.push("/login")}>Login Now</Button>
+							<Button className="mt-4" onClick={() => router.push("/login")}>
+								Login Now
+							</Button>
 						</div>
 					)
 				)}

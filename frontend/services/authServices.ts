@@ -58,9 +58,11 @@ export const authServices = {
 	},
 
 	activateAccount: async (data: { email: string; token: string }) => {
-		return await fetcher("/auth/activate-account/", {
-			method: "POST",
-			body: data,
-		});
+		return await fetcher(
+			`/auth/activate-account/?email=${data.email}&token=${data.token}`,
+			{
+				method: "GET",
+			}
+		);
 	},
 };
