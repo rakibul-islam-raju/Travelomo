@@ -1,9 +1,13 @@
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from user.models import User
 from vendor.serializers import VendorShortSerializer
 from vendor.models import Vendor
+
+from notification.emails import send_activation_email
+from utils.Token import Token
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -75,9 +79,19 @@ class VendorRegistrationSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "role"]
 
-    def create(self, validated_data):
+    def create(self, validated_data) -> User:
+        # generate token
+        tokens = Token.generate_and_hash_token(length=100)
+        token = tokens["token"]
+        hash = tokens["hash"]
+
         store = validated_data.pop("store_name")
-        user = User.objects.create_user(**validated_data, role="vendor")
+        user = User.objects.create_user(**validated_data, role="vendor", token=hash)
+
+        activation_url = f"{settings.FRONTEND_BASE_URL}/activate-account/?email={user.email}&token={token}"
+
+        # Send activation email
+        send_activation_email(user.email, activation_url)
 
         # create vendor
         Vendor.objects.create(user=user, store_name=store)
@@ -92,8 +106,27 @@ class CustomerRegistrationSerializer(serializers.ModelSerializer):
         fields = ["id", "email", "first_name", "last_name", "password", "role"]
         read_only_fields = ["id", "role"]
 
-    def create(self, validated_data):
-        user = User.objects.create_user(**validated_data, role="customer")
+    def create(self, validated_data) -> User:
+        # generate token
+        tokens = Token.generate_and_hash_token(length=100)
+        token = tokens["token"]
+        hash = tokens["hash"]
+
+        # Create user with the hashed token
+        user = User.objects.create_user(
+            email=validated_data["email"],
+            password=validated_data["password"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            role="customer",
+            token=hash,
+        )
+
+        activation_url = f"{settings.FRONTEND_BASE_URL}/activate-account/?email={user.email}&token={token}"
+
+        # Send activation email
+        send_activation_email(user.email, activation_url)
+
         return user
 
 

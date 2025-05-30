@@ -11,8 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
 
 from user.models import User
-from notification.emails import send_activation_email
-from utils.generate_token import generate_token
+from utils.Token import Token
 
 from .serializers import (
     ForgetPasswordSerializer,
@@ -121,50 +120,28 @@ class VendorRegistrationView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = VendorRegistrationSerializer
 
-    def perform_create(self, serializer):
-        user = serializer.save()
-        # store token and save
-        token = generate_token(length=100)
-        user.token = token
-        user.save()
-
-        activation_url = f"{settings.FRONTEND_BASE_URL}/activate-account/?email={user.email}&token={token}"
-
-        # Send activation email
-        send_activation_email(user.email, activation_url)
-
 
 class CustomerRegistrationView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = CustomerRegistrationSerializer
 
-    def perform_create(self, serializer):
-        user = serializer.save()
-        # store token and save
-        token = generate_token(length=100)
-        user.token = token
-        user.save()
-
-        activation_url = f"{settings.FRONTEND_BASE_URL}/activate-account/?email={user.email}&token={token}"
-
-        # Send activation email
-        send_activation_email(user.email, activation_url)
-
 
 class ActivateAccountView(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs) -> Response:
         email = request.GET.get("email")
         token = request.GET.get("token")
 
-        print("emaill -->", email)
-        print("token -->", token)
-
         try:
             user = User.objects.get(email=email)
-            print("user -->", user)
-            if user.token != token:
+            if not user.token:
+                return Response(
+                    {"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Verify the token matches the hashed token stored on the user
+            if not Token.verify_token(token, user.token):
                 return Response(
                     {"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
                 )
@@ -175,16 +152,24 @@ class ActivateAccountView(generics.GenericAPIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            # Activate account and clear token
             user.is_active = True
-            user.token = None  # Clear the token after activation
+            user.token = None
             user.save()
 
             return Response(
                 {"message": "Account activated successfully"}, status=status.HTTP_200_OK
             )
-        except User.DoesNotExist:
+        except User.DoesNotExist as e:
+            print(f"User not found error: {str(e)}")
             return Response(
                 {"message": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            print(f"Unexpected error: {str(e)}")
+            return Response(
+                {"message": "An error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
