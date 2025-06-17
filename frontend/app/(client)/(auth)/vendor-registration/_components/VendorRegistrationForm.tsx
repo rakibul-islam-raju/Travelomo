@@ -2,6 +2,7 @@
 
 import { BaseForm } from "@/components/molecules/form/BaseForm";
 import { TextField } from "@/components/molecules/form/TextField";
+import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { useZodForm } from "@/hooks/useZodForm";
 import { authServices } from "@/services/authServices";
@@ -87,7 +88,7 @@ export default function VendorRegistrationForm() {
 					/>
 				</div>
 				<Button className="w-full mt-6" type="submit" disabled={isPending}>
-					{isPending ? "Registering..." : "Register"}
+					Register {isPending && <Spinner />}
 				</Button>
 			</BaseForm>
 		</>

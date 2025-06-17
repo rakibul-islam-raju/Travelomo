@@ -3,6 +3,7 @@ import { forgetPasswordInitialValues, forgetPasswordSchema } from "./schema";
 
 import { BaseForm } from "@/components/molecules/form/BaseForm";
 import { TextField } from "@/components/molecules/form/TextField";
+import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { useZodForm } from "@/hooks/useZodForm";
 import { authServices } from "@/services/authServices";
@@ -49,7 +50,7 @@ export default function ForgetPassForm() {
 					/>
 				</div>
 				<Button className="w-full mt-6" type="submit" disabled={isPending}>
-					{isPending ? "Sending..." : "Send Reset Link"}
+					Send Reset Link {isPending && <Spinner />}
 				</Button>
 			</BaseForm>
 		</>

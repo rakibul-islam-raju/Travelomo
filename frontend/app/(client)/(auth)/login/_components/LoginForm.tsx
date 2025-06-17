@@ -3,6 +3,7 @@
 import { BaseForm } from "@/components/molecules/form/BaseForm";
 import { PasswordField } from "@/components/molecules/form/PasswordField";
 import { TextField } from "@/components/molecules/form/TextField";
+import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { useZodForm } from "@/hooks/useZodForm";
 import { authServices } from "@/services/authServices";
@@ -52,7 +53,7 @@ export default function LoginForm() {
 				/>
 			</div>
 			<Button className="w-full mt-6" type="submit" disabled={isPending}>
-				{isPending ? "Logging in..." : "Login"}
+				Login {isPending && <Spinner />}
 			</Button>
 		</BaseForm>
 	);

@@ -1,4 +1,3 @@
-"use client";
 import { siteConfig } from "@/config/siteConfig";
 import Link from "next/link";
 import HeaderLoginButton from "./HeaderLoginButton";

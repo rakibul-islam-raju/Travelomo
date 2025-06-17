@@ -8,6 +8,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getFirstTwoCharOfFullName } from "@/lib/string";
 import { authServices } from "@/services/authServices";
 import { useAuthStore } from "@/stores/authStore";
 import { LogIn } from "lucide-react";
@@ -36,7 +37,9 @@ export default function HeaderLoginButton() {
 					<DropdownMenuTrigger>
 						<Avatar>
 							{user?.avatar && <AvatarImage src={user?.avatar} />}
-							<AvatarFallback>{user?.first_name?.charAt(0)}</AvatarFallback>
+							<AvatarFallback className="text-primary">
+								{getFirstTwoCharOfFullName(`${user?.full_name}`)}
+							</AvatarFallback>
 						</Avatar>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent>
