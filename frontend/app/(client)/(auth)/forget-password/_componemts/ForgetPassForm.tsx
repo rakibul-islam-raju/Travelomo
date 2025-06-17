@@ -1,16 +1,13 @@
 "use client";
 import { forgetPasswordInitialValues, forgetPasswordSchema } from "./schema";
 
-import {
-	GenericForm,
-	GenericFormRef,
-} from "@/components/molecules/form/GenericForm";
+import { BaseForm } from "@/components/molecules/form/BaseForm";
 import { TextField } from "@/components/molecules/form/TextField";
 import { Button } from "@/components/ui/button";
+import { useZodForm } from "@/hooks/useZodForm";
 import { authServices } from "@/services/authServices";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
 import { toast } from "sonner";
 import { ForgetPasswordFormValues } from "./schema";
 
@@ -22,10 +19,12 @@ export default function ForgetPassForm() {
 			authServices.forgetPassword(data),
 	});
 
-	const formRef = useRef<GenericFormRef<ForgetPasswordFormValues>>(null);
+	const form = useZodForm(forgetPasswordSchema, {
+		defaultValues: forgetPasswordInitialValues,
+		mode: "onChange",
+	});
 
-	const onSubmit = async () => {
-		const data = formRef.current?.form.getValues();
+	const onSubmit = async (data: ForgetPasswordFormValues) => {
 		if (data?.email) {
 			register(data, {
 				onSuccess: () => {
@@ -40,12 +39,7 @@ export default function ForgetPassForm() {
 
 	return (
 		<>
-			<GenericForm
-				ref={formRef}
-				schema={forgetPasswordSchema}
-				initialValues={forgetPasswordInitialValues}
-				onSubmit={onSubmit}
-			>
+			<BaseForm form={form} onSubmit={onSubmit}>
 				<div className="space-y-4">
 					<TextField<ForgetPasswordFormValues>
 						name="email"
@@ -57,7 +51,7 @@ export default function ForgetPassForm() {
 				<Button className="w-full mt-6" type="submit" disabled={isPending}>
 					{isPending ? "Sending..." : "Send Reset Link"}
 				</Button>
-			</GenericForm>
+			</BaseForm>
 		</>
 	);
 }

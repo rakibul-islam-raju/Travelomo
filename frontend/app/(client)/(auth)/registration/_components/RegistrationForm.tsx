@@ -1,16 +1,13 @@
 "use client";
 
-import {
-	GenericForm,
-	GenericFormRef,
-} from "@/components/molecules/form/GenericForm";
+import { BaseForm } from "@/components/molecules/form/BaseForm";
 import { PasswordField } from "@/components/molecules/form/PasswordField";
 import { TextField } from "@/components/molecules/form/TextField";
+import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
+import { useZodForm } from "@/hooks/useZodForm";
 import { authServices } from "@/services/authServices";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useRef } from "react";
 import { toast } from "sonner";
 import {
 	RegistrationFormValues,
@@ -19,17 +16,17 @@ import {
 } from "./schema";
 
 export default function RegistrationForm() {
-	const router = useRouter();
-
 	const { mutate: register, isPending } = useMutation({
 		mutationFn: (data: Omit<RegistrationFormValues, "confirm_password">) =>
 			authServices.register(data, "customer"),
 	});
 
-	const formRef = useRef<GenericFormRef<RegistrationFormValues>>(null);
+	const form = useZodForm(registrationSchema, {
+		defaultValues: registrationInitialValues,
+		mode: "onChange",
+	});
 
-	const onSubmit = async () => {
-		const data = formRef.current?.form.getValues();
+	const onSubmit = async (data: RegistrationFormValues) => {
 		if (data?.confirm_password) {
 			const { confirm_password, ...registrationData } = data;
 			register(registrationData, {
@@ -38,7 +35,7 @@ export default function RegistrationForm() {
 						description:
 							"An email has been sent to verify your account to continue",
 					});
-					// router.push("/login");
+					form.reset();
 				},
 			});
 		}
@@ -46,12 +43,7 @@ export default function RegistrationForm() {
 
 	return (
 		<>
-			<GenericForm
-				ref={formRef}
-				schema={registrationSchema}
-				initialValues={registrationInitialValues}
-				onSubmit={onSubmit}
-			>
+			<BaseForm form={form} onSubmit={onSubmit}>
 				<div className="space-y-4">
 					<div className="grid grid-cols-2 gap-4">
 						<TextField<RegistrationFormValues>
@@ -87,9 +79,9 @@ export default function RegistrationForm() {
 					/>
 				</div>
 				<Button className="w-full mt-6" type="submit" disabled={isPending}>
-					{isPending ? "Registering..." : "Register"}
+					Register {isPending && <Spinner />}
 				</Button>
-			</GenericForm>
+			</BaseForm>
 		</>
 	);
 }

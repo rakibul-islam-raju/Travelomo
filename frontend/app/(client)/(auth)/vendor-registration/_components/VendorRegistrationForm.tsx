@@ -1,15 +1,12 @@
 "use client";
 
-import {
-	GenericForm,
-	GenericFormRef,
-} from "@/components/molecules/form/GenericForm";
+import { BaseForm } from "@/components/molecules/form/BaseForm";
 import { TextField } from "@/components/molecules/form/TextField";
 import { Button } from "@/components/ui/button";
+import { useZodForm } from "@/hooks/useZodForm";
 import { authServices } from "@/services/authServices";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
 import { toast } from "sonner";
 import {
 	VendorRegistrationFormValues,
@@ -26,10 +23,12 @@ export default function VendorRegistrationForm() {
 		) => authServices.register(data, "vendor"),
 	});
 
-	const formRef = useRef<GenericFormRef<VendorRegistrationFormValues>>(null);
+	const form = useZodForm(vendorRegistrationSchema, {
+		defaultValues: vendorRegistrationInitialValues,
+		mode: "onChange",
+	});
 
-	const onSubmit = async () => {
-		const data = formRef.current?.form.getValues();
+	const onSubmit = async (data: VendorRegistrationFormValues) => {
 		if (data?.confirm_password) {
 			const { confirm_password, ...registrationData } = data;
 			register(registrationData, {
@@ -46,12 +45,7 @@ export default function VendorRegistrationForm() {
 
 	return (
 		<>
-			<GenericForm
-				ref={formRef}
-				schema={vendorRegistrationSchema}
-				initialValues={vendorRegistrationInitialValues}
-				onSubmit={onSubmit}
-			>
+			<BaseForm form={form} onSubmit={onSubmit}>
 				<div className="space-y-4">
 					<div className="grid grid-cols-2 gap-4">
 						<TextField<VendorRegistrationFormValues>
@@ -95,7 +89,7 @@ export default function VendorRegistrationForm() {
 				<Button className="w-full mt-6" type="submit" disabled={isPending}>
 					{isPending ? "Registering..." : "Register"}
 				</Button>
-			</GenericForm>
+			</BaseForm>
 		</>
 	);
 }
