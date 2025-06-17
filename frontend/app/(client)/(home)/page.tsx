@@ -1,19 +1,32 @@
 import Slider from "@/app/(client)/(home)/_components/Slider";
 import CTA from "@/components/CTA";
-import { initialParams } from "@/config";
-import { eventApi } from "@/lib/features/events/eventApi";
-import { store } from "@/lib/store";
+import { serverFetcher } from "@/lib/serverFetcher";
+import { IEventListItem } from "@/models/Event";
+import { GenericListResponse } from "@/types/common";
 import { Suspense } from "react";
+import EventCard from "../_components/EventCard";
 import Section from "../_components/Section";
 import EventList from "./_components/EventList";
 import EventListSkeleton from "./_components/EventListSkeleton";
 import SearchForm from "./_components/SearchForm";
 import ViewAllBtn from "./_components/ViewAllBtn";
 
-export default async function Home() {
-	const { data: initialEventsData } = await store.dispatch(
-		eventApi.endpoints.getEvents.initiate(initialParams)
+export const dynamic = "force-dynamic";
+
+export const fetchEvents = async () => {
+	const limit = 8;
+	const response = await serverFetcher<GenericListResponse<IEventListItem>>(
+		`/events?limit=${limit}`,
+		{
+			method: "GET",
+			revalidate: 0,
+		}
 	);
+	return response;
+};
+
+export default async function Home() {
+	const events = await fetchEvents();
 
 	return (
 		<>
@@ -70,25 +83,25 @@ export default async function Home() {
 
 			<Section title="Featured Events" action={<ViewAllBtn />}>
 				<Suspense fallback={<EventListSkeleton />}>
-					<EventList initialEventsData={initialEventsData} />
+					<EventList initialEventsData={events} />
 				</Suspense>
 			</Section>
 
-			{/* <Section title="Ending Soon" action={<ViewAllBtn />}>
+			<Section title="Ending Soon" action={<ViewAllBtn />}>
 				<div className="grid grild-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 					{events?.results?.map((event) => (
 						<EventCard key={event.id} event={event} />
 					))}
 				</div>
-			</Section> */}
+			</Section>
 
-			{/* <Section title="Limited Availability" action={<ViewAllBtn />}>
+			<Section title="Limited Availability" action={<ViewAllBtn />}>
 				<div className="grid grild-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 					{events?.results?.map((event) => (
 						<EventCard key={event.id} event={event} />
 					))}
 				</div>
-			</Section> */}
+			</Section>
 
 			<CTA
 				title="Discover Your Dream Destination"

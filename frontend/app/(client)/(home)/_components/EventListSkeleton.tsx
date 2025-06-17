@@ -4,7 +4,7 @@ const EventListSkeleton = () => {
 	return (
 		<div className="grid grild-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 			{[...Array(4).keys()].map((i) => (
-				<EventCardSkeleton />
+				<EventCardSkeleton key={i} />
 			))}
 		</div>
 	);

@@ -13,15 +13,13 @@ import { authServices } from "@/services/authServices";
 import { useAuthStore } from "@/stores/authStore";
 import { LogIn } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function HeaderLoginButton() {
-	const router = useRouter();
 	const { isAuthenticated, user } = useAuthStore();
 
 	const handleLogout = async () => {
 		await authServices.logout();
-		router.push("/login");
+		window.location.href = "/login";
 	};
 
 	return (

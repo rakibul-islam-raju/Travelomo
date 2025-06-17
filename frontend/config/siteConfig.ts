@@ -14,3 +14,5 @@ export const siteConfig = {
 	email: "info@travelomo.com",
 	phone: "+8801718925923",
 };
+
+export const topbarHeight = 70;
