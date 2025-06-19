@@ -40,6 +40,12 @@ class VendorListSerializer(serializers.ModelSerializer):
         ]
 
 
+class MeVendorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vendor
+        fields = "__all__"
+
+
 class VendorDetailSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
 

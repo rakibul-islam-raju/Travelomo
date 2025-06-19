@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, filters
+from rest_framework import generics, filters, response, status
 
 from user.permissions import IsSystemAdmin, IsVendor
 
@@ -10,8 +10,23 @@ from .serializers import (
     VendorApprovalSerializer,
     VendorCreateSerializer,
     VendorDetailSerializerForAdmin,
+    MeVendorSerializer,
 )
 from .permission import IsVendorOwnerOrAdmin
+
+
+class VendorMeView(generics.GenericAPIView):
+    permission_classes = [IsVendor]
+    serializer_class = MeVendorSerializer
+
+    def get(self, request, *args, **kwargs):
+        vendor = Vendor.objects.get(user=request.user)
+        serializer = self.serializer_class(vendor)
+
+        return response.Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
 
 class VendorListCreateView(generics.ListCreateAPIView):
