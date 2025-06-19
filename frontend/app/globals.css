@@ -83,6 +83,11 @@
 	body {
 		@apply bg-background text-foreground font-poppins;
 	}
+
+	.prose-editor .ProseMirror:focus {
+		outline: none !important;
+		box-shadow: none !important;
+	}
 }
 
 /* Modern Scrollbar Styles */
