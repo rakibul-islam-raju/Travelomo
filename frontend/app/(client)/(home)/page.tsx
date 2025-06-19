@@ -13,7 +13,7 @@ import ViewAllBtn from "./_components/ViewAllBtn";
 
 export const dynamic = "force-dynamic";
 
-export const fetchEvents = async () => {
+const fetchEvents = async () => {
 	const limit = 8;
 	const response = await serverFetcher<GenericListResponse<IEventListItem>>(
 		`/events?limit=${limit}`,

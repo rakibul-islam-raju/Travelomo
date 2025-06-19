@@ -97,7 +97,6 @@ export const TextAreaField = <T extends FieldValues>({
 									resizable === false && "resize-none",
 									inputClassName
 								)}
-								autoResize={autoResize}
 							/>
 							{loading && <Spinner />}
 							{action && (

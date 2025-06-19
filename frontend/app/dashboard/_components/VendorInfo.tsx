@@ -5,15 +5,18 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useGetVendorDetailsQuery } from "@/lib/features/vendor/vendorApi";
-import { useSession } from "next-auth/react";
+import { vendorServices } from "@/services/vendorServices";
+import { useVendorStore } from "@/stores/vendorStore";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-export const VendorInfo = () => {
-	const session = useSession();
-	const vendor = session.data?.user?.vendor;
 
-	const { data: vendorDetails } = useGetVendorDetailsQuery(vendor?.id, {
-		skip: !vendor?.id,
+export const VendorInfo = () => {
+	const vendor = useVendorStore((state) => state.vendor);
+
+	const { data: vendorDetails } = useQuery({
+		queryKey: ["vedor-details", vendor?.id],
+		queryFn: () => vendorServices.getVendorDetails(vendor!.id),
+		enabled: !!vendor?.id,
 	});
 
 	return (

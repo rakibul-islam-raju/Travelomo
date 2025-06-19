@@ -36,6 +36,7 @@ export interface MeResponse {
 	email: string;
 	first_name: string;
 	last_name: string;
+	full_name: string;
 	role: UserRole;
 	is_active: boolean;
 	is_staff: boolean;

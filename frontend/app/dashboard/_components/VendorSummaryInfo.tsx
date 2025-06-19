@@ -1,10 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useGetVendorSummaryQuery } from "@/lib/features/vendor/vendorApi";
+import { vendorStatService } from "@/services/vendorStatService";
+import { useQuery } from "@tanstack/react-query";
 
 export const VendorSummaryInfo = () => {
-	const { data: vendorSummary } = useGetVendorSummaryQuery(undefined);
+	const { data: vendorSummary } = useQuery({
+		queryKey: ["vedor-summary"],
+		queryFn: () => vendorStatService.getVendorSummary(),
+	});
 
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

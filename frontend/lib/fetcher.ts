@@ -3,12 +3,17 @@ import { BASE_API_URL } from "@/config";
 import { extractErrorMessage } from "@/utils/extractErrorMessages";
 import { toast } from "sonner";
 
+type Params = {
+	[key: string]: string;
+};
+
 // lib/fetcher.ts
 export type FetcherOptions = {
 	revalidate?: number | false; // false = no cache
 	headers?: HeadersInit;
 	method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	body?: any;
+	params?: Params;
 };
 
 const EXCLUDED_ENDPOINTS_FOR_401 = ["/auth/login/", "/auth/refresh/"];
@@ -61,7 +66,10 @@ export async function fetcher<T = any>(
 ): Promise<T> {
 	const { revalidate = 0, headers, method = "GET", body } = options;
 	const BASE_URL = BASE_API_URL;
-	const fullUrl = `${BASE_URL}${url}`;
+	const qParams = new URLSearchParams(options.params).toString();
+	const fullUrl = qParams
+		? `${BASE_URL}${url}?${qParams}`
+		: `${BASE_URL}${url}`;
 
 	try {
 		const res = await fetch(fullUrl, {

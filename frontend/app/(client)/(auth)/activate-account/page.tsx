@@ -9,8 +9,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { isApiError } from "@/lib/baseApi";
 import { authServices } from "@/services/authServices";
+import { extractErrorMessage } from "@/utils/extractErrorMessages";
 import { useQuery } from "@tanstack/react-query";
 import { CircleCheck, ShieldAlert } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -79,9 +79,7 @@ export default function ActivateAccount() {
 					<div className="text-center bg-destructive/10 p-4 rounded-md">
 						<ShieldAlert className="w-10 h-10 text-destructive mx-auto" />
 						<p className="text-lg mb-4 text-destructive mt-4">
-							{isApiError(error)
-								? (error.data as { message: string }).message
-								: "Something went wrong. Please try again by clicking the activation link from your email."}
+							{extractErrorMessage(error)}
 						</p>
 					</div>
 				) : (

@@ -25,25 +25,11 @@ import {
 	SelectItem,
 	SelectValue,
 } from "@/components/ui/select";
-import { useGetVendorRegisteredTravelersQuery } from "@/lib/features/vendor/vendorApi";
+import { vendorStatService } from "@/services/vendorStatService";
 import { SelectTrigger } from "@radix-ui/react-select";
+import { useQuery } from "@tanstack/react-query";
 import { Calendar } from "lucide-react";
 import { useState } from "react";
-
-// const chartData = [
-// 	{ key: "January", count: 186 },
-// 	{ key: "February", count: 305 },
-// 	{ key: "March", count: 237 },
-// 	{ key: "April", count: 73 },
-// 	{ key: "May", count: 209 },
-// 	{ key: "June", count: 214 },
-// 	{ key: "July", count: 214 },
-// 	{ key: "August", count: 214 },
-// 	{ key: "September", count: 214 },
-// 	{ key: "October", count: 214 },
-// 	{ key: "November", count: 214 },
-// 	{ key: "December", count: 214 },
-// ];
 
 const chartConfig = {
 	desktop: {
@@ -59,13 +45,15 @@ export const RegisteredUserLineChart = () => {
 		setType(value);
 	};
 
-	const { data, isLoading } = useGetVendorRegisteredTravelersQuery(type, {
-		skip: !type,
+	const { data, isFetching } = useQuery({
+		queryKey: ["VendorRegisteredTravelers"],
+		queryFn: () => vendorStatService.getVendorRegisteredTravelers(type),
+		enabled: !!type,
 	});
 
 	let content: React.ReactNode = <NoDataFound />;
 
-	if (isLoading) {
+	if (isFetching) {
 		content = <AppLoader />;
 	}
 	if (data?.length) {

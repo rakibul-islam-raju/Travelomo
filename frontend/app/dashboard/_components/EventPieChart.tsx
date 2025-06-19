@@ -16,8 +16,9 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { useGetVendorEventsPieChartDataQuery } from "@/lib/features/vendor/vendorApi";
 import { cn } from "@/lib/utils";
+import { vendorStatService } from "@/services/vendorStatService";
+import { useQuery } from "@tanstack/react-query";
 import { format, subDays } from "date-fns";
 import _ from "lodash";
 import { CalendarIcon } from "lucide-react";
@@ -54,19 +55,18 @@ export const EventPieChart = () => {
 		to: new Date(),
 	});
 
-	const {
-		data: eventData,
-		isLoading,
-		error,
-	} = useGetVendorEventsPieChartDataQuery(
-		{
-			start_date: format(date?.from!, "yyyy-MM-dd"),
-			end_date: format(date?.to!, "yyyy-MM-dd"),
+	const { data: eventData, isFetching } = useQuery({
+		queryKey: ["VendorEventsPieChart"],
+		queryFn: () => {
+			const start_date = format(date?.from!, "yyyy-MM-dd");
+			const end_date = format(date?.to!, "yyyy-MM-dd");
+			return vendorStatService.getVendorEventsPieChartData(
+				start_date,
+				end_date
+			);
 		},
-		{
-			skip: !date,
-		}
-	);
+		enabled: !!date,
+	});
 
 	const chartData = useMemo(() => {
 		return eventData
@@ -83,7 +83,7 @@ export const EventPieChart = () => {
 	}, [eventData]);
 
 	const renderContent = () => {
-		if (isLoading) return <AppLoader />;
+		if (isFetching) return <AppLoader />;
 		if (totalEvents === 0) return <NoDataFound />;
 		return (
 			<PieChart>
