@@ -1,6 +1,7 @@
 "use client";
 
 import { BaseForm } from "@/components/molecules/form/BaseForm";
+import { PasswordField } from "@/components/molecules/form/PasswordField";
 import { TextField } from "@/components/molecules/form/TextField";
 import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
@@ -74,13 +75,13 @@ export default function VendorRegistrationForm() {
 						placeholder="Enter Store Name"
 						required
 					/>
-					<TextField<VendorRegistrationFormValues>
+					<PasswordField<VendorRegistrationFormValues>
 						name="password"
 						label="Password"
 						placeholder="Enter Password"
 						required
 					/>
-					<TextField<VendorRegistrationFormValues>
+					<PasswordField<VendorRegistrationFormValues>
 						name="confirm_password"
 						label="Confirm Password"
 						placeholder="Enter Confirm Password"

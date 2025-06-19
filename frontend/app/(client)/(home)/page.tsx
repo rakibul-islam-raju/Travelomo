@@ -17,10 +17,7 @@ const fetchEvents = async () => {
 	const limit = 8;
 	const response = await serverFetcher<GenericListResponse<IEventListItem>>(
 		`/events?limit=${limit}`,
-		{
-			method: "GET",
-			revalidate: 0,
-		}
+		{ method: "GET" }
 	);
 	return response;
 };

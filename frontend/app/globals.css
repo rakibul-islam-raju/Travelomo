@@ -83,10 +83,6 @@
 	body {
 		@apply bg-background text-foreground font-poppins;
 	}
-
-	a {
-		@apply text-primary;
-	}
 }
 
 /* Modern Scrollbar Styles */

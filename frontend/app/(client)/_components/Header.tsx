@@ -3,21 +3,6 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import HeaderLoginButton from "./HeaderLoginButton";
 
-const headerTopLinks: { label: string; href: string }[] = [
-	{
-		label: "Become a vendor",
-		href: "/vendor-registration",
-	},
-	{
-		label: "Create an account",
-		href: "/registration",
-	},
-	{
-		label: "Help & Support",
-		href: "/help-support",
-	},
-];
-
 export default function Header() {
 	return (
 		<header
@@ -34,6 +19,7 @@ export default function Header() {
 					</Link>
 
 					<div className="flex items-center gap-x-2">
+						<Link href={"/vendor-registration"}>Become a vendor</Link>
 						<HeaderLoginButton />
 					</div>
 				</div>

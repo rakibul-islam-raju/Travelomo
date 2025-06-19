@@ -27,15 +27,16 @@ export default function RegistrationPage() {
 				<div className="mt-4 text-center">
 					<p className="text-muted-foreground">
 						Already have an account?{" "}
-						<Link className="" href="/login">
-							Login
+						<Link className="text-primary hover:underline" href="/login">
+							Login now
 						</Link>
 					</p>
-					<p className="text-muted-foreground mt-2">
-						<Link className="" href="/vendor-registration">
-							List your business
-						</Link>
-					</p>
+					<Link
+						className="text-primary hover:underline"
+						href="/vendor-registration"
+					>
+						Become a vendor
+					</Link>
 				</div>
 			</CardContent>
 		</Card>

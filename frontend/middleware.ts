@@ -24,18 +24,23 @@ export function middleware(request: NextRequest) {
 
 	// Check if user is logged in by looking for the is_logged_in cookie
 	const isLoggedIn = request.cookies.has(COOKIE_CONSTS.IS_LOGGED_IN);
-	const userType = request.cookies.get(COOKIE_CONSTS.ROLE)?.value;
+	const role = request.cookies.get(COOKIE_CONSTS.ROLE)?.value;
+	const isVendor = role === "vendor";
+	const isCustomer = role === "customer";
 
 	// If the user is trying to access an auth route (like login) while already logged in,
-	// redirect them to the dashboard
+	// redirect them to the homepage or dashboard based on the role
 	if (isLoggedIn && authRoutes.some((route) => pathname.startsWith(route))) {
-		return NextResponse.redirect(new URL("/", request.url));
+		return NextResponse.redirect(
+			new URL(isVendor ? "/dashboard" : "/", request.url)
+		);
 	}
 
 	console.log("is logged in ==>>", isLoggedIn);
+	console.log("isVendor ==>>", isVendor);
 
 	// If the user is not logged in and tries to access a protected route,
-	// redirect them to the login page
+	// redirect them to the login page with callback url
 	if (
 		!isLoggedIn &&
 		(protectedRoutes.some((route) => pathname.startsWith(route)) ||
@@ -47,27 +52,21 @@ export function middleware(request: NextRequest) {
 		);
 	}
 
-	// If logged in user is customer and tries to access vendor routes
+	// If logged in user is customer and tries to access dashboard routes
 	// redirect to the home page
 	if (
 		isLoggedIn &&
-		userType !== "vendor" &&
+		!isVendor &&
 		vendorRoutes.some((route) => pathname.startsWith(route))
 	) {
 		return NextResponse.redirect(new URL("/", request.url));
-	}
-
-	// If the user is logged in and user type is vendor, but onboarding is completed and tries to access the onboarding page
-	// redirect to the dashboard
-	if (isLoggedIn && userType === "vendor") {
-		return NextResponse.redirect(new URL("/dashboard", request.url));
 	}
 
 	// If the user is logged in and user type is vendor and onboarding is completed, but tries to access the customer pages
 	// redirect to the dashboard
 	if (
 		isLoggedIn &&
-		userType === "vendor" &&
+		role === "vendor" &&
 		!vendorRoutes.some((route) => pathname.startsWith(route))
 	) {
 		return NextResponse.redirect(new URL("/dashboard", request.url));

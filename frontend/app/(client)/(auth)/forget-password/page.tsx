@@ -29,8 +29,8 @@ export default function ForgetPasswordPage() {
 				<div className="mt-4 text-center">
 					<p className="text-muted-foreground">
 						Remember your password?{" "}
-						<Link className="" href="/login">
-							Login
+						<Link className="text-primary hover:underline" href="/login">
+							Login Now
 						</Link>
 					</p>
 				</div>

@@ -18,7 +18,7 @@ export default function VendorRegistrationPage() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>List your business</CardTitle>
+				<CardTitle>Become A Vendor</CardTitle>
 				<CardDescription>
 					Create an account to start your business
 				</CardDescription>
@@ -27,12 +27,9 @@ export default function VendorRegistrationPage() {
 				<VendorRegistrationForm />
 
 				<div className="mt-4 text-center">
-					<p className="text-muted-foreground">
-						Create customer account?{" "}
-						<Link className="" href="/registration">
-							Register
-						</Link>
-					</p>
+					<Link className="hover:underline text-primary" href="/registration">
+						Create customer account
+					</Link>
 				</div>
 			</CardContent>
 		</Card>
