@@ -47,5 +47,4 @@ class AdminEventFilter(EventFilter):
     class Meta(EventFilter.Meta):
         fields = EventFilter.Meta.fields + [
             "is_archived",
-            "is_deleted",
         ]

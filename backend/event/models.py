@@ -36,12 +36,10 @@ class Event(BaseModel):
         max_digits=10, decimal_places=2, null=True, blank=True
     )
     image = models.ImageField(upload_to=generate_image_path, blank=True, null=True)
-    features = models.JSONField(default=list, blank=True, null=True)
-    tags = models.CharField(max_length=100, blank=True, null=True)
+    tags = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=100, choices=STATUS_CHOICES, default="draft")
 
     is_featured = models.BooleanField(default=False)
-    is_deleted = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
 
     objects = models.Manager()

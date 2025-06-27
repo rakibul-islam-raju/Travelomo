@@ -20,7 +20,6 @@ class EventCreateSerializer(serializers.ModelSerializer):
             "actual_price",
             "discount_price",
             "image",
-            "features",
             "tags",
             "is_featured",
             "status",

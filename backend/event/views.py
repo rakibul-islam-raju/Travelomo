@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from django_filters.rest_framework import DjangoFilterBackend, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from user.permissions import IsVendor, IsSystemAdmin
 
@@ -18,27 +18,12 @@ from .serializers import (
 )
 
 
-class EventListCreateView(generics.ListCreateAPIView):
+class EventListCreateView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = EventFilter
-    queryset = Event.objects.filter(
-        is_deleted=False, is_archived=False, status="published"
-    )
-
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return EventCreateSerializer
-        return EventListSerializer
-
-    def get_permissions(self):
-        if self.request.method == "POST":
-            self.permission_classes = [IsEventOwner]
-        else:
-            self.permission_classes = [AllowAny]
-        return super().get_permissions()
-
-    def perform_create(self, serializer):
-        serializer.save(vendor=self.request.user.vendor)
+    queryset = Event.objects.filter(is_archived=False, status="published")
+    serializer_class = EventListSerializer
+    permission_classes = [AllowAny]
 
 
 class EventDetailView(generics.RetrieveAPIView):
@@ -50,16 +35,12 @@ class EventDetailView(generics.RetrieveAPIView):
         if self.request.user.role == "admin":
             return Event.objects.all()
 
-        return Event.objects.filter(
-            is_deleted=False, is_archived=False, status="published"
-        )
+        return Event.objects.filter(is_archived=False, status="published")
 
 
 #  View only for vendor owner
 class DuplicateEventView(generics.GenericAPIView):
-    queryset = Event.objects.filter(
-        is_deleted=False, is_archived=False, status="published"
-    )
+    queryset = Event.objects.filter(is_archived=False, status="published")
     serializer_class = EventDetailSerializer
     permission_classes = [IsEventOwner]
 
@@ -75,7 +56,6 @@ class DuplicateEventView(generics.GenericAPIView):
             "available_seats": event.available_seats,
             "actual_price": event.actual_price,
             "discount_price": event.discount_price,
-            "features": event.features,
             "tags": event.tags,
             "status": "draft",
         }
@@ -94,8 +74,7 @@ class DuplicateEventView(generics.GenericAPIView):
         )
 
 
-class VendorEventListView(generics.ListAPIView):
-    serializer_class = VendorEventListSerializer
+class VendorEventListView(generics.ListCreateAPIView):
     permission_classes = [IsVendor]
     filter_backends = [DjangoFilterBackend]
     filterset_class = VendorEventFilter
@@ -103,51 +82,25 @@ class VendorEventListView(generics.ListAPIView):
     def get_queryset(self):
         return Event.objects.filter(
             vendor=self.request.user.vendor,
-            is_deleted=False,
         )
 
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return EventCreateSerializer
+        return VendorEventListSerializer
 
-class VendorEventUpdateView(generics.RetrieveUpdateAPIView):
+    def perform_create(self, serializer):
+        serializer.save(vendor=self.request.user.vendor)
+
+
+class VendorEventUpdateView(generics.RetrieveDestroyAPIView):
     serializer_class = EventDetailSerializer
     permission_classes = [IsEventOwner]
 
     def get_queryset(self):
         return Event.objects.filter(
             vendor=self.request.user.vendor,
-            is_deleted=False,
         )
-
-
-class VendorEventDeleteView(generics.GenericAPIView):
-    permission_classes = [IsEventOwner]
-
-    def get_queryset(self):
-        return Event.objects.filter(
-            vendor=self.request.user.vendor,
-            is_deleted=False,
-        )
-
-    def delete(self, request, *args, **kwargs):
-        event = get_object_or_404(Event, id=kwargs["event_id"])
-        event.is_deleted = True
-        event.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class UndoDeleteEventView(generics.GenericAPIView):
-    permission_classes = [IsEventOwner]
-
-    def get_queryset(self):
-        return Event.objects.filter(
-            vendor=self.request.user.vendor,
-            is_deleted=True,
-        )
-
-    def post(self, request, *args, **kwargs):
-        event = get_object_or_404(Event, id=kwargs["event_id"])
-        event.is_deleted = False
-        event.save()
-        return Response(status=status.HTTP_200_OK)
 
 
 # view for admin
