@@ -30,11 +30,9 @@ class Event(BaseModel):
     end_date = models.DateField()
     location = models.CharField(max_length=100)
     total_seats = models.PositiveSmallIntegerField()
-    available_seats = models.PositiveSmallIntegerField()
-    actual_price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_price = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True
-    )
+    available_seats = models.PositiveSmallIntegerField(blank=True, null=True, default=0)
+    actual_price = models.PositiveIntegerField()
+    discount_price = models.PositiveIntegerField(blank=True, null=True, default=0)
     image = models.ImageField(upload_to=generate_image_path, blank=True, null=True)
     tags = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=100, choices=STATUS_CHOICES, default="draft")
@@ -54,7 +52,9 @@ class Event(BaseModel):
         if not self.available_seats:
             self.available_seats = self.total_seats
 
-        if self.available_seats > self.total_seats:
+        print("available seats ==>", self.available_seats)
+        print("total seats ==>", self.total_seats)
+        if self.available_seats and self.available_seats > self.total_seats:
             raise ValueError("Available seats cannot be greater than total seats")
 
         super().save(*args, **kwargs)
@@ -63,7 +63,7 @@ class Event(BaseModel):
         ordering = ["-created_at"]
 
     @property
-    def price(self) -> Decimal:
+    def price(self) -> int:
         if self.discount_price:
             return self.discount_price
         return self.actual_price

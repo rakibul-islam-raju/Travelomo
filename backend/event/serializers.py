@@ -16,7 +16,7 @@ class EventCreateSerializer(serializers.ModelSerializer):
             "start_date",
             "end_date",
             "location",
-            "available_seats",
+            "total_seats",
             "actual_price",
             "discount_price",
             "image",
