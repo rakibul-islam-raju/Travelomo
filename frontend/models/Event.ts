@@ -44,7 +44,6 @@ export interface IEvent {
 	actual_price: string;
 	discount_price?: string | null;
 	image?: string | null;
-	features: string[];
 	tags?: string | null;
 	is_featured: boolean;
 	is_published: boolean;

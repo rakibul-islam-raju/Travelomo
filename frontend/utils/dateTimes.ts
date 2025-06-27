@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import dayjs from "dayjs";
 
 export const getDateRange = (
@@ -41,3 +42,19 @@ export const getDateRange = (
 		end_date,
 	};
 };
+
+export function addNDaysToDate(date: Date, days: number): Date {
+	const newDate = new Date();
+	newDate.setDate(date.getDate() + days);
+	return newDate;
+}
+
+export function formatDateDMY(date: Date | string): string {
+	const newDate = new Date(date);
+	return format(newDate, "dd-MM-yyyy");
+}
+
+export function formatDateYMD(date: Date | string): string {
+	const newDate = new Date(date);
+	return format(newDate, "yyyy-MM-dd");
+}
