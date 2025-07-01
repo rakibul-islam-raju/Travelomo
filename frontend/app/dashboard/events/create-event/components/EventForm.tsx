@@ -5,8 +5,10 @@ import { BaseForm } from "@/components/molecules/form/BaseForm";
 import { DatePickerField } from "@/components/molecules/form/DatePickerField";
 import { SelectField } from "@/components/molecules/form/SelectField";
 import { TextField } from "@/components/molecules/form/TextField";
-import { RichTextEditor } from "@/components/molecules/RichTextEditor";
+import { RichTextEditor } from "@/components/molecules/RichTextEditor/RichTextEditor";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import slugify from "slugify";
 import useEvent from "../../components/useEvent";
 import { EventFormValues } from "./schema";
 
@@ -19,12 +21,25 @@ export const EventForm = () => {
 		creatingEvent,
 	} = useEvent({});
 
+	const title = form.watch("title");
+
+	useEffect(() => {
+		if (title) {
+			form.setValue("slug", slugify(title));
+		}
+	}, [title]);
+
 	return (
 		<div className="max-w-2xl">
 			<BaseForm form={form} onSubmit={handleSubmit}>
 				<div className="space-y-4">
 					<TextField<EventFormValues> name="title" label="title" required />
-					<TextField<EventFormValues> name="slug" label="Slug" required />
+					<TextField<EventFormValues>
+						name="slug"
+						label="Slug"
+						required
+						helpText="A slug is the URL-friendly version of the title. It should contain only lowercase letters, numbers, and hyphens. Example: my-awesome-article"
+					/>
 					<RichTextEditor
 						label="Description"
 						value={description}

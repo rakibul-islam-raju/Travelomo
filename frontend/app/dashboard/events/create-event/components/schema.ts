@@ -19,7 +19,9 @@ export const eventSchema = z
 		location: z.string().min(1).max(100),
 		total_seats: z.coerce.number().int().nonnegative().max(32767),
 		actual_price: z.coerce.number().positive(),
-		discount_price: z.coerce.number().positive(),
+		discount_price: z.coerce
+			.number()
+			.min(0, "Discount amount cannot be less then 0."),
 		tags: z.string().max(255).optional(),
 		status: z.enum(STATUS_CHOICES),
 	})

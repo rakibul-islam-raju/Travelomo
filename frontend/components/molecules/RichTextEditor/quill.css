@@ -1,0 +1,12 @@
+.ql-toolbar {
+	border-radius: 5px !important;
+}
+
+.ql-container {
+	margin-top: 0 !important;
+	border-top-left-radius: 0px !important;
+	border-top-right-radius: 0px !important;
+	min-height: 150px;
+	max-height: 500px;
+	overflow-y: scroll;
+}

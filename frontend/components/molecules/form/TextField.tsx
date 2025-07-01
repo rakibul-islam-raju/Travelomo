@@ -8,6 +8,11 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import { ReactNode } from "react";
@@ -26,6 +31,7 @@ type TextFieldProps<T extends FieldValues> = {
 	inputClass?: string;
 	disabled?: boolean;
 	iconClass?: string;
+	helpText?: string;
 };
 
 /**
@@ -63,6 +69,7 @@ export const TextField = <T extends FieldValues>({
 	className,
 	inputClass,
 	iconClass,
+	helpText,
 	disabled = false,
 }: TextFieldProps<T>) => {
 	const { control } = useFormContext<T>();
@@ -73,8 +80,32 @@ export const TextField = <T extends FieldValues>({
 			render={({ field }) => (
 				<FormItem className={cn(className)}>
 					{label && (
-						<FormLabel htmlFor={name}>
+						<FormLabel htmlFor={name} className="flex gap-x-2 items-center">
 							<span>{label}</span>
+							{helpText && (
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<span className="cursor-help text-sm text-gray-500 hover:text-gray-700">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											>
+												<circle cx="12" cy="12" r="10" />
+												<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+												<line x1="12" y1="17" x2="12.01" y2="17" />
+											</svg>
+										</span>
+									</TooltipTrigger>
+									<TooltipContent side="right">{helpText}</TooltipContent>
+								</Tooltip>
+							)}
 							{required && <span className="ml-1 text-red-500">*</span>}
 						</FormLabel>
 					)}
