@@ -58,3 +58,8 @@ export function formatDateYMD(date: Date | string): string {
 	const newDate = new Date(date);
 	return format(newDate, "yyyy-MM-dd");
 }
+
+export function formatDateDMonthY(date: Date | string): string {
+	const newDate = new Date(date);
+	return format(newDate, "dd MMM, yyyy");
+}

@@ -22,7 +22,12 @@ export function SearchField({
 	onChange,
 }: SearchFieldProps) {
 	return (
-		<div className={cn("flex flex-col gap-2 w-[400px] max-w-full", className)}>
+		<div
+			className={cn(
+				"flex flex-col gap-2 w-full md:w-[400px] max-w-full",
+				className
+			)}
+		>
 			{label && <Label>{label}</Label>}
 			<div className="relative">
 				{icon && (

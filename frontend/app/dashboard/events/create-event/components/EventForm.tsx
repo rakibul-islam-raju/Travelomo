@@ -7,12 +7,15 @@ import { SelectField } from "@/components/molecules/form/SelectField";
 import { TextField } from "@/components/molecules/form/TextField";
 import { RichTextEditor } from "@/components/molecules/RichTextEditor/RichTextEditor";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import slugify from "slugify";
 import useEvent from "../../components/useEvent";
 import { EventFormValues } from "./schema";
 
 export const EventForm = () => {
+	const router = useRouter();
+
 	const {
 		form,
 		description,
@@ -97,7 +100,13 @@ export const EventForm = () => {
 					</div>
 
 					<div className="flex justify-end gap-2">
-						<Button variant={"outline"}>Cancel</Button>
+						<Button
+							variant={"outline"}
+							type="button"
+							onClick={() => router.push("/dashboard/events")}
+						>
+							Cancel
+						</Button>
 						<LoaderButton text="Save" type="submit" isLoading={creatingEvent} />
 					</div>
 				</div>

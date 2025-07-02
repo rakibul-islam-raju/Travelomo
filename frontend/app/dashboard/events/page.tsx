@@ -1,20 +1,18 @@
-"use client";
-
-import { AddButton, RefreshButton } from "@/components/Buttons";
-import { SearchField } from "@/components/molecules/form/SearchField";
+import { AddButton } from "@/components/Buttons";
+import { Metadata } from "next";
 import { DashboardPageContainer } from "../_components/DashboardPageContainer";
+import EventList from "./components/EventList";
+
+export const metadata: Metadata = {
+	title: "Event List",
+};
 
 const Events = () => {
-	const handleRefetch = () => {
-		console.log("refrech");
-	};
-
 	return (
 		<DashboardPageContainer>
 			<DashboardPageContainer.Header>
 				<DashboardPageContainer.Title>Events</DashboardPageContainer.Title>
 				<div className="flex items-center gap-2">
-					<RefreshButton refetch={handleRefetch} isRefetching={false} />
 					<AddButton
 						href="/dashboard/events/create-event"
 						text="Create Event"
@@ -22,7 +20,7 @@ const Events = () => {
 				</div>
 			</DashboardPageContainer.Header>
 			<DashboardPageContainer.Content>
-				<SearchField placeholder="Search events" />
+				<EventList />
 			</DashboardPageContainer.Content>
 		</DashboardPageContainer>
 	);

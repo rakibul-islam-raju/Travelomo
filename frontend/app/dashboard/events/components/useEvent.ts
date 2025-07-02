@@ -37,8 +37,6 @@ export default function useEvent({
 		mode: "onChange",
 	});
 
-	console.log("errorsss--->", form.formState.errors);
-
 	// Fetch events
 	const {
 		data: events,
