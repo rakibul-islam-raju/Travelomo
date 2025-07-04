@@ -28,3 +28,11 @@ export interface ICreateEvent {
 	is_featured?: boolean;
 	status: string;
 }
+
+export interface IEventFilter {
+	start_date?: string;
+	end_date?: string;
+	available_seats?: string;
+	start_price?: string;
+	end_price?: string;
+}
