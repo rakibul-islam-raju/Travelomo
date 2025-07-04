@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.utils import timezone
 
 from django_filters import rest_framework as filters
 
@@ -35,7 +34,7 @@ class EventFilter(filters.FilterSet):
             | Q(description__icontains=value)
             | Q(location__icontains=value)
             | Q(tags__icontains=value)
-        )
+        ).distinct()
 
 
 class VendorEventFilter(EventFilter):

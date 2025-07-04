@@ -80,6 +80,8 @@ class VendorEventListView(generics.ListCreateAPIView):
     filterset_class = VendorEventFilter
 
     def get_queryset(self):
+        print("FILTER PARAMS :=====>", self.request.query_params)
+
         return Event.objects.filter(
             vendor=self.request.user.vendor,
         )

@@ -19,6 +19,7 @@ class Event(BaseModel):
         ("draft", "Draft"),
         ("published", "Published"),
         ("paused", "Paused"),
+        ("travelling", "Travelling"),
         ("cancelled", "Cancelled"),
         ("completed", "Completed"),
     ]
