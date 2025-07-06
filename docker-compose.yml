@@ -1,0 +1,118 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7.4.0-alpine
+    container_name: travelomo_redis
+    expose:
+      - "6379"
+    networks:
+      - travelomo_network
+
+  db:
+    image: postgres:16
+    container_name: event_db
+    restart: always
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_PASSWORD: admin
+      # - POSTGRES_USER=postgres
+      # - POSTGRES_DB=travelomo
+    volumes:
+      - travelomo-db-data:/var/lib/postgresql/data
+    networks:
+      - travelomo_network
+
+  api:
+    container_name: travelomo_api
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
+    command: bash -c "
+      python manage.py migrate
+      && python manage.py collectstatic --noinput
+      && python manage.py create_admin
+      && python manage.py runserver 0.0.0.0:8000
+      "
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8282:8000"
+    depends_on:
+      - db
+      # - redis
+    networks:
+      - travelomo_network
+
+  celery:
+    container_name: travelomo_celery
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
+    command: celery -A core worker -l INFO
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - db
+      - api
+    networks:
+      - travelomo_network
+
+  celery-beat:
+    container_name: travelomo_celery_beat
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
+    command: celery -A core beat -l INFO
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - db
+      - api
+      - celery
+    networks:
+      - travelomo_network
+  web:
+    container_name: travelomo_web
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8181:3000"
+    env_file:
+      - ./frontend/.env.local
+    restart: unless-stopped
+    networks:
+      - travelomo_network
+
+  web_admin:
+    container_name: travelomo_web_admin
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    env_file:
+      - ./frontend/.env.local
+    ports:
+      - "8383:5173"
+    volumes:
+      - ./admin:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: yarn dev --host
+
+networks:
+  travelomo_network:
+    driver: bridge
+
+volumes:
+  travelomo-db-data:
