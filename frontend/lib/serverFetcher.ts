@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { BASE_API_URL } from "@/config";
+import { cookies } from "next/headers";
 
 export type FetcherOptions = {
 	revalidate?: number | false;
@@ -18,10 +19,14 @@ export const serverFetcher = async <T = any>(
 
 	const { method = "GET", headers, body } = options;
 
+	const cookieStore = await cookies();
+	const token = cookieStore.get("access")?.value;
+
 	const res = await fetch(fullUrl, {
 		method,
 		headers: {
 			"Content-Type": "application/json",
+			Authorization: `Bearer ${token}`,
 			...(headers || {}),
 		},
 		// only send body if method is not GET

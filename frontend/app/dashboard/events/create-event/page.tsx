@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 export default function CreateEvent() {
 	return (
 		<>
+			<h2 className="text-2xl font-medium mb-6">Create New Event</h2>
 			<EventForm />
 		</>
 	);
