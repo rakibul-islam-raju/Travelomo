@@ -4,8 +4,6 @@ services:
   redis:
     image: redis:7.4.0-alpine
     container_name: travelomo_redis
-    expose:
-      - "6379"
     networks:
       - travelomo_network
 
@@ -13,8 +11,8 @@ services:
     image: postgres:16
     container_name: event_db
     restart: always
-    expose:
-      - "5432"
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_PASSWORD: admin
       # - POSTGRES_USER=postgres
@@ -81,6 +79,7 @@ services:
       - celery
     networks:
       - travelomo_network
+
   web:
     container_name: travelomo_web
     build:
@@ -101,11 +100,11 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./frontend/.env.local
+    restart: unless-stopped
     ports:
       - "8383:5173"
     volumes:
       - ./admin:/app
-      - /app/node_modules
     environment:
       - NODE_ENV=development
     command: yarn dev --host

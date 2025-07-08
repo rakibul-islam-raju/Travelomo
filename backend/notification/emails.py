@@ -1,15 +1,9 @@
-import random
-import string
-import redis
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 from celery import shared_task
-
-# Connect to Redis
-redis_client = redis.StrictRedis(host="localhost", port=6379, db=0)
 
 
 # send async email
