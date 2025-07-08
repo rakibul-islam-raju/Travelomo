@@ -27,12 +27,12 @@ jobs:
             git pull origin main
 
             echo "🧹 Stopping and cleaning old containers"
-            docker compose down
+            docker-compose down
 
             echo "🧼 Pruning unused Docker data"
             docker system prune -af
 
             echo "🚀 Rebuilding and starting containers"
-            docker compose up --build -d
+            docker-compose up --build -d
 
             echo "✅ Deployment complete!"
