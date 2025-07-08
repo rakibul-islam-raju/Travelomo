@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            set -e
+            set -euxo pipefail  # Debug mode: print commands, fail early
 
             echo "👉 Pulling latest code"
             cd /var/www/Travelomo
