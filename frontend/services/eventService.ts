@@ -1,4 +1,3 @@
-import { EventFormValues } from "@/app/dashboard/events/create-event/components/schema";
 import { fetcher } from "@/lib/fetcher";
 import { GenericListResponse } from "@/types/common";
 import * as EventTypes from "@/types/event.types";
@@ -21,9 +20,9 @@ export const eventServices = {
 		);
 	},
 
-	updateEvent: async (data: Partial<EventFormValues>, id: number) => {
+	updateEvent: async (data: Partial<EventTypes.ICreateEvent>, id: string) => {
 		return await fetcher<EventTypes.IVendorEventListItem>(
-			`/events/vendor-event/${id}`,
+			`/events/vendor-event/${id}/`,
 			{ method: "PATCH", body: data }
 		);
 	},

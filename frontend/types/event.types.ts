@@ -11,6 +11,8 @@ export interface IVendorEventListItem {
 	image: string;
 	is_featured: boolean;
 	status: string;
+	seat_booked: number;
+	total_seats: number;
 }
 
 export interface ICreateEvent {
@@ -57,4 +59,5 @@ export interface IVendorEventDetails {
 	is_featured: boolean;
 	is_archived: boolean;
 	vendor: string;
+	seat_booked: number;
 }

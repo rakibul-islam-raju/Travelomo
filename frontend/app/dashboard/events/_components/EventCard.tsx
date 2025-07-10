@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { IVendorEventListItem } from "@/types/event.types";
 import { formatDateDMonthY } from "@/utils/dateTimes";
+import { isToday } from "date-fns";
 import { Calendar1, MapPin, MoveRight, Sofa } from "lucide-react";
 
 type Props = {
@@ -27,7 +28,8 @@ export const EventCard: React.FC<Props> = ({ event }) => {
 
 					<div className="">
 						<div className="flex gap-2">
-							<Sofa className="size-5" /> {event.available_seats} Seats
+							<Sofa className="size-5" />
+							{event.seat_booked}/{event.total_seats} Booked
 						</div>
 					</div>
 
@@ -38,6 +40,7 @@ export const EventCard: React.FC<Props> = ({ event }) => {
 					</div>
 
 					<div className="flex justify-end flex-wrap gap-2">
+						{isToday(event.end_date) && <Badge>Ending Today</Badge>}
 						{event.is_featured && <Badge>Featured</Badge>}
 						<EventStatus status={event.status} />
 					</div>

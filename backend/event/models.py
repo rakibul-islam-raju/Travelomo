@@ -53,8 +53,6 @@ class Event(BaseModel):
         if not self.available_seats:
             self.available_seats = self.total_seats
 
-        print("available seats ==>", self.available_seats)
-        print("total seats ==>", self.total_seats)
         if self.available_seats and self.available_seats > self.total_seats:
             raise ValueError("Available seats cannot be greater than total seats")
 
@@ -74,7 +72,7 @@ class Event(BaseModel):
         return self.end_date < timezone.now().date()
 
     @property
-    def seat_registered(self) -> int:
+    def seat_booked(self) -> int:
         return self.total_seats - self.available_seats
 
 

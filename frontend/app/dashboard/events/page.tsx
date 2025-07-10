@@ -1,7 +1,7 @@
 import { AddButton } from "@/components/Buttons";
 import { Metadata } from "next";
 import { DashboardPageContainer } from "../_components/DashboardPageContainer";
-import EventList from "./components/EventList";
+import EventList from "./_components/EventList";
 
 export const metadata: Metadata = {
 	title: "Event List",

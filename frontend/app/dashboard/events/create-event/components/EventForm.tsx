@@ -7,13 +7,18 @@ import { SelectField } from "@/components/molecules/form/SelectField";
 import { TextField } from "@/components/molecules/form/TextField";
 import { RichTextEditor } from "@/components/molecules/RichTextEditor/RichTextEditor";
 import { Button } from "@/components/ui/button";
+import { IVendorEventDetails } from "@/types/event.types";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import slugify from "slugify";
-import useEvent from "../../components/useEvent";
+import useEvent from "../../_components/useEvent";
 import { EventFormValues } from "./schema";
 
-export const EventForm = () => {
+type Props = {
+	data?: IVendorEventDetails;
+};
+
+export const EventForm: React.FC<Props> = ({ data }) => {
 	const router = useRouter();
 
 	const {
@@ -22,7 +27,7 @@ export const EventForm = () => {
 		handleUpdateDescription,
 		handleSubmit,
 		creatingEvent,
-	} = useEvent({});
+	} = useEvent({ eventId: data ? data.id : undefined });
 
 	const title = form.watch("title");
 
@@ -32,8 +37,30 @@ export const EventForm = () => {
 		}
 	}, [title]);
 
+	useEffect(() => {
+		if (data && data.status) {
+			// Delay reset until fields have mounted
+			setTimeout(() => {
+				form.reset({
+					title: data.title,
+					slug: data.slug,
+					description: data.description,
+					location: data.location,
+					start_date: new Date(data.start_date),
+					end_date: new Date(data.end_date),
+					actual_price: data.actual_price,
+					discount_price: data.discount_price,
+					total_seats: data.total_seats,
+					status: data.status.toLowerCase(),
+				});
+
+				handleUpdateDescription(data.description);
+			}, 0); // minimal delay to let all fields register
+		}
+	}, [data]);
+
 	return (
-		<div className="max-w-2xl">
+		<div className="max-w-3xl">
 			<BaseForm form={form} onSubmit={handleSubmit}>
 				<div className="space-y-4">
 					<TextField<EventFormValues> name="title" label="title" required />
@@ -103,7 +130,11 @@ export const EventForm = () => {
 						<Button
 							variant={"outline"}
 							type="button"
-							onClick={() => router.push("/dashboard/events")}
+							onClick={() =>
+								router.push(
+									data ? `/dashboard/events/${data.id}` : "/dashboard/events"
+								)
+							}
 						>
 							Cancel
 						</Button>

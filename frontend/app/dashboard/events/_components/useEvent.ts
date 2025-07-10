@@ -65,6 +65,25 @@ export default function useEvent({
 		},
 	});
 
+	// Update event
+	const { mutate: updateEvent, isPending: updatingEvent } = useMutation({
+		mutationFn: async (data: Partial<ICreateEvent>) => {
+			if (!eventId) {
+				return;
+			}
+			return await eventServices.updateEvent(data, eventId);
+		},
+
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ["Events"],
+			});
+			toast.success("Event updated successfully");
+			form.reset();
+			router.push(`/dashboard/events`);
+		},
+	});
+
 	const handleUpdateDescription = (content: string) => {
 		form.setValue("description", content);
 		setDescription(content);
@@ -76,8 +95,14 @@ export default function useEvent({
 			start_date: formatDateYMD(data.start_date),
 			end_date: formatDateYMD(data.start_date),
 		};
-		createEvent(postDate);
+		if (!eventId) {
+			createEvent(postDate);
+		} else {
+			updateEvent(postDate);
+		}
 	};
+
+	const handleUpdate = () => {};
 
 	return {
 		form,
@@ -90,5 +115,7 @@ export default function useEvent({
 		refetchEvents,
 		createEvent,
 		creatingEvent,
+		updateEvent,
+		updatingEvent,
 	};
 }

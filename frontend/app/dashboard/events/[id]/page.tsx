@@ -1,5 +1,6 @@
 import PlaceholderImage from "@/assets/images/event-details-placeholder.jpg";
 import { BackButton } from "@/components/Buttons";
+import { EventPriceWithDiscount } from "@/components/molecules/EventPriceWithDiscount";
 import { EventStatus } from "@/components/molecules/EventStatus";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,10 +24,7 @@ import {
 } from "lucide-react";
 import { Metadata } from "next";
 import Image from "next/image";
-
-export const metadata: Metadata = {
-	title: "Event Details",
-};
+import Link from "next/link";
 
 const fetchEvent = async (id: string) => {
 	const response = await serverFetcher<IVendorEventDetails>(
@@ -34,6 +32,20 @@ const fetchEvent = async (id: string) => {
 	);
 	return response;
 };
+
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+	const { id } = await params;
+	const event = await fetchEvent(id);
+
+	return {
+		title: `${event.title}`,
+		description: event.description || "Edit your event details here.",
+	};
+}
 
 export default async function EventDetails({
 	params,
@@ -87,8 +99,14 @@ export default async function EventDetails({
 						<DropdownMenuItem>
 							<Copy className="mr-2 h-4 w-4" /> Duplicate
 						</DropdownMenuItem>
-						<DropdownMenuItem>
-							<Edit2 className="mr-2 h-4 w-4" /> Edit
+						<DropdownMenuItem asChild>
+							<Link
+								prefetch
+								href={`/dashboard/events/edit/${event.id}`}
+								className="flex items-center gap-2"
+							>
+								<Edit2 className="mr-2 h-4 w-4" /> Edit
+							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem>
 							<Trash2 className="mr-2 h-4 w-4" /> Delete
@@ -129,24 +147,16 @@ export default async function EventDetails({
 						<div className="flex items-center gap-2">
 							<Ticket size={16} />
 							<span>
-								Seats: {event.total_seats - event.available_seats}/
-								{event.total_seats} booked
+								Seats: {event.seat_booked}/{event.total_seats} booked
 							</span>
 						</div>
 						<div className="flex items-center gap-2">
 							<DollarSign size={16} />
-							{hasDiscount ? (
-								<span>
-									<span className="line-through mr-2 text-destructive">
-										৳{event.actual_price}
-									</span>
-									<span className="text-green-600 font-medium">
-										৳{event.discount_price}
-									</span>
-								</span>
-							) : (
-								<span>Price: ৳{event.actual_price}</span>
-							)}
+							Price:{" "}
+							<EventPriceWithDiscount
+								actualPrice={event.actual_price}
+								discountPrice={event.discount_price}
+							/>
 						</div>
 					</div>
 				</div>

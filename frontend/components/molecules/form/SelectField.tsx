@@ -4,15 +4,15 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/form";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from '@/components/ui/select';
-import { FieldValues, Path, useFormContext } from 'react-hook-form';
+} from "@/components/ui/select";
+import { FieldValues, Path, useFormContext } from "react-hook-form";
 
 type Props<T extends FieldValues> = {
 	name: Path<T>;
@@ -62,27 +62,25 @@ export const SelectField = <T extends FieldValues>({
 			render={({ field }) => (
 				<FormItem className={className}>
 					{label && (
-						<FormLabel>
+						<FormLabel htmlFor={name} className="flex gap-x-2 items-center">
 							<span>{label}</span>
 							{required && <span className="ml-1 text-red-500">*</span>}
 						</FormLabel>
 					)}
-					<Select onValueChange={field.onChange} value={field.value}>
-						<FormControl>
+					<FormControl>
+						<Select onValueChange={field.onChange} value={field.value}>
 							<SelectTrigger>
-								<SelectValue placeholder={placeholder ?? 'Select an item'} />
+								<SelectValue placeholder={placeholder ?? "Select an item"} />
 							</SelectTrigger>
-						</FormControl>
-
-						<SelectContent>
-							{options.map((option) => (
-								<SelectItem key={option.value} value={option.value}>
-									{option.text}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-
+							<SelectContent>
+								{options.map((option) => (
+									<SelectItem key={option.value} value={option.value}>
+										{option.text}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</FormControl>
 					<FormMessage />
 				</FormItem>
 			)}
@@ -90,4 +88,4 @@ export const SelectField = <T extends FieldValues>({
 	);
 };
 
-SelectField.displayName = 'SelectField';
+SelectField.displayName = "SelectField";

@@ -76,7 +76,28 @@ class EventListSerializer(serializers.ModelSerializer):
 class EventDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = "__all__"
+        fields = [
+            "id",
+            "vendor",
+            "title",
+            "slug",
+            "description",
+            "start_date",
+            "end_date",
+            "location",
+            "total_seats",
+            "available_seats",
+            "actual_price",
+            "discount_price",
+            "image",
+            "tags",
+            "status",
+            "is_featured",
+            "is_archived",
+            "seat_booked",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "vendor", "created_at", "updated_at"]
 
 
@@ -91,9 +112,11 @@ class VendorEventListSerializer(serializers.ModelSerializer):
             "end_date",
             "location",
             "available_seats",
+            "total_seats",
             "actual_price",
             "discount_price",
             "image",
             "is_featured",
             "status",
+            "seat_booked",
         ]

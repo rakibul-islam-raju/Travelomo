@@ -1,14 +1,6 @@
 import { addNDaysToDate } from "@/utils/dateTimes";
 import { z } from "zod";
 
-export const STATUS_CHOICES = [
-	"draft",
-	"published",
-	"paused",
-	"cancelled",
-	"completed",
-] as const;
-
 export const eventSchema = z
 	.object({
 		title: z.string().trim().min(1, "Title is required").max(100),
@@ -23,7 +15,7 @@ export const eventSchema = z
 			.number()
 			.min(0, "Discount amount cannot be less then 0."),
 		tags: z.string().max(255).optional(),
-		status: z.enum(STATUS_CHOICES),
+		status: z.string(),
 	})
 	.refine((data) => data.discount_price <= data.actual_price, {
 		message: "Discount price cannot exceed the actual price.",
