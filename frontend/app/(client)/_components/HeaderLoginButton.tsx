@@ -11,7 +11,7 @@ import {
 import { getFirstTwoCharOfFullName } from "@/lib/string";
 import { authServices } from "@/services/authServices";
 import { useAuthStore } from "@/stores/authStore";
-import { LogIn } from "lucide-react";
+import { LogIn, LogOut, User } from "lucide-react";
 import Link from "next/link";
 
 export default function HeaderLoginButton() {
@@ -40,22 +40,23 @@ export default function HeaderLoginButton() {
 							</AvatarFallback>
 						</Avatar>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent>
+					<DropdownMenuContent side="bottom" align="end">
 						<DropdownMenuItem asChild>
-							<Link className="cursor-pointer text-inherit" href="/profile">
-								Profile
-							</Link>
-						</DropdownMenuItem>
-						<DropdownMenuItem>
-							<Link className="cursor-pointer text-inherit" href="/dashboard">
-								Dashboard
+							<Link
+								className="cursor-pointer text-inherit flex items-center gap-2"
+								href="/profile"
+								prefetch
+							>
+								<User />
+								<span>Profile</span>
 							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={handleLogout}
-							className="cursor-pointer text-red-600 hover:!text-red-600 hover:!bg-red-100"
+							className="cursor-pointer text-red-600 hover:!text-red-600 hover:!bg-red-100 flex gap-2 items-center"
 						>
-							Logout
+							<LogOut />
+							<span>Logout</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

@@ -101,9 +101,9 @@ export default async function Home() {
 			</Section>
 
 			<CTA
-				title="Discover Your Dream Destination"
-				description="Join us on an unforgettable journey and make your travel dreams come true"
-				buttonText="Explore More"
+				title="Let's travel your next destination"
+				description="Book and make your trips effortlessly. Join thousands who trust Travelomo for smarter journeys."
+				buttonText="Get Started"
 			/>
 		</>
 	);

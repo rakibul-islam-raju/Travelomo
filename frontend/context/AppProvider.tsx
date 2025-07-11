@@ -10,7 +10,7 @@ export default function AppProvider({
 	return (
 		<QueryProvider>
 			<AuthInitializer>
-				<Toaster richColors closeButton theme="light" />
+				<Toaster richColors closeButton theme="light" position="top-center" />
 				{children}
 			</AuthInitializer>
 		</QueryProvider>

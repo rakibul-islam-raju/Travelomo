@@ -1,87 +1,123 @@
+import { AppLogo } from "@/components/AppLogo";
 import { siteConfig } from "@/config/siteConfig";
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
 
 export default function Footer() {
 	return (
-		<footer className="bg-primary/10 pt-8 mt-12">
-			<div className="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-				<div className="">
-					<Link href="/">
-						<h2 className="text-primary text-2xl md:text-4xl font-bold">
-							{siteConfig.name}
-						</h2>
-					</Link>
-
+		<footer className="bg-primary/5 pt-12 mt-16 border-t border-primary/20">
+			<div className="container grid grid-cols-1 md:grid-cols-3 gap-8">
+				{/* Brand & Social */}
+				<div>
+					<AppLogo className="text-primary" />
 					<p className="text-sm text-muted-foreground">{siteConfig.subtitle}</p>
 
-					<div className="flex flex-col gap-2 mt-4">
-						<h3 className="text-primary text-lg font-bold">Follow Us</h3>
-						<div className="flex gap-6">
-							<Link href={siteConfig.links.facebook}>
-								<Facebook className="text-primary" />
+					<div className="mt-6">
+						<h3 className="text-lg font-semibold text-primary mb-2">
+							Follow Us
+						</h3>
+						<div className="flex gap-4">
+							<Link
+								href={siteConfig.links.facebook}
+								aria-label="Facebook"
+								className="hover:text-primary"
+							>
+								<Facebook />
 							</Link>
-							<Link href={siteConfig.links.instagram}>
-								<Instagram className="text-primary" />
+							<Link
+								href={siteConfig.links.instagram}
+								aria-label="Instagram"
+								className="hover:text-primary"
+							>
+								<Instagram />
 							</Link>
-							<Link href={siteConfig.links.linkedin}>
-								<Linkedin className="text-primary" />
+							<Link
+								href={siteConfig.links.linkedin}
+								aria-label="LinkedIn"
+								className="hover:text-primary"
+							>
+								<Linkedin />
 							</Link>
-							<Link href={siteConfig.links.linkedin}>
-								<Twitter className="text-primary" />
+							<Link
+								href={siteConfig.links.twitter}
+								aria-label="Twitter"
+								className="hover:text-primary"
+							>
+								<Twitter />
 							</Link>
 						</div>
 					</div>
 				</div>
-				<div className="flex flex-col gap-4">
-					<h3 className="text-primary text-lg font-bold">Quick Links</h3>
-					<div className="flex gap-6">
-						<ul className="list-none p-0 m-0 inline-flex flex-col gap-2">
-							<li className="text-sm text-muted-foreground hover:underline">
+
+				{/* Quick Links */}
+				<div className="grid grid-cols-2 gap-4">
+					<div>
+						<h3 className="text-lg font-semibold text-primary mb-2">
+							Quick Links
+						</h3>
+						<ul className="space-y-2 text-sm text-muted-foreground">
+							<li>
 								<Link href="/" className="hover:underline">
-									Privacy & Policy
+									Privacy Policy
 								</Link>
 							</li>
-							<li className="text-sm text-muted-foreground hover:underline">
+							<li>
 								<Link href="/" className="hover:underline">
 									Terms & Conditions
 								</Link>
 							</li>
-							<li className="text-sm text-muted-foreground hover:underline">
+							<li>
 								<Link href="/" className="hover:underline">
 									Contact Us
 								</Link>
 							</li>
 						</ul>
-						<ul className="list-none p-0 m-0 inline-flex flex-col gap-2">
-							<li className="text-sm text-muted-foreground">
-								<Link href="/" className="hover:underline">
-									Create An Account
+					</div>
+					<div>
+						<h3 className="text-lg font-semibold text-primary mb-2 invisible">
+							Extra
+						</h3>
+						<ul className="space-y-2 text-sm text-muted-foreground">
+							<li>
+								<Link href="/registration" prefetch className="hover:underline">
+									Create Account
 								</Link>
 							</li>
-							<li className="text-sm text-muted-foreground hover:underline">
-								<Link href="/" className="hover:underline">
-									Create A Vendor Account
+							<li>
+								<Link
+									href="/vendor-registration"
+									prefetch
+									className="hover:underline"
+								>
+									Vendor Signup
 								</Link>
 							</li>
 						</ul>
 					</div>
 				</div>
-				<div className="flex flex-col gap-2">
-					<div className="flex flex-col gap-2">
-						<h3 className="text-primary text-lg font-bold">Contact Us</h3>
-						<p className="text-sm text-muted-foreground">
-							Email: {siteConfig.email}
-						</p>
-						<p className="text-sm text-muted-foreground">
-							Phone: {siteConfig.phone}
-						</p>
-					</div>
+
+				{/* Contact */}
+				<div>
+					<h3 className="text-lg font-semibold text-primary mb-2">Contact</h3>
+					<p className="text-sm text-muted-foreground mb-1">
+						Email:{" "}
+						<a href={`mailto:${siteConfig.email}`} className="hover:underline">
+							{siteConfig.email}
+						</a>
+					</p>
+					<p className="text-sm text-muted-foreground">
+						Phone:{" "}
+						<a href={`tel:${siteConfig.phone}`} className="hover:underline">
+							{siteConfig.phone}
+						</a>
+					</p>
 				</div>
 			</div>
-			<div className="bg-primary/90 text-white py-2 mt-6">
-				<div className="flex flex-col items-center justify-center">
-					<p className="text-sm font-bold">
+
+			{/* Bottom Bar */}
+			<div className="mt-12 border-t border-primary/20 py-2 bg-primary/90 text-white">
+				<div className="container text-center">
+					<p className="text-sm font-medium">
 						&copy; {new Date().getFullYear()} {siteConfig.name}. All rights
 						reserved.
 					</p>

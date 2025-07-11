@@ -1,4 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Metadata } from "next";
 import Link from "next/link";
 import LoginForm from "./_components/LoginForm";
@@ -13,6 +19,7 @@ export default function LoginPage() {
 		<Card>
 			<CardHeader>
 				<CardTitle>Login</CardTitle>
+				<CardDescription>Please enter your details to login.</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<LoginForm />

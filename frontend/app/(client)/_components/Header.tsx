@@ -1,6 +1,6 @@
-import { siteConfig, topbarHeight } from "@/config/siteConfig";
+import { AppLogo } from "@/components/AppLogo";
+import { topbarHeight } from "@/config/siteConfig";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import HeaderLoginButton from "./HeaderLoginButton";
 
 export default function Header() {
@@ -14,12 +14,9 @@ export default function Header() {
 			<div className="container">
 				{/* header main section */}
 				<div className="flex items-center justify-between gap-6 transition-all duration-300 py-2">
-					<Link href="/">
-						<h1 className="text-xl font-bold text-white">{siteConfig.name}</h1>
-					</Link>
+					<AppLogo />
 
 					<div className="flex items-center gap-x-2">
-						<Link href={"/vendor-registration"}>Become a vendor</Link>
 						<HeaderLoginButton />
 					</div>
 				</div>

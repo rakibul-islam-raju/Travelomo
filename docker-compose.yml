@@ -9,7 +9,7 @@ services:
 
   db:
     image: postgres:16
-    container_name: event_db
+    container_name: travelomo_db
     restart: always
     ports:
       - "5433:5432"
