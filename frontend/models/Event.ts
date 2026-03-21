@@ -40,14 +40,17 @@ export interface IEvent {
 	start_date: string;
 	end_date: string;
 	location: string;
-	seat_available: number;
+	total_seats: number;
+	available_seats: number;
 	actual_price: string;
 	discount_price?: string | null;
 	image?: string | null;
 	tags?: string | null;
+	status: string;
 	is_featured: boolean;
-	is_published: boolean;
-	is_deleted: boolean;
 	is_archived: boolean;
+	seat_booked: number;
 	price: string;
+	created_at: string;
+	updated_at: string;
 }

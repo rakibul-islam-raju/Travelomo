@@ -74,6 +74,8 @@ class EventListSerializer(serializers.ModelSerializer):
 
 
 class EventDetailSerializer(serializers.ModelSerializer):
+    vendor = serializers.SerializerMethodField()
+
     class Meta:
         model = Event
         fields = [
@@ -95,10 +97,18 @@ class EventDetailSerializer(serializers.ModelSerializer):
             "is_featured",
             "is_archived",
             "seat_booked",
+            "price",
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["id", "vendor", "created_at", "updated_at"]
+
+    def get_vendor(self, obj):
+        return {
+            "id": obj.vendor.id,
+            "store_name": obj.vendor.store_name,
+            "logo": obj.vendor.logo.url if obj.vendor.logo else None,
+        }
 
 
 class VendorEventListSerializer(serializers.ModelSerializer):
