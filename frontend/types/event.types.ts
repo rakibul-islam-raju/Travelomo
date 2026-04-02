@@ -13,6 +13,7 @@ export interface IVendorEventListItem {
 	status: string;
 	seat_booked: number;
 	total_seats: number;
+	cancellation_days: number;
 }
 
 export interface ICreateEvent {
@@ -29,6 +30,7 @@ export interface ICreateEvent {
 	image?: string;
 	is_featured?: boolean;
 	status: string;
+	cancellation_days?: number;
 }
 
 export interface IEventFilter {
@@ -60,4 +62,5 @@ export interface IVendorEventDetails {
 	is_archived: boolean;
 	vendor: string;
 	seat_booked: number;
+	cancellation_days: number;
 }

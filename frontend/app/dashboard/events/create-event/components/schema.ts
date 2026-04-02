@@ -16,6 +16,7 @@ export const eventSchema = z
 			.min(0, "Discount amount cannot be less then 0."),
 		tags: z.string().max(255).optional(),
 		status: z.string(),
+		cancellation_days: z.coerce.number().int().min(0).default(0),
 	})
 	.refine((data) => data.discount_price <= data.actual_price, {
 		message: "Discount price cannot exceed the actual price.",
@@ -38,4 +39,5 @@ export const defaultEventValues: EventFormValues = {
 	discount_price: 0,
 	tags: "",
 	status: "draft",
+	cancellation_days: 0,
 };

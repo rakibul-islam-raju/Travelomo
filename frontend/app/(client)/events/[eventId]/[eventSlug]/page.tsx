@@ -1,11 +1,9 @@
 import Divider from "@/components/Divider";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/dates";
 import { serverFetcher } from "@/lib/serverFetcher";
 import { IEvent } from "@/models/Event";
 import {
-	Armchair,
 	Calendar,
 	ChevronLeft,
 	MapPin,
@@ -17,6 +15,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import BookingSidebar from "./_components/BookingSidebar";
 
 type Props = {
 	params: Promise<{ eventId: string; eventSlug: string }>;
@@ -207,10 +206,12 @@ export default async function EventDetailsPage({ params }: Props) {
 						</div>
 
 						{/* Book Button */}
-						<Button className="w-full" size="lg">
-							<Armchair className="w-4 h-4 mr-2" />
-							Book Now
-						</Button>
+						<BookingSidebar
+							eventId={event.id}
+							availableSeats={event.available_seats}
+							price={event.price}
+							cancellationDays={event.cancellation_days ?? 0}
+						/>
 					</div>
 				</div>
 			</div>

@@ -51,6 +51,7 @@ export interface IEvent {
 	is_archived: boolean;
 	seat_booked: number;
 	price: string;
+	cancellation_days: number;
 	created_at: string;
 	updated_at: string;
 }

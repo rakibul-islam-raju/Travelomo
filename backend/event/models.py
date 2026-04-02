@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from django.db import models
@@ -40,6 +41,10 @@ class Event(BaseModel):
 
     is_featured = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
+    cancellation_days = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Days before start_date that cancellation is allowed. 0 = no cancellation.",
+    )
 
     objects = models.Manager()
 
@@ -77,9 +82,17 @@ class Event(BaseModel):
 
 
 class SeatBooking(BaseModel):
+    BOOKING_STATUS_CHOICES = [
+        ("confirmed", "Confirmed"),
+        ("cancelled", "Cancelled"),
+    ]
+
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     seat_number = models.PositiveSmallIntegerField()
+    status = models.CharField(
+        max_length=20, choices=BOOKING_STATUS_CHOICES, default="confirmed"
+    )
 
     objects = models.Manager()
 
@@ -89,3 +102,12 @@ class SeatBooking(BaseModel):
     @property
     def total_price(self) -> Decimal:
         return self.event.price * self.seat_number
+
+    @property
+    def can_cancel(self) -> bool:
+        if self.status == "cancelled":
+            return False
+        if self.event.cancellation_days == 0:
+            return False
+        deadline = self.event.start_date - timedelta(days=self.event.cancellation_days)
+        return timezone.now().date() <= deadline

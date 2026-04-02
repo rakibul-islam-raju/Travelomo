@@ -52,6 +52,7 @@ export const EventForm: React.FC<Props> = ({ data }) => {
 					discount_price: data.discount_price,
 					total_seats: data.total_seats,
 					status: data.status.toLowerCase(),
+					cancellation_days: data.cancellation_days ?? 0,
 				});
 
 				handleUpdateDescription(data.description);
@@ -125,6 +126,12 @@ export const EventForm: React.FC<Props> = ({ data }) => {
 							required
 						/>
 					</div>
+					<TextField<EventFormValues>
+						name="cancellation_days"
+						label="Cancellation Deadline (days before event)"
+						type="number"
+						helpText="Customers can cancel their booking up to this many days before the event start date. Set to 0 to disable cancellations."
+					/>
 
 					<div className="flex justify-end gap-2">
 						<Button

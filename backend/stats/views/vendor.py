@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from django.db.models import Count
+from decimal import Decimal
+from django.db.models import Count, Sum, Case, When, F, ExpressionWrapper, DecimalField
 from django.db.models.functions import TruncDate, TruncMonth
 
 from rest_framework.generics import GenericAPIView
@@ -36,7 +37,22 @@ class VendorDashboardSummaryView(GenericAPIView):
             event__vendor=self.request.user.vendor,
             event__status="completed",
         ).count()
-        total_earnings = 00.00
+        earnings_result = SeatBooking.objects.filter(
+            event__vendor=self.request.user.vendor,
+            event__status="completed",
+            status="confirmed",
+        ).aggregate(
+            total=Sum(
+                ExpressionWrapper(
+                    F("seat_number") * Case(
+                        When(event__discount_price__gt=0, then=F("event__discount_price")),
+                        default=F("event__actual_price"),
+                    ),
+                    output_field=DecimalField(),
+                )
+            )
+        )
+        total_earnings = float(earnings_result["total"] or Decimal("0.00"))
 
         data = {
             "total_completed_events": total_completed_events,

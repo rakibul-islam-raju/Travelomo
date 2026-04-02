@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Settings2, SquareTerminal } from "lucide-react";
+import { LayoutDashboard, Settings2, SquareTerminal, Ticket } from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/app/dashboard/_components/nav-main";
@@ -32,6 +32,11 @@ const data = {
 			title: "Events",
 			url: "/dashboard/events",
 			icon: SquareTerminal,
+		},
+		{
+			title: "Bookings",
+			url: "/dashboard/bookings",
+			icon: Ticket,
 		},
 		{
 			title: "Settings",

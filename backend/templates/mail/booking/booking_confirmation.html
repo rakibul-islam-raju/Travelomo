@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Booking Confirmed</title>
+	</head>
+
+	<body>
+		<h1>Booking Confirmed!</h1>
+		<hr />
+		<p>Hi {{ user_name }},</p>
+		<p>Your booking has been confirmed. Here are your booking details:</p>
+		<table>
+			<tr>
+				<td><strong>Booking ID:</strong></td>
+				<td>{{ booking_id }}</td>
+			</tr>
+			<tr>
+				<td><strong>Event:</strong></td>
+				<td>{{ event_title }}</td>
+			</tr>
+			<tr>
+				<td><strong>Date:</strong></td>
+				<td>{{ event_start_date }} – {{ event_end_date }}</td>
+			</tr>
+			<tr>
+				<td><strong>Location:</strong></td>
+				<td>{{ event_location }}</td>
+			</tr>
+			<tr>
+				<td><strong>Seats Booked:</strong></td>
+				<td>{{ seats_booked }}</td>
+			</tr>
+			<tr>
+				<td><strong>Total Price:</strong></td>
+				<td>${{ total_price }}</td>
+			</tr>
+		</table>
+		<hr />
+		<p>Thank you for booking with Travelomo. We look forward to seeing you!</p>
+	</body>
+</html>

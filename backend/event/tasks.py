@@ -1,8 +1,11 @@
 from datetime import datetime
+from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.html import strip_tags
 from celery import shared_task
 
-from .models import Event
+from notification.emails import send_email
+from .models import Event, SeatBooking
 
 
 @shared_task
@@ -20,3 +23,36 @@ def update_completed_events():
     count = events_to_complete.update(status="completed")
 
     return f"Updated {count} events to completed status"
+
+
+@shared_task
+def send_booking_confirmation_email(booking_id):
+    try:
+        booking = SeatBooking.objects.select_related("event", "user").get(id=booking_id)
+    except SeatBooking.DoesNotExist:
+        return f"Booking {booking_id} not found"
+
+    subject = f"Booking Confirmed - {booking.event.title}"
+    html_content = render_to_string(
+        "mail/booking/booking_confirmation.html",
+        {
+            "user_name": booking.user.full_name,
+            "event_title": booking.event.title,
+            "event_start_date": booking.event.start_date,
+            "event_end_date": booking.event.end_date,
+            "event_location": booking.event.location,
+            "seats_booked": booking.seat_number,
+            "total_price": booking.total_price,
+            "booking_id": str(booking.id),
+        },
+    )
+    plain_message = strip_tags(html_content)
+
+    send_email(
+        subject=subject,
+        plain_message=plain_message,
+        html_content=html_content,
+        to_email=[booking.user.email],
+    )
+
+    return f"Confirmation email sent for booking {booking_id}"
