@@ -3,7 +3,7 @@ from rest_framework import generics, filters, response, status
 
 from user.permissions import IsSystemAdmin, IsVendor
 
-from .models import Vendor
+from .models import Vendor, VendorPaymentMethod
 from .serializers import (
     VendorListSerializer,
     VendorDetailSerializer,
@@ -11,6 +11,7 @@ from .serializers import (
     VendorCreateSerializer,
     VendorDetailSerializerForAdmin,
     MeVendorSerializer,
+    VendorPaymentMethodSerializer,
 )
 from .permission import IsVendorOwnerOrAdmin
 
@@ -78,3 +79,23 @@ class VendorDetailView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user.role == "admin":
             return VendorDetailSerializerForAdmin
         return self.serializer_class
+
+
+class VendorPaymentMethodListCreateView(generics.ListCreateAPIView):
+    serializer_class = VendorPaymentMethodSerializer
+    permission_classes = [IsVendor]
+    pagination_class = None
+
+    def get_queryset(self):
+        return VendorPaymentMethod.objects.filter(vendor=self.request.user.vendor)
+
+    def perform_create(self, serializer):
+        serializer.save(vendor=self.request.user.vendor)
+
+
+class VendorPaymentMethodDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = VendorPaymentMethodSerializer
+    permission_classes = [IsVendor]
+
+    def get_queryset(self):
+        return VendorPaymentMethod.objects.filter(vendor=self.request.user.vendor)

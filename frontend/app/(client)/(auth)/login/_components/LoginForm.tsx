@@ -9,12 +9,13 @@ import { useZodForm } from "@/hooks/useZodForm";
 import { authServices } from "@/services/authServices";
 import { useAuthStore } from "@/stores/authStore";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { defaultLoginValues, LoginFormValues, loginSchema } from "./schema";
 
 export default function LoginForm() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const { setUser } = useAuthStore();
 
 	const { mutate: login, isPending } = useMutation({
@@ -31,7 +32,10 @@ export default function LoginForm() {
 			onSuccess: (response) => {
 				toast.success("Login successful");
 				setUser(response.user);
-				router.replace("/");
+				const callbackUrl = searchParams.get("callbackUrl");
+				router.replace(
+					callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/"
+				);
 			},
 		});
 	};

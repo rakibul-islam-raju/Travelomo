@@ -115,6 +115,10 @@ export async function fetcher<T = any>(
 			throw new Error(errorMessage);
 		}
 
+		if (res.status === 204) {
+			return undefined as T;
+		}
+
 		return res.json();
 	} catch (error) {
 		const errorMessage =

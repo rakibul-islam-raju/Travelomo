@@ -1,39 +1,99 @@
 "use client";
 
+import { PaymentReferenceForm } from "@/components/bookings/PaymentReferenceForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { bookingServices } from "@/services/bookingService";
-import { IBooking } from "@/types/booking.types";
+import { BookingStatus, IBooking } from "@/types/booking.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/lib/dates";
-import { Calendar, MapPin, Ticket } from "lucide-react";
+import {
+	AlertCircle,
+	Calendar,
+	CheckCircle2,
+	Clock3,
+	MapPin,
+	ReceiptText,
+	Ticket,
+	XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
+
+const statusStyles: Record<BookingStatus, string> = {
+	awaiting_payment_reference: "border-amber-200 bg-amber-50 text-amber-800",
+	pending_verification: "border-blue-200 bg-blue-50 text-blue-800",
+	confirmed: "border-green-200 bg-green-50 text-green-800",
+	payment_rejected: "border-red-200 bg-red-50 text-red-800",
+	expired: "border-gray-200 bg-gray-100 text-gray-700",
+	cancelled: "border-gray-200 bg-gray-100 text-gray-700",
+};
+
+const statusGuidance: Record<BookingStatus, string> = {
+	awaiting_payment_reference:
+		"Your seats are held. Submit the external payment transaction ID before the timer ends.",
+	pending_verification:
+		"Your transaction ID is with the organizer. We'll update this booking after they review it.",
+	confirmed: "The organizer verified your payment and your seats are confirmed.",
+	payment_rejected:
+		"The organizer could not verify this payment. Review the reason below before contacting them.",
+	expired: "The reservation expired and its seats were released.",
+	cancelled: "This booking was cancelled and its seats were released.",
+};
+
+function StatusIcon({ status }: { status: BookingStatus }) {
+	if (status === "confirmed") return <CheckCircle2 className="h-4 w-4" />;
+	if (status === "pending_verification") return <Clock3 className="h-4 w-4" />;
+	if (status === "payment_rejected") return <XCircle className="h-4 w-4" />;
+	if (status === "awaiting_payment_reference") return <ReceiptText className="h-4 w-4" />;
+	return <AlertCircle className="h-4 w-4" />;
+}
+
+function formatMoney(amount: string, currency: string) {
+	return new Intl.NumberFormat("en-BD", {
+		style: "currency",
+		currency,
+	}).format(Number(amount));
+}
 
 export default function MyBookingsPage() {
 	const queryClient = useQueryClient();
+	const [confirmingCancel, setConfirmingCancel] = useState<string | null>(null);
 
-	const { data, isLoading } = useQuery({
+	const { data, isLoading, isError, refetch } = useQuery({
 		queryKey: ["MyBookings"],
 		queryFn: () => bookingServices.getMyBookings(),
+		refetchInterval: 60_000,
 	});
 
 	const { mutate: cancelBooking, isPending: cancelling } = useMutation({
 		mutationFn: (id: string) => bookingServices.cancelBooking(id),
 		onSuccess: () => {
-			toast.success("Booking cancelled successfully.");
+			toast.success("Booking cancelled and seats released");
+			setConfirmingCancel(null);
 			queryClient.invalidateQueries({ queryKey: ["MyBookings"] });
 		},
 	});
 
 	if (isLoading) {
 		return (
-			<div className="space-y-4">
-				{[...Array(3)].map((_, i) => (
-					<div
-						key={i}
-						className="h-32 rounded-xl border bg-muted animate-pulse"
-					/>
+			<div className="mx-auto max-w-4xl space-y-4 py-8">
+				<div className="h-10 w-56 animate-pulse rounded-lg bg-muted" />
+				{[...Array(3)].map((_, index) => (
+					<div key={index} className="h-44 animate-pulse rounded-2xl border bg-muted/50" />
 				))}
+			</div>
+		);
+	}
+
+	if (isError) {
+		return (
+			<div className="mx-auto max-w-xl py-20 text-center">
+				<AlertCircle className="mx-auto h-10 w-10 text-destructive" />
+				<h1 className="mt-4 text-xl font-bold">We couldn&apos;t load your bookings</h1>
+				<p className="mt-2 text-muted-foreground">Please check your connection and try again.</p>
+				<Button className="mt-5" onClick={() => refetch()}>Try again</Button>
 			</div>
 		);
 	}
@@ -41,70 +101,84 @@ export default function MyBookingsPage() {
 	const bookings = data?.results ?? [];
 
 	return (
-		<div className="max-w-3xl mx-auto space-y-6">
-			<h1 className="text-2xl font-bold">My Bookings</h1>
+		<div className="mx-auto max-w-4xl space-y-6 py-8">
+			<div>
+				<p className="text-sm font-medium text-primary">Your trips</p>
+				<h1 className="text-3xl font-bold tracking-tight">My bookings</h1>
+				<p className="mt-1 text-muted-foreground">
+					Finish pending payments and follow verification progress here.
+				</p>
+			</div>
 
 			{bookings.length === 0 ? (
-				<div className="text-center py-16 text-muted-foreground">
-					<Ticket className="w-10 h-10 mx-auto mb-3 opacity-40" />
-					<p>You have no bookings yet.</p>
+				<div className="rounded-2xl border border-dashed py-16 text-center text-muted-foreground">
+					<Ticket className="mx-auto mb-3 h-10 w-10 opacity-40" />
+					<h2 className="font-semibold text-foreground">No bookings yet</h2>
+					<p className="mt-1 text-sm">Find an event you love and reserve your seats.</p>
+					<Button asChild className="mt-5"><Link href="/events">Explore events</Link></Button>
 				</div>
 			) : (
-				<div className="space-y-4">
+				<div className="space-y-5">
 					{bookings.map((booking: IBooking) => (
-						<div
-							key={booking.id}
-							className="rounded-xl border bg-card p-5 shadow-sm space-y-3"
-						>
-							<div className="flex items-start justify-between gap-3">
-								<h2 className="font-semibold text-lg leading-tight">
-									{booking.event_title}
-								</h2>
-								<Badge
-									variant={
-										booking.status === "confirmed" ? "default" : "secondary"
-									}
-								>
-									{booking.status}
-								</Badge>
-							</div>
-
-							<div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground">
-								<span className="flex items-center gap-1.5">
-									<Calendar className="w-4 h-4" />
-									{formatDate(booking.event_start_date)} –{" "}
-									{formatDate(booking.event_end_date)}
-								</span>
-								<span className="flex items-center gap-1.5">
-									<MapPin className="w-4 h-4" />
-									{booking.event_location}
-								</span>
-							</div>
-
-							<div className="flex items-center justify-between pt-1">
-								<div className="text-sm space-x-4">
-									<span>
-										<span className="text-muted-foreground">Seats: </span>
-										<span className="font-medium">{booking.seat_number}</span>
-									</span>
-									<span>
-										<span className="text-muted-foreground">Total: </span>
-										<span className="font-medium">${booking.total_price}</span>
-									</span>
+						<article key={booking.id} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+							<div className="p-5 sm:p-6">
+								<div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+									<div>
+										<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+											{booking.booking_reference}
+										</p>
+										<h2 className="mt-1 text-xl font-semibold">{booking.event_title}</h2>
+									</div>
+									<Badge variant="outline" className={`w-fit gap-1.5 px-3 py-1 ${statusStyles[booking.status]}`}>
+										<StatusIcon status={booking.status} /> {booking.status_label}
+									</Badge>
 								</div>
 
-								{booking.can_cancel && (
-									<Button
-										variant="destructive"
-										size="sm"
-										disabled={cancelling}
-										onClick={() => cancelBooking(booking.id)}
-									>
-										Cancel
-									</Button>
-								)}
+								<div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+									<span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{formatDate(booking.event_start_date)} – {formatDate(booking.event_end_date)}</span>
+									<span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{booking.event_location}</span>
+									<span className="flex items-center gap-1.5"><Ticket className="h-4 w-4" />{booking.seat_number} seat{booking.seat_number > 1 ? "s" : ""}</span>
+								</div>
+
+								<div className={`mt-4 rounded-xl border p-3 text-sm ${statusStyles[booking.status]}`}>
+									{statusGuidance[booking.status]}
+									{booking.payment_submission?.rejection_reason && (
+										<p className="mt-2 font-medium">Reason: {booking.payment_submission.rejection_reason}</p>
+									)}
+								</div>
+
+								<div className="mt-4 flex flex-col justify-between gap-3 border-t pt-4 sm:flex-row sm:items-center">
+									<div>
+										<p className="text-xs text-muted-foreground">Booking total</p>
+										<p className="text-lg font-bold">{formatMoney(booking.total_price, booking.currency)}</p>
+									</div>
+									{booking.can_cancel && booking.status !== "awaiting_payment_reference" && (
+										<div className="flex items-center gap-2">
+											{confirmingCancel === booking.id ? (
+												<>
+													<span className="text-sm text-muted-foreground">Release these seats?</span>
+													<Button size="sm" variant="ghost" onClick={() => setConfirmingCancel(null)}>Keep booking</Button>
+													<Button size="sm" variant="destructive" disabled={cancelling} onClick={() => cancelBooking(booking.id)}>{cancelling ? "Cancelling..." : "Yes, cancel"}</Button>
+												</>
+											) : (
+												<Button size="sm" variant="outline" onClick={() => setConfirmingCancel(booking.id)}>Cancel booking</Button>
+											)}
+										</div>
+									)}
+								</div>
 							</div>
-						</div>
+
+							{booking.status === "awaiting_payment_reference" && (
+								<div className="border-t bg-muted/20 p-5 sm:p-6">
+									<PaymentReferenceForm
+										booking={booking}
+										compact
+										onSubmitted={() => queryClient.invalidateQueries({ queryKey: ["MyBookings"] })}
+										onCancel={() => cancelBooking(booking.id)}
+									/>
+								</div>
+							)}
+						</article>
 					))}
 				</div>
 			)}

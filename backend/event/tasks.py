@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import strip_tags
 from celery import shared_task
+from django.db.models import Q
 
 from notification.emails import send_email
 from .models import Event, SeatBooking
@@ -32,6 +33,9 @@ def send_booking_confirmation_email(booking_id):
     except SeatBooking.DoesNotExist:
         return f"Booking {booking_id} not found"
 
+    if booking.status != "confirmed":
+        return f"Booking {booking_id} is not confirmed"
+
     subject = f"Booking Confirmed - {booking.event.title}"
     html_content = render_to_string(
         "mail/booking/booking_confirmation.html",
@@ -56,3 +60,52 @@ def send_booking_confirmation_email(booking_id):
     )
 
     return f"Confirmation email sent for booking {booking_id}"
+
+
+@shared_task
+def send_booking_status_email(booking_id, status_message):
+    try:
+        booking = SeatBooking.objects.select_related("event", "user").get(id=booking_id)
+    except SeatBooking.DoesNotExist:
+        return f"Booking {booking_id} not found"
+
+    subject = f"Booking update - {booking.event.title}"
+    html_content = render_to_string(
+        "mail/booking/booking_status.html",
+        {
+            "user_name": booking.user.full_name,
+            "event_title": booking.event.title,
+            "booking_reference": booking.booking_reference,
+            "status_label": booking.get_status_display(),
+            "status_message": status_message,
+        },
+    )
+    send_email(
+        subject=subject,
+        plain_message=strip_tags(html_content),
+        html_content=html_content,
+        to_email=[booking.user.email],
+    )
+    return f"Status email sent for booking {booking_id}"
+
+
+@shared_task
+def expire_stale_bookings():
+    now = timezone.now()
+    booking_ids = list(
+        SeatBooking.objects.filter(
+            Q(
+                status="awaiting_payment_reference",
+                payment_reference_expires_at__lte=now,
+            )
+            | Q(
+                status="pending_verification",
+                verification_expires_at__lte=now,
+            )
+        ).values_list("id", flat=True)
+    )
+
+    from .services import expire_booking
+
+    expired_count = sum(expire_booking(booking_id) for booking_id in booking_ids)
+    return f"Expired {expired_count} stale bookings"

@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Settings2, SquareTerminal, Ticket } from "lucide-react";
+import { LayoutDashboard, SquareTerminal, Ticket, WalletCards } from "lucide-react";
 import * as React from "react";
 
 import { NavMain } from "@/app/dashboard/_components/nav-main";
@@ -39,27 +39,9 @@ const data = {
 			icon: Ticket,
 		},
 		{
-			title: "Settings",
-			url: "#",
-			icon: Settings2,
-			items: [
-				{
-					title: "General",
-					url: "#",
-				},
-				{
-					title: "Team",
-					url: "#",
-				},
-				{
-					title: "Billing",
-					url: "#",
-				},
-				{
-					title: "Limits",
-					url: "#",
-				},
-			],
+			title: "Payment setup",
+			url: "/dashboard/payment-methods",
+			icon: WalletCards,
 		},
 	],
 

@@ -22,4 +22,8 @@ app.conf.beat_schedule = {
         "task": "event.tasks.update_completed_events",
         "schedule": crontab(hour=0, minute=0),  # Run daily at midnight
     },
+    "expire-stale-bookings": {
+        "task": "event.tasks.expire_stale_bookings",
+        "schedule": crontab(minute="*/5"),
+    },
 }

@@ -1,5 +1,6 @@
 import Divider from "@/components/Divider";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/dates";
 import { serverFetcher } from "@/lib/serverFetcher";
 import { IEvent } from "@/models/Event";

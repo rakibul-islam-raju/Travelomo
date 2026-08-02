@@ -14,3 +14,10 @@ class IsSystemAdmin(BasePermission):
 class IsVendor(BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == "vendor"
+
+
+class IsCustomer(BasePermission):
+    message = "Only customer accounts can book event seats."
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == "customer"

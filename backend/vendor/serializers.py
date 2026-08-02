@@ -1,5 +1,30 @@
 from rest_framework import serializers
-from .models import Vendor
+from .models import Vendor, VendorPaymentMethod
+
+
+class VendorPaymentMethodSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VendorPaymentMethod
+        fields = [
+            "id",
+            "name",
+            "account_name",
+            "account_number",
+            "instructions",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate_name(self, value):
+        return value.strip()
+
+    def validate_account_name(self, value):
+        return value.strip()
+
+    def validate_account_number(self, value):
+        return value.strip()
 
 
 class VendorShortSerializer(serializers.ModelSerializer):
@@ -41,6 +66,8 @@ class VendorListSerializer(serializers.ModelSerializer):
 
 
 class MeVendorSerializer(serializers.ModelSerializer):
+    payment_methods = VendorPaymentMethodSerializer(many=True, read_only=True)
+
     class Meta:
         model = Vendor
         fields = "__all__"

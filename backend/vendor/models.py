@@ -48,3 +48,26 @@ class Vendor(BaseModel):
 
     def __str__(self) -> str:
         return self.store_name
+
+
+class VendorPaymentMethod(BaseModel):
+    vendor = models.ForeignKey(
+        Vendor, on_delete=models.CASCADE, related_name="payment_methods"
+    )
+    name = models.CharField(max_length=60)
+    account_name = models.CharField(max_length=120)
+    account_number = models.CharField(max_length=80)
+    instructions = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["name", "created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["vendor", "name", "account_number"],
+                name="unique_vendor_payment_destination",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.vendor.store_name} - {self.name}"

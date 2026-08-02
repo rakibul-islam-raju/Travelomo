@@ -24,6 +24,26 @@ export interface MeVendor {
 	approved_at?: string;
 	user: string;
 	approved_by?: string;
+	payment_methods?: VendorPaymentMethod[];
+}
+
+export interface VendorPaymentMethod {
+	id: string;
+	name: string;
+	account_name: string;
+	account_number: string;
+	instructions: string;
+	is_active: boolean;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface VendorPaymentMethodInput {
+	name: string;
+	account_name: string;
+	account_number: string;
+	instructions: string;
+	is_active?: boolean;
 }
 
 export interface VendorDetails {

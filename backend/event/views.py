@@ -1,13 +1,10 @@
-from django.db import transaction
-from django.db.models import F
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 
-from user.permissions import IsVendor, IsSystemAdmin
+from user.permissions import IsCustomer, IsVendor, IsSystemAdmin
 
 from .models import Event, SeatBooking
 from .permissions import IsEventOwner
@@ -20,6 +17,14 @@ from .serializers import (
     SeatBookingCreateSerializer,
     SeatBookingListSerializer,
     VendorBookingListSerializer,
+    PaymentReferenceSubmitSerializer,
+    PaymentReviewSerializer,
+)
+from .services import (
+    cancel_booking,
+    reserve_booking,
+    review_payment,
+    submit_payment_reference,
 )
 
 
@@ -37,7 +42,7 @@ class EventDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         # If the user is an admin, return all events
-        if self.request.user.role == "admin":
+        if getattr(self.request.user, "role", None) == "admin":
             return Event.objects.all()
 
         return Event.objects.filter(is_archived=False, status="published")
@@ -120,66 +125,72 @@ class AdminEventListView(generics.ListAPIView):
     ordering = ["-created_at"]
 
 
-class BookSeatView(generics.CreateAPIView):
+class BookSeatView(generics.GenericAPIView):
     serializer_class = SeatBookingCreateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCustomer]
 
-    def perform_create(self, serializer):
-        event = serializer.validated_data["event"]
-        seat_number = serializer.validated_data["seat_number"]
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        booking = reserve_booking(
+            user=request.user,
+            event_id=serializer.validated_data["event"],
+            seat_number=serializer.validated_data["seat_number"],
+        )
+        booking = (
+            SeatBooking.objects.select_related("event__vendor")
+            .prefetch_related("event__vendor__payment_methods")
+            .get(pk=booking.pk)
+        )
+        return Response(
+            SeatBookingListSerializer(booking, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
-        with transaction.atomic():
-            updated = Event.objects.filter(
-                pk=event.pk,
-                available_seats__gte=seat_number,
-            ).update(available_seats=F("available_seats") - seat_number)
 
-            if not updated:
-                raise serializer.ValidationError("Not enough seats available.")
+class SubmitPaymentReferenceView(generics.GenericAPIView):
+    serializer_class = PaymentReferenceSubmitSerializer
+    permission_classes = [IsCustomer]
 
-            booking = serializer.save(user=self.request.user)
-
-        from .tasks import send_booking_confirmation_email
-        send_booking_confirmation_email.delay(str(booking.id))
+    def post(self, request, pk):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        booking = submit_payment_reference(
+            user=request.user,
+            booking_id=pk,
+            payment_method_id=serializer.validated_data["payment_method"],
+            transaction_id=serializer.validated_data["transaction_id"],
+        )
+        booking = SeatBooking.objects.select_related(
+            "event__vendor", "payment_submission__payment_method"
+        ).get(pk=booking.pk)
+        return Response(
+            SeatBookingListSerializer(booking, context={"request": request}).data
+        )
 
 
 class MyBookingsView(generics.ListAPIView):
     serializer_class = SeatBookingListSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCustomer]
 
     def get_queryset(self):
         return (
             SeatBooking.objects.filter(user=self.request.user)
-            .select_related("event")
+            .select_related(
+                "event__vendor",
+                "payment_submission__payment_method",
+                "payment_submission__reviewed_by",
+            )
+            .prefetch_related("event__vendor__payment_methods")
             .order_by("-created_at")
         )
 
 
 class CancelBookingView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsCustomer]
 
     def post(self, request, pk):
-        booking = get_object_or_404(SeatBooking, pk=pk, user=request.user)
-
-        if booking.status == "cancelled":
-            return Response(
-                {"detail": "Booking is already cancelled."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        if not booking.can_cancel:
-            return Response(
-                {"detail": "Cancellation deadline has passed or cancellation is not allowed for this event."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        with transaction.atomic():
-            booking.status = "cancelled"
-            booking.save()
-            Event.objects.filter(pk=booking.event_id).update(
-                available_seats=F("available_seats") + booking.seat_number
-            )
-
+        cancel_booking(user=request.user, booking_id=pk)
         return Response({"detail": "Booking cancelled successfully."})
 
 
@@ -190,6 +201,32 @@ class VendorEventBookingsView(generics.ListAPIView):
     def get_queryset(self):
         return (
             SeatBooking.objects.filter(event__vendor=self.request.user.vendor)
-            .select_related("event", "user")
+            .select_related(
+                "event",
+                "user",
+                "payment_submission__payment_method",
+                "payment_submission__reviewed_by",
+            )
             .order_by("-created_at")
+        )
+
+
+class VendorReviewPaymentView(generics.GenericAPIView):
+    serializer_class = PaymentReviewSerializer
+    permission_classes = [IsVendor]
+
+    def post(self, request, pk):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        booking = review_payment(
+            vendor=request.user.vendor,
+            booking_id=pk,
+            action=serializer.validated_data["action"],
+            reason=serializer.validated_data.get("reason", ""),
+        )
+        booking = SeatBooking.objects.select_related(
+            "event", "user", "payment_submission__payment_method"
+        ).get(pk=booking.pk)
+        return Response(
+            VendorBookingListSerializer(booking, context={"request": request}).data
         )

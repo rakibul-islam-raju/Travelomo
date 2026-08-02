@@ -11,6 +11,8 @@ from .views import (
     MyBookingsView,
     CancelBookingView,
     VendorEventBookingsView,
+    SubmitPaymentReferenceView,
+    VendorReviewPaymentView,
 )
 
 app_name = "event"
@@ -36,5 +38,15 @@ urlpatterns = [
     path("bookings/", BookSeatView.as_view(), name="book-seat"),
     path("bookings/my/", MyBookingsView.as_view(), name="my-bookings"),
     path("bookings/vendor/", VendorEventBookingsView.as_view(), name="vendor-bookings"),
+    path(
+        "bookings/vendor/<str:pk>/review/",
+        VendorReviewPaymentView.as_view(),
+        name="vendor-review-payment",
+    ),
+    path(
+        "bookings/<str:pk>/payment-reference/",
+        SubmitPaymentReferenceView.as_view(),
+        name="submit-payment-reference",
+    ),
     path("bookings/<str:pk>/cancel/", CancelBookingView.as_view(), name="cancel-booking"),
 ]

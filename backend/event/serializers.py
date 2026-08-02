@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from .models import Event, SeatBooking
+from vendor.serializers import VendorPaymentMethodSerializer
+
+from .models import Event, ManualPaymentSubmission, SeatBooking
 
 
 class EventCreateSerializer(serializers.ModelSerializer):
@@ -135,31 +137,50 @@ class VendorEventListSerializer(serializers.ModelSerializer):
         ]
 
 
-class SeatBookingCreateSerializer(serializers.ModelSerializer):
-    total_price = serializers.ReadOnlyField()
-    can_cancel = serializers.ReadOnlyField()
+class SeatBookingCreateSerializer(serializers.Serializer):
+    event = serializers.UUIDField()
+    seat_number = serializers.IntegerField(min_value=1, max_value=100)
+
+
+class PaymentReferenceSubmitSerializer(serializers.Serializer):
+    payment_method = serializers.UUIDField()
+    transaction_id = serializers.CharField(max_length=120, trim_whitespace=True)
+
+
+class PaymentReviewSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(choices=["approve", "reject"])
+    reason = serializers.CharField(
+        max_length=300, required=False, allow_blank=True, trim_whitespace=True
+    )
+
+
+class ManualPaymentSubmissionSerializer(serializers.ModelSerializer):
+    payment_method_name = serializers.CharField(
+        source="payment_method.name", read_only=True
+    )
+    reviewed_by_name = serializers.CharField(
+        source="reviewed_by.full_name", read_only=True, allow_null=True
+    )
 
     class Meta:
-        model = SeatBooking
-        fields = ["id", "event", "seat_number", "status", "total_price", "can_cancel", "created_at"]
-        read_only_fields = ["id", "status", "created_at"]
-
-    def validate(self, attrs):
-        event = attrs["event"]
-        seat_number = attrs["seat_number"]
-        if event.status != "published":
-            raise serializers.ValidationError("This event is not available for booking.")
-        if seat_number <= 0:
-            raise serializers.ValidationError("seat_number must be at least 1.")
-        if seat_number > event.available_seats:
-            raise serializers.ValidationError(
-                f"Only {event.available_seats} seats available."
-            )
-        return attrs
+        model = ManualPaymentSubmission
+        fields = [
+            "id",
+            "payment_method",
+            "payment_method_name",
+            "transaction_id",
+            "status",
+            "reviewed_by_name",
+            "reviewed_at",
+            "rejection_reason",
+            "created_at",
+        ]
 
 
 class SeatBookingListSerializer(serializers.ModelSerializer):
-    total_price = serializers.ReadOnlyField()
+    total_price = serializers.DecimalField(
+        source="total_amount", max_digits=12, decimal_places=2, read_only=True
+    )
     can_cancel = serializers.ReadOnlyField()
     event_title = serializers.CharField(source="event.title", read_only=True)
     event_slug = serializers.CharField(source="event.slug", read_only=True)
@@ -167,17 +188,28 @@ class SeatBookingListSerializer(serializers.ModelSerializer):
     event_end_date = serializers.DateField(source="event.end_date", read_only=True)
     event_location = serializers.CharField(source="event.location", read_only=True)
     event_image = serializers.ImageField(source="event.image", read_only=True)
-    event_price = serializers.ReadOnlyField(source="event.price")
+    event_price = serializers.DecimalField(
+        source="unit_price", max_digits=12, decimal_places=2, read_only=True
+    )
+    payment_submission = ManualPaymentSubmissionSerializer(read_only=True)
+    payment_methods = serializers.SerializerMethodField()
+    status_label = serializers.CharField(source="get_status_display", read_only=True)
 
     class Meta:
         model = SeatBooking
         fields = [
             "id",
             "event",
+            "booking_reference",
             "seat_number",
             "status",
+            "status_label",
             "total_price",
+            "currency",
             "can_cancel",
+            "payment_reference_expires_at",
+            "verification_expires_at",
+            "cancelled_at",
             "event_title",
             "event_slug",
             "event_start_date",
@@ -185,26 +217,44 @@ class SeatBookingListSerializer(serializers.ModelSerializer):
             "event_location",
             "event_image",
             "event_price",
+            "payment_submission",
+            "payment_methods",
             "created_at",
         ]
 
+    def get_payment_methods(self, obj):
+        if obj.status != "awaiting_payment_reference":
+            return []
+        methods = obj.event.vendor.payment_methods.filter(is_active=True)
+        return VendorPaymentMethodSerializer(methods, many=True).data
+
 
 class VendorBookingListSerializer(serializers.ModelSerializer):
-    total_price = serializers.ReadOnlyField()
+    total_price = serializers.DecimalField(
+        source="total_amount", max_digits=12, decimal_places=2, read_only=True
+    )
     user_name = serializers.CharField(source="user.full_name", read_only=True)
     user_email = serializers.CharField(source="user.email", read_only=True)
     event_title = serializers.CharField(source="event.title", read_only=True)
+    payment_submission = ManualPaymentSubmissionSerializer(read_only=True)
+    status_label = serializers.CharField(source="get_status_display", read_only=True)
 
     class Meta:
         model = SeatBooking
         fields = [
             "id",
+            "booking_reference",
             "event",
             "event_title",
             "user_name",
             "user_email",
             "seat_number",
             "status",
+            "status_label",
             "total_price",
+            "currency",
+            "payment_reference_expires_at",
+            "verification_expires_at",
+            "payment_submission",
             "created_at",
         ]

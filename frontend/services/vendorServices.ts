@@ -9,8 +9,37 @@ export const vendorServices = {
 	},
 
 	getVendorDetails: async (id: string) => {
-		return await fetcher<VendorTypes.VendorDetails>(`/vendors/${id}`, {
+		return await fetcher<VendorTypes.VendorDetails>(`/vendors/${id}/`, {
 			method: "GET",
+		});
+	},
+
+	getPaymentMethods: async () => {
+		return await fetcher<VendorTypes.VendorPaymentMethod[]>(
+			"/vendors/payment-methods/"
+		);
+	},
+
+	createPaymentMethod: async (data: VendorTypes.VendorPaymentMethodInput) => {
+		return await fetcher<VendorTypes.VendorPaymentMethod>(
+			"/vendors/payment-methods/",
+			{ method: "POST", body: data }
+		);
+	},
+
+	updatePaymentMethod: async (
+		id: string,
+		data: Partial<VendorTypes.VendorPaymentMethodInput>
+	) => {
+		return await fetcher<VendorTypes.VendorPaymentMethod>(
+			`/vendors/payment-methods/${id}/`,
+			{ method: "PATCH", body: data }
+		);
+	},
+
+	deletePaymentMethod: async (id: string) => {
+		return await fetcher<void>(`/vendors/payment-methods/${id}/`, {
+			method: "DELETE",
 		});
 	},
 };

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { COOKIE_CONSTS } from "./constants";
 
 // Define protected routes that require authentication
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "/my-bookings"];
 
 const protectedRoutesInclude = ["/checkout"];
 
