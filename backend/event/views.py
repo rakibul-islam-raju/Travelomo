@@ -1,5 +1,6 @@
-from rest_framework import status
-from rest_framework import generics
+from django.utils import timezone
+from django.shortcuts import get_object_or_404
+from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
@@ -28,15 +29,66 @@ from .services import (
 )
 
 
-class EventListCreateView(generics.ListAPIView):
+class EventListCreateView(generics.ListCreateAPIView):
+    """
+    # Event list & create view
+    * This api is for user, vendor and admin
+
+    - Vendor can only see their own events
+    - User can see all published and running events
+    - Admin can see all events
+
+
+    """
+
     filter_backends = [DjangoFilterBackend]
     filterset_class = EventFilter
-    queryset = Event.objects.filter(is_archived=False, status="published")
-    serializer_class = EventListSerializer
-    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        # if user is vendor
+        if self.request.user.role == "vendor":
+            return Event.objects.filter(
+                vendor=self.request.user.vendor,
+                is_deleted=False,
+            )
+        # if user is admin
+        elif self.request.user.role == "admin":
+            return Event.objects.all()
+        # if user is user
+        else:
+            return Event.objects.filter(
+                is_deleted=False,
+                is_archived=False,
+                status="published",
+                start_date__lte=timezone.now(),
+                end_date__gte=timezone.now(),
+            )
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return EventCreateSerializer
+        return EventListSerializer
+
+    def get_permissions(self):
+        if self.request.method == "POST":
+            self.permission_classes = [IsVendor]
+        else:
+            self.permission_classes = [AllowAny]
+        return super().get_permissions()
+
+    def perform_create(self, serializer):
+        serializer.save(vendor=self.request.user.vendor)
 
 
 class EventDetailView(generics.RetrieveAPIView):
+    """
+    # Event detail view
+    * This api is only for user and vendor
+
+    - Vendor can only see their own event details
+    - User can see all published and running events details
+    """
+
     serializer_class = EventDetailSerializer
     permission_classes = [AllowAny]
 

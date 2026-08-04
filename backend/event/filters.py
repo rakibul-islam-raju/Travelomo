@@ -1,5 +1,4 @@
 from django.db.models import Q
-
 from django_filters import rest_framework as filters
 
 from .models import Event
@@ -26,6 +25,8 @@ class EventFilter(filters.FilterSet):
             "end_price",
             "is_featured",
             "status",
+            "is_archived",
+            "vendor",
         ]
 
     def search_filter(self, queryset, name, value):
