@@ -1,12 +1,14 @@
-from datetime import datetime
+import logging
+
 from django.template.loader import render_to_string
 from django.utils import timezone
-from django.utils.html import strip_tags
 from celery import shared_task
 from django.db.models import Q
 
-from notification.emails import send_email
+from notification.delivery import queue_email
 from .models import Event, SeatBooking
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task
@@ -31,6 +33,7 @@ def send_booking_confirmation_email(booking_id):
     try:
         booking = SeatBooking.objects.select_related("event", "user").get(id=booking_id)
     except SeatBooking.DoesNotExist:
+        logger.warning("Booking %s not found; confirmation email not sent", booking_id)
         return f"Booking {booking_id} not found"
 
     if booking.status != "confirmed":
@@ -50,16 +53,15 @@ def send_booking_confirmation_email(booking_id):
             "booking_id": str(booking.id),
         },
     )
-    plain_message = strip_tags(html_content)
-
-    send_email(
+    queue_email(
+        kind="booking_confirmation",
+        booking=booking,
+        recipient=booking.user.email,
         subject=subject,
-        plain_message=plain_message,
-        html_content=html_content,
-        to_email=[booking.user.email],
+        html_body=html_content,
     )
 
-    return f"Confirmation email sent for booking {booking_id}"
+    return f"Confirmation email queued for booking {booking_id}"
 
 
 @shared_task
@@ -67,6 +69,7 @@ def send_booking_status_email(booking_id, status_message):
     try:
         booking = SeatBooking.objects.select_related("event", "user").get(id=booking_id)
     except SeatBooking.DoesNotExist:
+        logger.warning("Booking %s not found; status email not sent", booking_id)
         return f"Booking {booking_id} not found"
 
     subject = f"Booking update - {booking.event.title}"
@@ -80,13 +83,14 @@ def send_booking_status_email(booking_id, status_message):
             "status_message": status_message,
         },
     )
-    send_email(
+    queue_email(
+        kind="booking_status",
+        booking=booking,
+        recipient=booking.user.email,
         subject=subject,
-        plain_message=strip_tags(html_content),
-        html_content=html_content,
-        to_email=[booking.user.email],
+        html_body=html_content,
     )
-    return f"Status email sent for booking {booking_id}"
+    return f"Status email queued for booking {booking_id}"
 
 
 @shared_task

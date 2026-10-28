@@ -1,8 +1,14 @@
 import { fetcher } from "@/lib/fetcher";
+import { IEvent } from "@/models/Event";
 import { GenericListResponse } from "@/types/common";
 import * as EventTypes from "@/types/event.types";
 
 export const eventServices = {
+	// Silent: used for background seat-count refreshes on the event page.
+	getPublicEvent: async (eventId: string) => {
+		return await fetcher<IEvent>(`/events/${eventId}/`, { silent: true });
+	},
+
 	getEventsForVendor: async (params?: { [key: string]: string }) => {
 		return await fetcher<GenericListResponse<EventTypes.IVendorEventListItem>>(
 			"/events/vendor-event/",

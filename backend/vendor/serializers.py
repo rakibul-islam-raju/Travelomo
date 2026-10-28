@@ -3,10 +3,16 @@ from .models import Vendor, VendorPaymentMethod
 
 
 class VendorPaymentMethodSerializer(serializers.ModelSerializer):
+    channel_label = serializers.CharField(
+        source="get_channel_display", read_only=True
+    )
+
     class Meta:
         model = VendorPaymentMethod
         fields = [
             "id",
+            "channel",
+            "channel_label",
             "name",
             "account_name",
             "account_number",

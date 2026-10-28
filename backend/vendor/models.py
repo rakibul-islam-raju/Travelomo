@@ -51,9 +51,20 @@ class Vendor(BaseModel):
 
 
 class VendorPaymentMethod(BaseModel):
+    # DEC-001: the external channels a vendor may ask customers to pay through.
+    CHANNEL_CHOICES = [
+        ("bkash", "bKash"),
+        ("nagad", "Nagad"),
+        ("rocket", "Rocket"),
+        ("upay", "Upay"),
+        ("bank_transfer", "Bank transfer"),
+    ]
+
     vendor = models.ForeignKey(
         Vendor, on_delete=models.CASCADE, related_name="payment_methods"
     )
+    channel = models.CharField(max_length=20, choices=CHANNEL_CHOICES)
+    # The vendor's own label for this account, e.g. "bKash Personal".
     name = models.CharField(max_length=60)
     account_name = models.CharField(max_length=120)
     account_number = models.CharField(max_length=80)

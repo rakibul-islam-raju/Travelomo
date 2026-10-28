@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +11,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useSubmitOnce } from "@/hooks/useSubmitOnce";
+import { getErrorMessage, isApiError } from "@/lib/apiError";
 import { bookingServices } from "@/services/bookingService";
 import { IBooking } from "@/types/booking.types";
 import { useMutation } from "@tanstack/react-query";
 import {
+	AlertCircle,
 	Check,
 	Clock3,
 	Copy,
@@ -28,8 +32,13 @@ interface PaymentReferenceFormProps {
 	booking: IBooking;
 	onSubmitted: (booking: IBooking) => void;
 	onCancel?: () => void;
+	/** Start over after the hold expires or the booking changes on the server. */
+	onExpired?: () => void;
 	compact?: boolean;
 }
+
+// The reservation is no longer accepting a reference (API_CONTRACT.md §2.6).
+const STALE_BOOKING_CODES = ["booking_expired", "invalid_booking_state", "not_found"];
 
 function formatMoney(amount: string, currency: string) {
 	return new Intl.NumberFormat("en-BD", {
@@ -51,8 +60,10 @@ export function PaymentReferenceForm({
 	booking,
 	onSubmitted,
 	onCancel,
+	onExpired,
 	compact = false,
 }: PaymentReferenceFormProps) {
+	const submitOnce = useSubmitOnce();
 	const methods = booking.payment_methods ?? [];
 	const [methodId, setMethodId] = useState(methods[0]?.id ?? "");
 	const [transactionId, setTransactionId] = useState("");
@@ -73,7 +84,12 @@ export function PaymentReferenceForm({
 	const timeLeft = expiresAt - now;
 	const hasExpired = timeLeft <= 0;
 
-	const { mutate: submitReference, isPending } = useMutation({
+	const {
+		mutate: submitReference,
+		isPending,
+		error,
+		reset: clearError,
+	} = useMutation({
 		mutationFn: () =>
 			bookingServices.submitPaymentReference(booking.id, {
 				payment_method: methodId,
@@ -86,6 +102,18 @@ export function PaymentReferenceForm({
 			onSubmitted(updatedBooking);
 		},
 	});
+
+	const apiError = isApiError(error) ? error : null;
+	const transactionIdError = apiError?.fieldErrors.transaction_id?.[0];
+	const paymentMethodError = apiError?.fieldErrors.payment_method?.[0];
+	const isStale = STALE_BOOKING_CODES.includes(apiError?.code ?? "");
+	const generalError =
+		error && !transactionIdError && !paymentMethodError
+			? getErrorMessage(error)
+			: null;
+
+	const handleSubmit = () =>
+		submitOnce((release) => submitReference(undefined, { onSettled: release }));
 
 	const copyAccountNumber = async () => {
 		if (!selectedMethod) return;
@@ -140,7 +168,13 @@ export function PaymentReferenceForm({
 
 			<div className="space-y-2">
 				<Label htmlFor={`payment-method-${booking.id}`}>Pay using</Label>
-				<Select value={methodId} onValueChange={setMethodId}>
+				<Select
+					value={methodId}
+					onValueChange={(value) => {
+						setMethodId(value);
+						clearError();
+					}}
+				>
 					<SelectTrigger id={`payment-method-${booking.id}`}>
 						<SelectValue placeholder="Choose a payment method" />
 					</SelectTrigger>
@@ -152,6 +186,9 @@ export function PaymentReferenceForm({
 						))}
 					</SelectContent>
 				</Select>
+				{paymentMethodError && (
+					<p className="text-sm text-destructive">{paymentMethodError}</p>
+				)}
 			</div>
 
 			{selectedMethod && (
@@ -164,6 +201,10 @@ export function PaymentReferenceForm({
 						<div className="flex justify-between gap-4">
 							<span className="text-muted-foreground">Method</span>
 							<span className="font-medium">{selectedMethod.name}</span>
+						</div>
+						<div className="flex justify-between gap-4">
+							<span className="text-muted-foreground">Channel</span>
+							<span className="font-medium">{selectedMethod.channel_label}</span>
 						</div>
 						<div className="flex justify-between gap-4">
 							<span className="text-muted-foreground">Account name</span>
@@ -209,28 +250,69 @@ export function PaymentReferenceForm({
 						className="pl-9 font-mono"
 						placeholder="Enter the ID from your payment receipt"
 						value={transactionId}
-						onChange={(event) => setTransactionId(event.target.value)}
-						disabled={hasExpired || isPending}
+						onChange={(event) => {
+							setTransactionId(event.target.value);
+							clearError();
+						}}
+						disabled={hasExpired || isStale || isPending}
+						aria-invalid={Boolean(transactionIdError)}
+						aria-describedby={
+							transactionIdError ? `transaction-id-error-${booking.id}` : undefined
+						}
 					/>
 				</div>
+				{transactionIdError && (
+					<p
+						id={`transaction-id-error-${booking.id}`}
+						className="text-sm text-destructive"
+					>
+						{transactionIdError}
+					</p>
+				)}
 				<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
 					<ShieldCheck className="h-3.5 w-3.5" />
 					Submission does not confirm payment. The organizer verifies it manually.
 				</p>
 			</div>
 
+			{(hasExpired || generalError) && (
+				<Alert variant="destructive">
+					<AlertCircle className="h-4 w-4" />
+					<AlertDescription className="space-y-3">
+						<p>
+							{generalError ??
+								"This seat hold has expired. Start a new reservation to book these seats."}
+						</p>
+						{onExpired && (hasExpired || isStale) && (
+							<Button type="button" size="sm" variant="outline" onClick={onExpired}>
+								Start over
+							</Button>
+						)}
+					</AlertDescription>
+				</Alert>
+			)}
+
 			<div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-				{onCancel && (
-					<Button type="button" variant="outline" onClick={onCancel}>
+				{onCancel && !hasExpired && !isStale && (
+					<Button
+						type="button"
+						variant="outline"
+						onClick={onCancel}
+						disabled={isPending}
+					>
 						Cancel reservation
 					</Button>
 				)}
 				<Button
 					type="button"
 					disabled={
-						hasExpired || isPending || !methodId || transactionId.trim().length < 4
+						hasExpired ||
+						isStale ||
+						isPending ||
+						!methodId ||
+						transactionId.trim().length < 4
 					}
-					onClick={() => submitReference()}
+					onClick={handleSubmit}
 				>
 					{isPending ? (
 						"Submitting..."

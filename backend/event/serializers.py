@@ -1,3 +1,6 @@
+from decimal import Decimal
+
+from django.db.models import Count, Sum
 from rest_framework import serializers
 
 from vendor.serializers import VendorPaymentMethodSerializer
@@ -115,6 +118,59 @@ class EventDetailSerializer(serializers.ModelSerializer):
         }
 
 
+class AdminEventDetailSerializer(EventDetailSerializer):
+    booking_summary = serializers.SerializerMethodField()
+
+    class Meta(EventDetailSerializer.Meta):
+        fields = EventDetailSerializer.Meta.fields + ["booking_summary"]
+
+    def get_vendor(self, obj) -> dict:
+        vendor = obj.vendor
+        return {
+            "id": vendor.id,
+            "store_name": vendor.store_name,
+            "logo": vendor.logo.url if vendor.logo else None,
+            "store_email": vendor.store_email,
+            "store_phone": str(vendor.store_phone) if vendor.store_phone else None,
+            "owner_email": vendor.user.email,
+            "is_approved": vendor.is_approved,
+        }
+
+    def get_booking_summary(self, obj) -> dict:
+        """Bookings, seats and snapshot amounts per status, from one grouped query."""
+        rows = {
+            row["status"]: row
+            for row in SeatBooking.objects.filter(event=obj)
+            .values("status")
+            .annotate(
+                bookings=Count("id"),
+                seats=Sum("seat_number"),
+                amount=Sum("total_amount"),
+            )
+            .order_by()
+        }
+        statuses = []
+        for status, label in SeatBooking.BOOKING_STATUS_CHOICES:
+            row = rows.get(status, {})
+            statuses.append(
+                {
+                    "status": status,
+                    "label": label,
+                    "bookings": row.get("bookings", 0),
+                    "seats": row.get("seats") or 0,
+                    "amount": str(row.get("amount") or Decimal("0.00")),
+                }
+            )
+        confirmed = rows.get("confirmed", {})
+        return {
+            "total_bookings": sum(row["bookings"] for row in statuses),
+            "statuses": statuses,
+            # Vendor-approved booking snapshots only; Travelomo cannot confirm settlement.
+            "verified_booking_value": str(confirmed.get("amount") or Decimal("0.00")),
+            "currency": "BDT",
+        }
+
+
 class VendorEventListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
@@ -161,6 +217,9 @@ class ManualPaymentSubmissionSerializer(serializers.ModelSerializer):
     reviewed_by_name = serializers.CharField(
         source="reviewed_by.full_name", read_only=True, allow_null=True
     )
+    channel_label = serializers.CharField(
+        source="get_channel_display", read_only=True
+    )
 
     class Meta:
         model = ManualPaymentSubmission
@@ -168,6 +227,10 @@ class ManualPaymentSubmissionSerializer(serializers.ModelSerializer):
             "id",
             "payment_method",
             "payment_method_name",
+            "channel",
+            "channel_label",
+            "amount",
+            "currency",
             "transaction_id",
             "status",
             "reviewed_by_name",

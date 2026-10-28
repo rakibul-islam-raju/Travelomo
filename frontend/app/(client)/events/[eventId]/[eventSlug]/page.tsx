@@ -22,6 +22,23 @@ type Props = {
 	params: Promise<{ eventId: string; eventSlug: string }>;
 };
 
+// The API's TIME_ZONE; booking closes on the event's start date there.
+const BOOKING_TIME_ZONE = "Asia/Dhaka";
+
+// Mirrors the API's reservation rules so the page doesn't offer a booking it would reject.
+function getUnavailableReason(event: IEvent): string | null {
+	if (event.status !== "published" || event.is_archived) {
+		return "This event isn't open for booking right now.";
+	}
+	const today = new Intl.DateTimeFormat("en-CA", {
+		timeZone: BOOKING_TIME_ZONE,
+	}).format(new Date());
+	if (event.start_date <= today) {
+		return "Booking has closed because this event has started.";
+	}
+	return null;
+}
+
 async function getEvent(eventId: string): Promise<IEvent | null> {
 	try {
 		return await serverFetcher<IEvent>(`/events/${eventId}/`);
@@ -212,6 +229,7 @@ export default async function EventDetailsPage({ params }: Props) {
 							availableSeats={event.available_seats}
 							price={event.price}
 							cancellationDays={event.cancellation_days ?? 0}
+							unavailableReason={getUnavailableReason(event)}
 						/>
 					</div>
 				</div>

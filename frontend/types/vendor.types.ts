@@ -27,8 +27,13 @@ export interface MeVendor {
 	payment_methods?: VendorPaymentMethod[];
 }
 
+// Matches VendorPaymentMethod.CHANNEL_CHOICES in the API (DECISIONS.md, DEC-001).
+export type PaymentChannel = "bkash" | "nagad" | "rocket" | "upay" | "bank_transfer";
+
 export interface VendorPaymentMethod {
 	id: string;
+	channel: PaymentChannel;
+	channel_label: string;
 	name: string;
 	account_name: string;
 	account_number: string;
@@ -39,6 +44,7 @@ export interface VendorPaymentMethod {
 }
 
 export interface VendorPaymentMethodInput {
+	channel: PaymentChannel | "";
 	name: string;
 	account_name: string;
 	account_number: string;

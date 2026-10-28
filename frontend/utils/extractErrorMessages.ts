@@ -1,63 +1,89 @@
-export const extractErrorMessage = (error: any): string => {
-	let errorMessage = "Something went wrong";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-	if (error?.detail) {
-		errorMessage = error.detail;
-	} else if (error?.msg) {
-		errorMessage = error.msg;
-	} else if (error?.message) {
-		errorMessage = error.message;
-	} else if (error?.error) {
-		errorMessage = error.error;
-	} else if (error?.non_field_errors) {
-		errorMessage = error.non_field_errors;
-	} else if (Array.isArray(error)) {
-		const errors = error.filter((err: any) => typeof err === "string");
-		errorMessage = errors.join(", ");
-	} else if (typeof error === "object") {
-		const errors = [];
-		for (const key in error) {
-			if (Array.isArray(error[key])) {
-				const fieldErrors = error[key].map(
-					(msg) => `${key.toUpperCase()}: ${msg}`
-				);
-				errors.push(...fieldErrors);
-			}
+// Error bodies follow API_CONTRACT.md §2: either { detail, code? } or
+// { <field>: string[], non_field_errors: string[] }. Field values may still be
+// plain strings on older endpoints, so both forms are accepted.
+
+export const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again.";
+export const NETWORK_ERROR_MESSAGE =
+	"We couldn't reach Travelomo. Check your connection and try again.";
+
+const STATUS_MESSAGES: Record<number, string> = {
+	0: NETWORK_ERROR_MESSAGE,
+	400: "Please check your details and try again.",
+	401: "Please log in to continue.",
+	403: "You don't have permission to do that.",
+	404: "We couldn't find what you were looking for.",
+	409: "This changed in the meantime. Refresh and try again.",
+	429: "Too many attempts. Please wait a moment and try again.",
+	500: "Something went wrong on our side. Please try again.",
+	502: "Travelomo is temporarily unavailable. Please try again shortly.",
+	503: "Travelomo is temporarily unavailable. Please try again shortly.",
+	504: "Travelomo is temporarily unavailable. Please try again shortly.",
+};
+
+const GENERAL_ERROR_KEYS = ["detail", "msg", "message", "error"];
+const NON_FIELD_ERRORS = "non_field_errors";
+
+export const getStatusMessage = (status?: number): string =>
+	(status !== undefined && STATUS_MESSAGES[status]) || DEFAULT_ERROR_MESSAGE;
+
+const toMessages = (value: unknown): string[] => {
+	if (typeof value === "string") return value ? [value] : [];
+	if (Array.isArray(value)) {
+		return value.filter((item): item is string => typeof item === "string");
+	}
+	return [];
+};
+
+/** Field errors keyed by field name; nested serializer errors use "parent.child". */
+export const extractFieldErrors = (
+	error: any,
+	prefix = ""
+): Record<string, string[]> => {
+	if (!error || typeof error !== "object" || Array.isArray(error)) return {};
+
+	const fieldErrors: Record<string, string[]> = {};
+	for (const [key, value] of Object.entries(error)) {
+		if (!prefix && (GENERAL_ERROR_KEYS.includes(key) || key === "code")) continue;
+		const path = prefix ? `${prefix}.${key}` : key;
+
+		if (value && typeof value === "object" && !Array.isArray(value)) {
+			Object.assign(fieldErrors, extractFieldErrors(value, path));
+			continue;
 		}
-		errorMessage = errors.join(", ");
-	} else if (error?.status === 400) {
-		errorMessage = "Bad Request";
-	} else if (error?.status === 401) {
-		errorMessage = "Unauthorized";
-	} else if (error?.status === 403) {
-		errorMessage = "Forbidden";
-	} else if (error?.status === 404) {
-		errorMessage = "Not Found";
-	} else if (error?.status === 405) {
-		errorMessage = "Method Not Allowed";
-	} else if (error?.status === 408) {
-		errorMessage = "Request Timeout";
-	} else if (error?.status === 409) {
-		errorMessage = "Conflict";
-	} else if (error?.status === 413) {
-		errorMessage = "Payload Too Large";
-	} else if (error?.status === 414) {
-		errorMessage = "URI Too Long";
-	} else if (error?.status === 415) {
-		errorMessage = "Unsupported Media Type";
-	} else if (error?.status === 500) {
-		errorMessage = "Internal Server Error";
-	} else if (error?.status === 501) {
-		errorMessage = "Not Implemented";
-	} else if (error?.status === 502) {
-		errorMessage = "Bad Gateway";
-	} else if (error?.status === 503) {
-		errorMessage = "Service Unavailable";
-	} else if (error?.status === 504) {
-		errorMessage = "Gateway Timeout";
-	} else if (typeof error === "string") {
-		errorMessage = error;
+		const messages = toMessages(value);
+		if (messages.length) fieldErrors[path] = messages;
+	}
+	return fieldErrors;
+};
+
+const fieldLabel = (path: string) => {
+	const label = path.split(".").pop()!.replace(/_/g, " ");
+	return label.charAt(0).toUpperCase() + label.slice(1);
+};
+
+export const extractErrorMessage = (error: any, status?: number): string => {
+	if (typeof error === "string") return error || getStatusMessage(status);
+	if (error instanceof Error) return error.message || getStatusMessage(status);
+	if (Array.isArray(error)) {
+		return toMessages(error).join(" ") || getStatusMessage(status);
 	}
 
-	return errorMessage;
+	if (error && typeof error === "object") {
+		for (const key of GENERAL_ERROR_KEYS) {
+			const [message] = toMessages(error[key]);
+			if (message) return message;
+		}
+
+		const messages = Object.entries(extractFieldErrors(error)).flatMap(
+			([path, fieldMessages]) =>
+				path === NON_FIELD_ERRORS
+					? fieldMessages
+					: fieldMessages.map((message) => `${fieldLabel(path)}: ${message}`)
+		);
+		if (messages.length) return messages.join(" ");
+	}
+
+	return getStatusMessage(status);
 };

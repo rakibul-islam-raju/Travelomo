@@ -1,3 +1,5 @@
+import { PaymentChannel } from "./vendor.types";
+
 export interface IBookingCreate {
 	event: string;
 	seat_number: number;
@@ -13,6 +15,8 @@ export type BookingStatus =
 
 export interface IPaymentMethod {
 	id: string;
+	channel: PaymentChannel;
+	channel_label: string;
 	name: string;
 	account_name: string;
 	account_number: string;
@@ -26,8 +30,12 @@ export interface IPaymentSubmission {
 	id: string;
 	payment_method: string;
 	payment_method_name: string;
+	channel: PaymentChannel;
+	channel_label: string;
+	amount: string;
+	currency: string;
 	transaction_id: string;
-	status: "pending" | "verified" | "rejected";
+	status: "pending" | "verified" | "rejected" | "withdrawn" | "expired";
 	reviewed_by_name: string | null;
 	reviewed_at: string | null;
 	rejection_reason: string;

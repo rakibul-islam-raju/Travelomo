@@ -15,7 +15,7 @@ export const eventApi = baseApi.injectEndpoints({
 
 		getEventDetails: builder.query({
 			query: (id) => ({
-				url: `/vendors/${id}/`,
+				url: `/events/admin-event/${id}/`,
 				method: "GET",
 			}),
 			providesTags: ["EventDetails"],

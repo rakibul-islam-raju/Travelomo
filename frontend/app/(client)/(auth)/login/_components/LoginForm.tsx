@@ -6,6 +6,7 @@ import { TextField } from "@/components/molecules/form/TextField";
 import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
 import { useZodForm } from "@/hooks/useZodForm";
+import { getSafeRedirectPath } from "@/lib/redirect";
 import { authServices } from "@/services/authServices";
 import { useAuthStore } from "@/stores/authStore";
 import { useMutation } from "@tanstack/react-query";
@@ -32,10 +33,7 @@ export default function LoginForm() {
 			onSuccess: (response) => {
 				toast.success("Login successful");
 				setUser(response.user);
-				const callbackUrl = searchParams.get("callbackUrl");
-				router.replace(
-					callbackUrl && callbackUrl.startsWith("/") ? callbackUrl : "/"
-				);
+				router.replace(getSafeRedirectPath(searchParams.get("callbackUrl")));
 			},
 		});
 	};

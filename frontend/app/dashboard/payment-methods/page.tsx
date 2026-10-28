@@ -11,10 +11,18 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { vendorServices } from "@/services/vendorServices";
 import {
+	PaymentChannel,
 	VendorPaymentMethod,
 	VendorPaymentMethodInput,
 } from "@/types/vendor.types";
@@ -31,7 +39,17 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
+// Matches VendorPaymentMethod.CHANNEL_CHOICES in the API (DECISIONS.md, DEC-001).
+const CHANNELS: { value: PaymentChannel; label: string }[] = [
+	{ value: "bkash", label: "bKash" },
+	{ value: "nagad", label: "Nagad" },
+	{ value: "rocket", label: "Rocket" },
+	{ value: "upay", label: "Upay" },
+	{ value: "bank_transfer", label: "Bank transfer" },
+];
+
 const emptyForm: VendorPaymentMethodInput = {
+	channel: "",
 	name: "",
 	account_name: "",
 	account_number: "",
@@ -65,6 +83,7 @@ export default function PaymentMethodsPage() {
 	const openEdit = (method: VendorPaymentMethod) => {
 		setEditing(method);
 		setForm({
+			channel: method.channel,
 			name: method.name,
 			account_name: method.account_name,
 			account_number: method.account_number,
@@ -110,7 +129,10 @@ export default function PaymentMethodsPage() {
 	});
 
 	const valid =
-		form.name.trim() && form.account_name.trim() && form.account_number.trim();
+		form.channel &&
+		form.name.trim() &&
+		form.account_name.trim() &&
+		form.account_number.trim();
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
@@ -150,7 +172,7 @@ export default function PaymentMethodsPage() {
 					<Card key={method.id} className={!method.is_active ? "opacity-70" : ""}>
 						<CardHeader className="pb-3">
 							<div className="flex items-start justify-between gap-3">
-								<div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><CreditCard className="h-5 w-5" /></div><div><CardTitle className="text-lg">{method.name}</CardTitle><p className={`mt-1 flex items-center gap-1 text-xs ${method.is_active ? "text-green-700" : "text-muted-foreground"}`}>{method.is_active && <CheckCircle2 className="h-3.5 w-3.5" />}{method.is_active ? "Shown to customers" : "Paused"}</p></div></div>
+								<div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><CreditCard className="h-5 w-5" /></div><div><CardTitle className="text-lg">{method.name}</CardTitle><p className="mt-1 text-xs text-muted-foreground">{method.channel_label}</p><p className={`mt-1 flex items-center gap-1 text-xs ${method.is_active ? "text-green-700" : "text-muted-foreground"}`}>{method.is_active && <CheckCircle2 className="h-3.5 w-3.5" />}{method.is_active ? "Shown to customers" : "Paused"}</p></div></div>
 								<Switch checked={method.is_active} disabled={toggling} onCheckedChange={() => toggleMethod(method)} aria-label={`${method.is_active ? "Pause" : "Enable"} ${method.name}`} />
 							</div>
 						</CardHeader>
@@ -167,7 +189,18 @@ export default function PaymentMethodsPage() {
 				<DialogContent className="sm:max-w-lg">
 					<DialogHeader><DialogTitle>{editing ? "Edit payment method" : "Add payment method"}</DialogTitle><p className="text-sm text-muted-foreground">Customers will use these details to pay you outside Travelomo.</p></DialogHeader>
 					<div className="space-y-4 py-2">
-						<div className="space-y-2"><Label htmlFor="method-name">Method name</Label><Input id="method-name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Example: bKash Personal or Bank Transfer" /></div>
+						<div className="space-y-2">
+							<Label htmlFor="method-channel">Channel</Label>
+							<Select value={form.channel} onValueChange={(value) => setForm({ ...form, channel: value as PaymentChannel })}>
+								<SelectTrigger id="method-channel"><SelectValue placeholder="Choose how customers pay" /></SelectTrigger>
+								<SelectContent>
+									{CHANNELS.map((channel) => (
+										<SelectItem key={channel.value} value={channel.value}>{channel.label}</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="space-y-2"><Label htmlFor="method-name">Label</Label><Input id="method-name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Example: bKash Personal or City Bank Savings" /></div>
 						<div className="space-y-2"><Label htmlFor="account-name">Account holder name</Label><Input id="account-name" value={form.account_name} onChange={(event) => setForm({ ...form, account_name: event.target.value })} placeholder="Name customers should see" /></div>
 						<div className="space-y-2"><Label htmlFor="account-number">Account or wallet number</Label><Input id="account-number" value={form.account_number} onChange={(event) => setForm({ ...form, account_number: event.target.value })} placeholder="Example: 01XXXXXXXXX" /></div>
 						<div className="space-y-2"><Label htmlFor="instructions">Helpful instructions (optional)</Label><Textarea id="instructions" value={form.instructions} onChange={(event) => setForm({ ...form, instructions: event.target.value })} placeholder="Example: Use Send Money and include your name in the reference." rows={3} /></div>

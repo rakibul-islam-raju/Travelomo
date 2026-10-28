@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { BASE_API_URL } from "@/config";
+import { ApiError, isApiError } from "@/lib/apiError";
 import { extractErrorMessage } from "@/utils/extractErrorMessages";
 import { toast } from "sonner";
 
@@ -14,6 +15,8 @@ export type FetcherOptions = {
 	method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	body?: any;
 	params?: Params;
+	/** Skip the error toast because the caller shows the error itself. */
+	silent?: boolean;
 };
 
 const EXCLUDED_ENDPOINTS_FOR_401 = ["/auth/login/", "/auth/refresh/"];
@@ -59,10 +62,26 @@ const refreshToken = async () => {
 	return refreshPromise;
 };
 
-export async function fetcher<T = any>(
+const sessionExpired = () =>
+	new ApiError("Your session has expired. Please log in again.", {
+		status: 401,
+		code: "session_expired",
+	});
+
+// Error bodies may be empty or HTML (e.g. a gateway 502), not just JSON.
+const readErrorBody = async (res: Response) => {
+	try {
+		const text = await res.text();
+		return text ? JSON.parse(text) : null;
+	} catch {
+		return null;
+	}
+};
+
+async function request<T>(
 	url: string,
-	options: FetcherOptions = {},
-	retryCount = 0
+	options: FetcherOptions,
+	retryCount: number
 ): Promise<T> {
 	const { revalidate = 0, headers, method = "GET", body } = options;
 	const BASE_URL = BASE_API_URL;
@@ -71,8 +90,9 @@ export async function fetcher<T = any>(
 		? `${BASE_URL}${url}?${qParams}`
 		: `${BASE_URL}${url}`;
 
+	let res: Response;
 	try {
-		const res = await fetch(fullUrl, {
+		res = await fetch(fullUrl, {
 			method,
 			credentials: "include",
 			headers: {
@@ -85,45 +105,61 @@ export async function fetcher<T = any>(
 				revalidate === false
 					? { revalidate: 0, tags: ["no-store"] }
 					: { revalidate: revalidate || 0 },
-		});
+		} as RequestInit);
+	} catch {
+		throw ApiError.network();
+	}
 
-		// Handle 401 Unauthorized
-		if (res.status === 401 && !EXCLUDED_ENDPOINTS_FOR_401.includes(url)) {
-			// Prevent infinite retry loops
-			if (retryCount >= 1) {
-				toast.error("Session expired. Please login again.");
-				throw new Error("Authentication failed after token refresh");
-			}
-
-			try {
-				const refreshResult = await refreshToken();
-				if (refreshResult?.success) {
-					// Retry the original request with incremented retry count
-					return fetcher(url, options, retryCount + 1);
-				} else {
-					throw new Error("Failed to refresh token");
-				}
-			} catch (error) {
-				toast.error("Session expired. Please login again.");
-				throw error;
-			}
+	// Handle 401 Unauthorized
+	if (res.status === 401 && !EXCLUDED_ENDPOINTS_FOR_401.includes(url)) {
+		// Prevent infinite retry loops
+		if (retryCount >= 1) {
+			throw sessionExpired();
 		}
 
-		if (!res.ok) {
-			const errorRes = await res.json();
-			const errorMessage = extractErrorMessage(errorRes);
-			throw new Error(errorMessage);
+		let refreshResult;
+		try {
+			refreshResult = await refreshToken();
+		} catch {
+			throw sessionExpired();
 		}
-
-		if (res.status === 204) {
-			return undefined as T;
+		if (!refreshResult?.success) {
+			throw sessionExpired();
 		}
+		// Retry the original request with incremented retry count
+		return fetcher<T>(url, options, retryCount + 1);
+	}
 
-		return res.json();
+	if (!res.ok) {
+		throw ApiError.fromResponse(res.status, await readErrorBody(res));
+	}
+
+	if (res.status === 204) {
+		return undefined as T;
+	}
+
+	return res.json();
+}
+
+/**
+ * Client-side API request. Failures are thrown as `ApiError` and shown in a
+ * toast unless `silent` is set.
+ */
+export async function fetcher<T = any>(
+	url: string,
+	options: FetcherOptions = {},
+	retryCount = 0
+): Promise<T> {
+	try {
+		return await request<T>(url, options, retryCount);
 	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : "An unknown error occurred";
-		toast.error(errorMessage);
-		throw error;
+		const apiError = isApiError(error)
+			? error
+			: new ApiError(extractErrorMessage(error), { status: 0 });
+		// A retried request reports through the original call, so each failure toasts once.
+		if (!options.silent && retryCount === 0) {
+			toast.error(apiError.message);
+		}
+		throw apiError;
 	}
 }

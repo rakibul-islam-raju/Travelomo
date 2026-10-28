@@ -1,4 +1,3 @@
-from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework import status, generics
 from rest_framework.response import Response
@@ -11,6 +10,7 @@ from .models import Event, SeatBooking
 from .permissions import IsEventOwner
 from .filters import EventFilter, VendorEventFilter, AdminEventFilter
 from .serializers import (
+    AdminEventDetailSerializer,
     EventCreateSerializer,
     EventListSerializer,
     EventDetailSerializer,
@@ -35,7 +35,8 @@ class EventListCreateView(generics.ListCreateAPIView):
     * This api is for user, vendor and admin
 
     - Vendor can only see their own events
-    - User can see all published and running events
+    - Customers and anonymous users see published, unarchived events that
+      are still open for booking (sold-out events included)
     - Admin can see all events
 
 
@@ -45,24 +46,13 @@ class EventListCreateView(generics.ListCreateAPIView):
     filterset_class = EventFilter
 
     def get_queryset(self):
-        # if user is vendor
-        if self.request.user.role == "vendor":
-            return Event.objects.filter(
-                vendor=self.request.user.vendor,
-                is_deleted=False,
-            )
-        # if user is admin
-        elif self.request.user.role == "admin":
-            return Event.objects.all()
-        # if user is user
-        else:
-            return Event.objects.filter(
-                is_deleted=False,
-                is_archived=False,
-                status="published",
-                start_date__lte=timezone.now(),
-                end_date__gte=timezone.now(),
-            )
+        role = getattr(self.request.user, "role", None)
+        events = Event.objects.select_related("vendor")
+        if role == "vendor":
+            return events.filter(vendor=self.request.user.vendor)
+        if role == "admin":
+            return events.all()
+        return events.publicly_listed()
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -86,7 +76,7 @@ class EventDetailView(generics.RetrieveAPIView):
     * This api is only for user and vendor
 
     - Vendor can only see their own event details
-    - User can see all published and running events details
+    - User can see published, unarchived events, including ones that have started
     """
 
     serializer_class = EventDetailSerializer
@@ -97,7 +87,7 @@ class EventDetailView(generics.RetrieveAPIView):
         if getattr(self.request.user, "role", None) == "admin":
             return Event.objects.all()
 
-        return Event.objects.filter(is_archived=False, status="published")
+        return Event.objects.publicly_visible()
 
 
 #  View only for vendor owner
@@ -169,12 +159,17 @@ class VendorEventUpdateView(generics.RetrieveDestroyAPIView):
 
 # view for admin
 class AdminEventListView(generics.ListAPIView):
-    queryset = Event.objects.all()
+    queryset = Event.objects.select_related("vendor").order_by("-created_at", "-id")
     serializer_class = EventListSerializer
     permission_classes = [IsSystemAdmin]
     filter_backends = [DjangoFilterBackend]
     filterset_class = AdminEventFilter
-    ordering = ["-created_at"]
+
+
+class AdminEventDetailView(generics.RetrieveAPIView):
+    queryset = Event.objects.select_related("vendor__user")
+    serializer_class = AdminEventDetailSerializer
+    permission_classes = [IsSystemAdmin]
 
 
 class BookSeatView(generics.GenericAPIView):
@@ -234,7 +229,7 @@ class MyBookingsView(generics.ListAPIView):
                 "payment_submission__reviewed_by",
             )
             .prefetch_related("event__vendor__payment_methods")
-            .order_by("-created_at")
+            .order_by("-created_at", "-id")
         )
 
 
@@ -259,7 +254,7 @@ class VendorEventBookingsView(generics.ListAPIView):
                 "payment_submission__payment_method",
                 "payment_submission__reviewed_by",
             )
-            .order_by("-created_at")
+            .order_by("-created_at", "-id")
         )
 
 

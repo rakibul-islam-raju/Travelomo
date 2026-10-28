@@ -7,6 +7,7 @@ from .views import (
     VendorEventListView,
     VendorEventUpdateView,
     AdminEventListView,
+    AdminEventDetailView,
     BookSeatView,
     MyBookingsView,
     CancelBookingView,
@@ -19,6 +20,11 @@ app_name = "event"
 
 urlpatterns = [
     path("events/admin-event/", AdminEventListView.as_view(), name="admin-event-list"),
+    path(
+        "events/admin-event/<str:pk>/",
+        AdminEventDetailView.as_view(),
+        name="admin-event-detail",
+    ),
     path(
         "events/vendor-event/", VendorEventListView.as_view(), name="vendor-event-list"
     ),

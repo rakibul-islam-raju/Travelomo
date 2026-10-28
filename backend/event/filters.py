@@ -11,8 +11,10 @@ class EventFilter(filters.FilterSet):
     available_seats = filters.NumberFilter(
         field_name="available_seats", lookup_expr="gte"
     )
-    start_price = filters.NumberFilter(field_name="price", lookup_expr="gte")
-    end_price = filters.NumberFilter(field_name="price", lookup_expr="lte")
+    # `price` is a Python property, so these filter on the database expression
+    # for the price a customer actually pays.
+    start_price = filters.NumberFilter(method="effective_price_filter")
+    end_price = filters.NumberFilter(method="effective_price_filter")
 
     class Meta:
         model = Event
@@ -36,6 +38,12 @@ class EventFilter(filters.FilterSet):
             | Q(location__icontains=value)
             | Q(tags__icontains=value)
         ).distinct()
+
+    def effective_price_filter(self, queryset, name, value):
+        lookup = "gte" if name == "start_price" else "lte"
+        return queryset.with_effective_price().filter(
+            **{f"effective_price__{lookup}": value}
+        )
 
 
 class VendorEventFilter(EventFilter):

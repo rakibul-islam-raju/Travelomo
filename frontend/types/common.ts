@@ -6,8 +6,8 @@ export type AuthTokens = {
 export interface GenericListResponse<T> {
 	count: number;
 	results: T[];
-	next: string;
-	previous: string;
+	next: string | null;
+	previous: string | null;
 }
 
 export interface GenericListParams {

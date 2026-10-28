@@ -24,6 +24,7 @@ docker-compose down              # Stop all services
 cd frontend && npm run dev       # Dev server with Turbopack
 cd frontend && npm run build     # Production build
 cd frontend && npm run lint      # ESLint
+cd frontend && npm run test      # Component/unit tests (vitest, __tests__/)
 ```
 
 ### Admin Panel (Vite) — runs on port 5173
@@ -43,6 +44,7 @@ cd backend && python manage.py migrate
 cd backend && python manage.py test                    # All tests
 cd backend && python manage.py test event.tests        # Single app tests
 cd backend && python manage.py create_admin            # Seed admin user
+cd backend && python manage.py check_email_deliveries  # Email delivery health; exits non-zero on failed/stuck mail
 ```
 
 ## Architecture
@@ -53,6 +55,7 @@ cd backend && python manage.py create_admin            # Seed admin user
 - **API prefix:** `/api/v1/` — auth at `/api/v1/auth/`, stats at `/api/v1/stats/`
 - **Swagger:** served at root URL via drf-spectacular
 - **Celery:** configured in `core/eventcelery.py`, used for email notifications (`notification/tasks.py`, `event/tasks.py`)
+- **Booking email delivery:** `notification.delivery.queue_email` stores an `EmailDelivery` row and the `deliver_email` task sends it, retrying temporary SMTP failures; failures are visible in Django admin
 - **Custom user model:** `user/models.py` with custom manager in `user/managers.py`
 - **Environment:** uses `django-environ`, reads from `backend/.env`
 

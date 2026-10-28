@@ -1,8 +1,10 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 from decimal import Decimal
 import uuid
 
 from django.db import models
+from django.db.models import Q, Value
+from django.db.models.functions import Coalesce, NullIf
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -14,6 +16,34 @@ from utils.models import BaseModel
 def generate_image_path(instance, filename):
     vendor_store_name = instance.vendor.store_name
     return f"event_images/{vendor_store_name}/{filename}"
+
+
+class EventQuerySet(models.QuerySet):
+    def with_effective_price(self):
+        """Alias `effective_price`, the database twin of `Event.price`."""
+        if "effective_price" in self.query.annotations:
+            return self
+        return self.alias(
+            effective_price=Coalesce(
+                NullIf("discount_price", Value(0)), "actual_price"
+            )
+        )
+
+    def publicly_visible(self):
+        """Events whose detail page anyone may open.
+
+        Started events stay visible so customers can revisit what they booked;
+        the page shows booking as closed.
+        """
+        return self.filter(status="published", is_archived=False)
+
+    def publicly_listed(self):
+        """Events shown in public discovery: those `reserve_booking` would accept.
+
+        Sold-out events stay listed so customers can see them as sold out;
+        the `available_seats` filter excludes them.
+        """
+        return self.publicly_visible().filter(start_date__gt=timezone.localdate())
 
 
 class Event(BaseModel):
@@ -47,7 +77,7 @@ class Event(BaseModel):
         help_text="Days before start_date that cancellation is allowed. 0 = no cancellation.",
     )
 
-    objects = models.Manager()
+    objects = EventQuerySet.as_manager()
 
     def __str__(self) -> str:
         return self.title
@@ -69,9 +99,15 @@ class Event(BaseModel):
 
     @property
     def price(self) -> int:
+        # Keep in sync with EventQuerySet.with_effective_price.
         if self.discount_price:
             return self.discount_price
         return self.actual_price
+
+    @property
+    def starts_at(self) -> datetime:
+        """Midnight at the start of `start_date` in the project time zone (Asia/Dhaka)."""
+        return timezone.make_aware(datetime.combine(self.start_date, time.min))
 
     @property
     def is_completed(self) -> bool:
@@ -91,6 +127,8 @@ class SeatBooking(BaseModel):
         ("expired", "Expired"),
         ("cancelled", "Cancelled"),
     ]
+    # DEC-003: a customer may hold only one of these per event at a time.
+    UNFINISHED_STATUSES = ["awaiting_payment_reference", "pending_verification"]
 
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -110,6 +148,17 @@ class SeatBooking(BaseModel):
     cancelled_at = models.DateTimeField(blank=True, null=True)
 
     objects = models.Manager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "user"],
+                condition=Q(
+                    status__in=["awaiting_payment_reference", "pending_verification"]
+                ),
+                name="one_unfinished_booking_per_customer_event",
+            )
+        ]
 
     def __str__(self) -> str:
         return f"{self.booking_reference} - {self.event.title}"
@@ -132,7 +181,7 @@ class SeatBooking(BaseModel):
         if self.event.cancellation_days == 0:
             return False
         deadline = self.event.start_date - timedelta(days=self.event.cancellation_days)
-        return timezone.now().date() <= deadline
+        return timezone.localdate() <= deadline
 
 
 class ManualPaymentSubmission(BaseModel):
@@ -140,8 +189,13 @@ class ManualPaymentSubmission(BaseModel):
         ("pending", "Pending"),
         ("verified", "Verified"),
         ("rejected", "Rejected"),
+        ("withdrawn", "Withdrawn"),
+        ("expired", "Expired"),
     ]
+    # DEC-007: a transaction ID can back only one of these per channel.
+    LIVE_STATUSES = ["pending", "verified"]
 
+    # DEC-004: one submission per booking; after a rejection the customer books again.
     booking = models.OneToOneField(
         SeatBooking, on_delete=models.CASCADE, related_name="payment_submission"
     )
@@ -151,6 +205,13 @@ class ManualPaymentSubmission(BaseModel):
     submitted_by = models.ForeignKey(
         User, on_delete=models.PROTECT, related_name="manual_payment_submissions"
     )
+    # Snapshots taken at submission, so later edits to the method or price
+    # cannot change what the vendor is verifying.
+    channel = models.CharField(
+        max_length=20, choices=VendorPaymentMethod.CHANNEL_CHOICES, editable=False
+    )
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=3, default="BDT")
     transaction_id = models.CharField(max_length=120)
     normalized_transaction_id = models.CharField(max_length=120, editable=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
@@ -168,12 +229,15 @@ class ManualPaymentSubmission(BaseModel):
         ordering = ["-created_at"]
         constraints = [
             models.UniqueConstraint(
-                fields=["payment_method", "normalized_transaction_id"],
-                name="unique_transaction_per_payment_method",
+                fields=["channel", "normalized_transaction_id"],
+                condition=Q(status__in=["pending", "verified"]),
+                name="unique_live_transaction_per_channel",
             )
         ]
 
     def save(self, *args, **kwargs):
+        if not self.channel:
+            self.channel = self.payment_method.channel
         self.transaction_id = self.transaction_id.strip()
         self.normalized_transaction_id = "".join(
             self.transaction_id.upper().split()

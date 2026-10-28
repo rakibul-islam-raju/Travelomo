@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { COOKIE_CONSTS } from "./constants";
+import { buildLoginUrl } from "./lib/redirect";
 
 // Define protected routes that require authentication
 const protectedRoutes = ["/dashboard", "/my-bookings"];
@@ -48,7 +49,7 @@ export function middleware(request: NextRequest) {
 	) {
 		console.log("redirecting to login page ===>");
 		return NextResponse.redirect(
-			new URL(`/login?callbackUrl=${pathname}`, request.url)
+			new URL(buildLoginUrl(pathname + request.nextUrl.search), request.url)
 		);
 	}
 

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "vendor.apps.VendorConfig",
     "event.apps.EventConfig",
     "stats.apps.StatsConfig",
+    "notification.apps.NotificationConfig",
     # third party apps
     "rest_framework",
     "corsheaders",
@@ -164,8 +165,9 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_PAGINATION_CLASS": "utils.pagination.StandardLimitOffsetPagination",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "utils.exceptions.api_exception_handler",
     "PAGE_SIZE": int(PAGE_SIZE),
 }
 
@@ -233,10 +235,15 @@ AUTH_COOKIES = {
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
-EMAIL_PORT = env("EMAIL_PORT")
-EMAIL_USE_TLS = env("EMAIL_USE_TLS")
+EMAIL_PORT = env.int("EMAIL_PORT")
+# Typed reads: a raw env("EMAIL_USE_TLS") is the string "False", which is truthy.
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+# Seconds before an unresponsive SMTP server counts as a failed attempt.
+EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=20)
+# Total send attempts per email, including retries of temporary failures.
+EMAIL_DELIVERY_MAX_ATTEMPTS = env.int("EMAIL_DELIVERY_MAX_ATTEMPTS", default=6)
 
 ADMIN_CONTACT_EMAIL = env("ADMIN_CONTACT_EMAIL")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")

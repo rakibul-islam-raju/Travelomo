@@ -26,4 +26,8 @@ app.conf.beat_schedule = {
         "task": "event.tasks.expire_stale_bookings",
         "schedule": crontab(minute="*/5"),
     },
+    "requeue-stale-email-deliveries": {
+        "task": "notification.tasks.requeue_stale_email_deliveries",
+        "schedule": crontab(minute="*/10"),
+    },
 }

@@ -11,54 +11,54 @@ Priority legend:
 
 ## 0. Decisions and Baseline
 
-- [ ] **DEC-001 · P0** Define which external payment methods/channels vendors can configure and the instructions customers must see.
-- [ ] **DEC-002 · P0** Define separate deadlines for customer transaction-ID submission and vendor verification, plus timeout behavior.
-- [ ] **DEC-003 · P0** Define booking status transitions and whether repeat bookings for the same customer/event are allowed.
-- [ ] **DEC-004 · P0** Define cancellation, off-platform refund communication/recording, resubmission, and admin-override rules.
-- [ ] **DEC-005 · P0** Define whether the dashboard metric is “verified booking value” or another manually reconciled amount.
-- [ ] **DEC-006 · P1** Confirm receipt/invoice fields, supported currency display, timezone, and legal/tax requirements.
-- [ ] **DEC-007 · P0** Define transaction-ID normalization and uniqueness scope, including whether payment channel is required.
-- [ ] **BASE-001 · P0** Run and record current backend tests, frontend build, and admin test/build results.
-- [ ] **BASE-002 · P0** Fix the missing `Button` import on the public event-detail page.
+- [x] **DEC-001 · P0** Define which external payment methods/channels vendors can configure and the instructions customers must see. — `DECISIONS.md`; `VendorPaymentMethod.channel`
+- [x] **DEC-002 · P0** Define separate deadlines for customer transaction-ID submission and vendor verification, plus timeout behavior. — `DECISIONS.md`; 20 min / 24 h capped at `Event.starts_at`; `DeadlineTests`
+- [x] **DEC-003 · P0** Define booking status transitions and whether repeat bookings for the same customer/event are allowed. — `DECISIONS.md`; one unfinished booking per customer/event; `OneUnfinishedBookingTests`
+- [x] **DEC-004 · P0** Define cancellation, off-platform refund communication/recording, resubmission, and admin-override rules. — `DECISIONS.md`; rejection is final, refunds off-platform, admin view-only; `ReadOnlyBookingAdminTests`
+- [ ] **DEC-005 · P0** Define whether the dashboard metric is “verified booking value” or another manually reconciled amount. — default proposed in `DECISIONS.md`: confirmed-booking snapshots; needs owner confirmation
+- [ ] **DEC-006 · P1** Confirm receipt/invoice fields, supported currency display, timezone, and legal/tax requirements. — fields/BDT/Asia/Dhaka proposed in `DECISIONS.md`; legal/tax review open
+- [x] **DEC-007 · P0** Define transaction-ID normalization and uniqueness scope, including whether payment channel is required. — `DECISIONS.md`; unique per channel among pending/verified; `TransactionIdTests`
+- [x] **BASE-001 · P0** Run and record current backend tests, frontend build, and admin test/build results. — recorded in `BASELINE.md`
+- [x] **BASE-002 · P0** Fix the missing `Button` import on the public event-detail page. — import added in `37bfa24`; `next build` passes (`BASELINE.md`)
 - [ ] **BASE-003 · P1** Correct `FEATURES.md` status entries using verified behavior from the source audit.
-- [ ] **BASE-004 · P1** Define and document canonical pagination and API error response shapes.
+- [x] **BASE-004 · P1** Define and document canonical pagination and API error response shapes. — `API_CONTRACT.md`
 - [ ] **BASE-005 · P1** Generate/validate the OpenAPI schema and identify contract mismatches in both clients.
 
 ## 1. Booking Integrity
 
-- [ ] **BOOK-001 · P0** Add a customer-only booking permission and tests for every role.
-- [ ] **BOOK-002 · P0** Reject bookings for non-bookable event status, past/start-date policy, archived events, and invalid seat counts.
-- [ ] **BOOK-003 · P0** Extract booking creation into an atomic domain/service function.
-- [ ] **BOOK-004 · P0** Prevent overselling when concurrent customers request the final seats.
-- [ ] **BOOK-005 · P0** Extract cancellation into an atomic domain/service function.
-- [ ] **BOOK-006 · P0** Prevent repeated or concurrent cancellation from restoring seats twice.
-- [ ] **BOOK-007 · P0** Replace invalid/inconsistent exception handling with stable DRF validation responses.
+- [x] **BOOK-001 · P0** Add a customer-only booking permission and tests for every role. — `IsCustomer`/`IsVendor` on views; service raises 403; role matrix in `event/tests/test_api.py`
+- [x] **BOOK-002 · P0** Reject bookings for non-bookable event status, past/start-date policy, archived events, and invalid seat counts. — `reserve_booking` checks; `ReservationEligibilityTests`
+- [x] **BOOK-003 · P0** Extract booking creation into an atomic domain/service function. — `event/services.py:reserve_booking`
+- [x] **BOOK-004 · P0** Prevent overselling when concurrent customers request the final seats. — event row lock + conditional decrement; `test_concurrency.py`
+- [x] **BOOK-005 · P0** Extract cancellation into an atomic domain/service function. — `event/services.py:cancel_booking`
+- [x] **BOOK-006 · P0** Prevent repeated or concurrent cancellation from restoring seats twice. — booking row lock + status check + `seats_released_at`; `CancellationTests`, `test_concurrency.py`
+- [x] **BOOK-007 · P0** Replace invalid/inconsistent exception handling with stable DRF validation responses. — `utils/exceptions.py` handler, `BusinessRuleError`/`Conflict`; codes in `API_CONTRACT.md` §2.6
 - [ ] **BOOK-008 · P0** Add immutable unit price, seat count, subtotal/total, and currency snapshots to bookings.
 - [ ] **BOOK-009 · P0** Backfill existing booking snapshots and add database constraints/indexes.
 - [ ] **BOOK-010 · P1** Add a support-friendly unique booking reference.
 - [ ] **BOOK-011 · P1** Add booking detail/receipt API output with a safely masked transaction reference and verification audit data appropriate to the viewer.
-- [ ] **BOOK-012 · P1** Verify customer and vendor booking lists use the agreed pagination contract.
+- [x] **BOOK-012 · P1** Verify customer and vendor booking lists use the agreed pagination contract. — `utils/pagination.py` (max 100), `-created_at, -id` ordering; `BookingPaginationTests`
 - [ ] **BOOK-013 · P1** Add vendor booking filters for event, customer, date, and status.
-- [ ] **BOOK-014 · P0** Add tests for booking, cancellation deadline, repeated cancellation, sold-out state, and price snapshots.
-- [ ] **BOOK-015 · P0** Add database-backed concurrency tests using an engine with production-equivalent locking.
+- [x] **BOOK-014 · P0** Add tests for booking, cancellation deadline, repeated cancellation, sold-out state, and price snapshots. — `event/tests/test_services.py`
+- [x] **BOOK-015 · P0** Add database-backed concurrency tests using an engine with production-equivalent locking. — `event/tests/test_concurrency.py` (PostgreSQL, threaded)
 
 ## 2. Booking User Experience
 
-- [ ] **BUI-001 · P0** Preserve the event return URL through unauthenticated login.
-- [ ] **BUI-002 · P0** Display booking API validation/network errors in the dialog.
-- [ ] **BUI-003 · P0** Prevent duplicate submits and handle zero/changed availability safely.
-- [ ] **BUI-004 · P1** Refetch event availability and booking queries after booking/cancellation.
-- [ ] **BUI-005 · P1** Add an explicit cancellation confirmation dialog and error state.
-- [ ] **BUI-006 · P1** Complete loading, empty, error, confirmed, cancelled, sold-out, and non-cancellable states.
+- [x] **BUI-001 · P0** Preserve the event return URL through unauthenticated login. — `lib/redirect.ts` (safe `callbackUrl`), used by the sidebar, middleware and `LoginForm`
+- [x] **BUI-002 · P0** Display booking API validation/network errors in the dialog. — inline errors via `ApiError` + `silent` fetcher option
+- [x] **BUI-003 · P0** Prevent duplicate submits and handle zero/changed availability safely. — `useSubmitOnce`, live seat count, seat validation
+- [x] **BUI-004 · P1** Refetch event availability and booking queries after booking/cancellation. — `useRefreshBookingData` (bookings, event availability, `router.refresh()`)
+- [x] **BUI-005 · P1** Add an explicit cancellation confirmation dialog and error state. — `components/bookings/CancelBookingDialog.tsx`
+- [x] **BUI-006 · P1** Complete loading, empty, error, confirmed, cancelled, sold-out, and non-cancellable states. — sidebar blocked/sold-out states; My Bookings non-cancellable note and Load more
 - [ ] **BUI-007 · P1** Add booking detail/receipt page and link each history item to it.
 - [ ] **BUI-008 · P1** Make vendor bookings responsive and add pagination/filter controls.
-- [ ] **BUI-009 · P1** Add component/integration tests for booking and cancellation UIs.
+- [x] **BUI-009 · P1** Add component/integration tests for booking and cancellation UIs. — `frontend/__tests__/` (vitest, 54 tests)
 
 ## 3. Manual Payment Verification
 
-- [ ] **PAY-001 · P0** Add booking statuses for awaiting payment reference, pending verification, confirmed, payment rejected, expired, and cancelled as required by DEC-003/004.
-- [ ] **PAY-002 · P0** Add `ManualPaymentSubmission` with channel, normalized transaction ID, amount/currency data, status, verifier, timestamps, and rejection reason.
-- [ ] **PAY-003 · P0** Add transaction-ID normalization and reuse protection with safe conflict responses.
+- [x] **PAY-001 · P0** Add booking statuses for awaiting payment reference, pending verification, confirmed, payment rejected, expired, and cancelled as required by DEC-003/004. — `SeatBooking.BOOKING_STATUS_CHOICES` per DEC-003/004
+- [x] **PAY-002 · P0** Add `ManualPaymentSubmission` with channel, normalized transaction ID, amount/currency data, status, verifier, timestamps, and rejection reason. — channel/amount/currency snapshots, statuses incl. withdrawn/expired; migrations `event/0016`–`0017`
+- [x] **PAY-003 · P0** Add transaction-ID normalization and reuse protection with safe conflict responses. — `unique_live_transaction_per_channel`; safe `transaction_id` field error; `TransactionIdTests`
 - [ ] **PAY-004 · P0** Add atomic reservation creation that snapshots the server-calculated amount, holds seats, and returns a submission deadline.
 - [ ] **PAY-005 · P0** Add vendor-owned payment instructions/methods and return them with the customer's reservation.
 - [ ] **PAY-006 · P0** Add an owner-only endpoint to submit channel plus transaction ID for an unexpired reservation and move it to pending verification.
@@ -75,8 +75,8 @@ Priority legend:
 
 ## 4. Emails and Notifications
 
-- [ ] **MAIL-001 · P0** Test the existing booking confirmation template/task and its missing-booking behavior.
-- [ ] **MAIL-002 · P0** Add retry/error handling and monitoring for mail delivery failures.
+- [x] **MAIL-001 · P0** Test the existing booking confirmation template/task and its missing-booking behavior. — `notification/tests/test_booking_emails.py`
+- [x] **MAIL-002 · P0** Add retry/error handling and monitoring for mail delivery failures. — `EmailDelivery` + `deliver_email` retries, admin Resend, stale sweep, `check_email_deliveries`
 - [ ] **MAIL-003 · P0** Send a pending-verification notice on submission and booking confirmation only after vendor approval.
 - [ ] **MAIL-004 · P1** Include booking reference, immutable totals, event details, and receipt link in the confirmation.
 - [ ] **MAIL-005 · P1** Send rejection/expiry notices and deduplicate all notices across repeated state-transition requests.
@@ -120,19 +120,19 @@ Priority legend:
 
 ## 8. Event Discovery
 
-- [ ] **EVT-001 · P0** Fix effective-price filtering so it uses database expressions/annotations instead of the `price` Python property.
+- [x] **EVT-001 · P0** Fix effective-price filtering so it uses database expressions/annotations instead of the `price` Python property. — `EventQuerySet.with_effective_price()`; `EffectivePriceFilterTests`
 - [ ] **EVT-002 · P1** Define canonical query parameters for keyword/location, dates, guests, price, availability, and pagination.
 - [ ] **EVT-003 · P1** Replace the placeholder public `/events` page with a paginated event grid.
 - [ ] **EVT-004 · P1** Add events-page filter controls synchronized to the URL.
 - [ ] **EVT-005 · P1** Wire the home search form to `/events` using the same parameters.
 - [ ] **EVT-006 · P1** Add clear-filters, empty, loading, error, and back/forward navigation behavior.
-- [ ] **EVT-007 · P0** Test public visibility for archived, cancelled, completed, unpublished, sold-out, and date-ineligible events per product rules.
+- [x] **EVT-007 · P0** Test public visibility for archived, cancelled, completed, unpublished, sold-out, and date-ineligible events per product rules. — `publicly_listed()`/`publicly_visible()`; `PublicVisibilityTests` (also fixed the `GET /events/` 500)
 - [ ] **EVT-008 · P1** Add backend filter tests and frontend query-serialization tests.
 
 ## 9. Admin Panel
 
-- [ ] **ADMIN-001 · P0** Fix the admin event-detail API query, which currently targets the vendor endpoint.
-- [ ] **ADMIN-002 · P1** Replace the event detail placeholder with event, vendor, dates, price, capacity, status, archive, and booking summary data.
+- [x] **ADMIN-001 · P0** Fix the admin event-detail API query, which currently targets the vendor endpoint. — new `GET /events/admin-event/<id>/`; `admin/src/__test__/event/eventDetails.test.jsx`
+- [x] **ADMIN-002 · P1** Replace the event detail placeholder with event, vendor, dates, price, capacity, status, archive, and booking summary data. — `AdminEventDetailSerializer.booking_summary`; `AdminEventDetailTests`
 - [ ] **ADMIN-003 · P1** Add staff update serializer/API with superuser permission rules.
 - [ ] **ADMIN-004 · P1** Build and wire the referenced edit-staff modal.
 - [ ] **ADMIN-005 · P2** Decide vendor hard-delete versus deactivate/soft-delete behavior and document data-retention impact.
@@ -169,10 +169,10 @@ Priority legend:
 
 Start with this bounded batch before introducing manual-payment migrations:
 
-- [ ] `BASE-001`, `BASE-002`, `BASE-004`
-- [ ] `BOOK-001` through `BOOK-007`, `BOOK-012`, `BOOK-014`, `BOOK-015`
-- [ ] `BUI-001` through `BUI-006`, `BUI-009`
-- [ ] `MAIL-001`, `MAIL-002`
-- [ ] `EVT-001`, `EVT-007`
-- [ ] `ADMIN-001`, `ADMIN-002`
+- [x] `BASE-001`, `BASE-002`, `BASE-004`
+- [x] `BOOK-001` through `BOOK-007`, `BOOK-012`, `BOOK-014`, `BOOK-015`
+- [x] `BUI-001` through `BUI-006`, `BUI-009`
+- [x] `MAIL-001`, `MAIL-002`
+- [x] `EVT-001`, `EVT-007`
+- [x] `ADMIN-001`, `ADMIN-002`
 - [ ] Then complete `DEC-001` through `DEC-007` and begin the manual-verification data model.
